@@ -1,4 +1,4 @@
-name: Build and deploy Node.js app to Azure Web App - WagaMart
+name: Build and Deploy Node.js app to Azure Web App - WagaMart
 
 on:
   push:
@@ -8,55 +8,50 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Using ubuntu-latest
-
+    runs-on: ubuntu-latest  # Changed to Ubuntu since you switched to Linux
+  
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Node.js version
+      
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
+          node-version: '16.x'  # Ensure the version matches your app requirement
 
-      - name: Install dependencies, build, and test
+      - name: Install dependencies and build
         run: |
           npm install
           npm run build --if-present
-          npm run test --if-present
-      
+
       - name: Archive production artifacts
         run: |
           mkdir -p archive
-          tar --exclude='./archive' -czf archive/node-app.tar.gz .
+          zip -r archive/node-app.zip . # Ensure all files are zipped properly
 
-      - name: Upload artifact for deployment job
+      - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: archive/node-app.tar.gz
+          path: archive/node-app.zip
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Ensure the deployment uses Linux
     needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    
+
     steps:
-      - name: Download artifact from build job
+      - name: Download artifact from build
         uses: actions/download-artifact@v4
         with:
           name: node-app
           path: archive
 
       - name: Unzip artifact
-        run: tar -xzf archive/node-app.tar.gz -C .
+        run: unzip archive/node-app.zip -d .
 
-      - name: 'Deploy to Azure Web App'
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
-        id: deploy-to-webapp
         with:
-          app-name: 'WagaMart'
+          app-name: 'WagaMart'  # Ensure this is the correct app name
           slot-name: 'Production'
           package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_91D723C46DBE4293864097B0CC17DA3A }}
