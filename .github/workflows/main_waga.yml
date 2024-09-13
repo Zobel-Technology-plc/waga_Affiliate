@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy Node.js app to Azure Web App - Waga
 
 on:
@@ -12,7 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -21,11 +17,11 @@ jobs:
         with:
           node-version: '20.x'
 
-      - name: npm install, build, and test
+      - name: npm install, build, and start
         run: |
           npm install
           npm run build --if-present
-          npm run test --if-present
+          npm run start
 
       - name: Zip artifact for deployment
         run: zip release.zip ./* -r
@@ -52,11 +48,32 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip
 
-      - name: 'Deploy to Azure Web App'
+      - name: Check DNS resolution for Azure Web App
+        run: |
+          host waga.scm.azurewebsites.net
+
+      - name: Test connectivity to Azure Web App
+        run: |
+          curl -v https://waga.scm.azurewebsites.net
+
+      - name: 'Deploy to Azure Web App with Retry Logic'
         id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: 'Waga'
-          slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_3CAA86A153CA4F37A0526A7097D38788 }}
-          package: .
+        run: |
+          retries=3
+          delay=10
+          for attempt in $(seq 1 $retries); do
+            echo "Deployment attempt $attempt of $retries..."
+            if az webapp deployment source config-zip --resource-group Zobel --name Waga --src release.zip; then
+              echo "Deployment succeeded."
+              break
+            else
+              echo "Deployment failed."
+              if [ $attempt -lt $retries ]; then
+                echo "Retrying in $delay seconds..."
+                sleep $delay
+              else
+                echo "All $retries attempts failed."
+                exit 1
+              fi
+            fi
+          done

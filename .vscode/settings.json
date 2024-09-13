@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "undefined/subscriptions/82ba5a15-e92e-4fb8-8aa0-8dd7949dbb43/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/Waga",
+    "appService.deploySubpath": "."
+}
