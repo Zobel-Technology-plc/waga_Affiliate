@@ -12,7 +12,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.3s, background 0.3s, border 0.3s, color 0.3s;
 }
 
 .bottom-nav .nav-link.active {

@@ -92,7 +92,7 @@ const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
 
     const inviter = await User.findOneAndUpdate(
       { userId: inviterUserId },
-      { $inc: { points: 1000 } },
+      { $inc: { points: 50000 } },
       { new: true }
     );
 
