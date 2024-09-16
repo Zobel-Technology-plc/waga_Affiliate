@@ -56,7 +56,7 @@ const sendOrderNotificationToTelegram = async (userId, order) => {
     Order ID: ${order.orderId}\n
     Total Amount: ${order.totalAmount} birr\n
     Payment Status: ${order.paymentStatus}\n
-    Commission: ${order.commissionamount} birr\n\n
+    Commission: ${order.commissionamount} birr (Pending)\n\n
     *Order Items:*\n${order.orderItems.map(item => `- ${item.name} (${item.quantity}x): ${(order.totalAmount / item.quantity).toFixed(2)} birr`).join('\n')}
   `;
 
