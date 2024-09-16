@@ -82,7 +82,7 @@ const requestPhoneNumber = async (chatId, userId) => {
 };
 
 // Function to handle invite link logic
-const handleInviteLink = async (userId, inviterUserId, chatId) => {
+const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
   try {
     const user = await User.findOne({ userId });
     if (user && (user.hasJoinedViaInvite || user.phoneNumber)) {
@@ -97,7 +97,8 @@ const handleInviteLink = async (userId, inviterUserId, chatId) => {
     );
 
     if (inviter) {
-      await sendMessage(inviterUserId, `Congratulations! You've earned 1000 points for inviting a friend.`);
+      // Modify message to include the joiner's name
+      await sendMessage(inviterUserId, `Congratulations! You've earned 1000 points for inviting ${joinerName}.`);
     }
 
     await User.findOneAndUpdate(
@@ -130,6 +131,9 @@ export default async function handler(req, res) {
     const userId = message.from.id;
     const text = message.text;
 
+    // Extract the joining user's first name or username
+    const joinerName = message.from.first_name || message.from.username || 'A user';
+
     await dbConnect();
 
     if (text && text.startsWith('/start')) {
@@ -137,8 +141,8 @@ export default async function handler(req, res) {
       const inviterUserId = text.split(' ')[1];
 
       if (inviterUserId) {
-        // Handle invite link logic
-        const inviteResult = await handleInviteLink(userId, inviterUserId, chatId);
+        // Handle invite link logic and pass the joiner's name
+        const inviteResult = await handleInviteLink(userId, inviterUserId, chatId, joinerName);
         if (!inviteResult.success) {
           return res.status(200).json({ success: true, message: inviteResult.message });
         }
