@@ -90,6 +90,17 @@ const ServiceOrder = () => {
 
   return (
     <div className="p-4">
+    {/* Back Button using PNG image */}
+    <div className="mb-4 cursor-pointer" onClick={() => router.push('/services')}>
+        <Image
+          src="/assets/icons/back.png"  // Path to the back button image
+          alt="Back to Services"
+          width={30}  // Set desired width
+          height={30}  // Set desired height
+          className="hover:opacity-80"  // Optional hover effect
+        />
+    </div> 
+
       <h1 className="text-2xl font-bold mb-4">Place Your Service Order</h1>
       {serviceImage && (
         <div className="relative w-full h-60 mb-4">
