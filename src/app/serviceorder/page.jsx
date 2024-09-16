@@ -65,18 +65,7 @@ const ServiceOrder = () => {
       if (response.ok) {
         console.log("Order created successfully");
 
-        // Reward 10,000 points after a successful order
-        await fetch("/api/points", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId,
-            points: 10000, // Reward 10,000 points
-          }),
-        });
-
+        // Redirect to confirmation page
         router.push('/order-confirmed');
       } else {
         console.error("Failed to create order:", response.statusText);
@@ -90,8 +79,9 @@ const ServiceOrder = () => {
 
   return (
     <div className="p-4">
-    {/* Back Button using PNG image */}
-    <div className="mb-4 cursor-pointer" onClick={() => router.push('/services')}>
+
+      {/* Back Button using PNG image */}
+      <div className="mb-4 cursor-pointer" onClick={() => router.push('/services')}>
         <Image
           src="/assets/icons/back.png"  // Path to the back button image
           alt="Back to Services"
@@ -99,9 +89,10 @@ const ServiceOrder = () => {
           height={30}  // Set desired height
           className="hover:opacity-80"  // Optional hover effect
         />
-    </div> 
-
+      </div> 
+      
       <h1 className="text-2xl font-bold mb-4">Place Your Service Order</h1>
+
       {serviceImage && (
         <div className="relative w-full h-60 mb-4">
           <Image
@@ -163,7 +154,7 @@ const ServiceOrder = () => {
         </>
       )}
 
-      <div className="flex justify-center mb-10">
+      <div className="flex justify-center mb-14">
         <button
           onClick={handleOrder}
           className="bg-blue-500 text-white p-2 rounded-md"

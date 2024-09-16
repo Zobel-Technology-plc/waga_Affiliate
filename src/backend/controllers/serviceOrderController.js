@@ -13,16 +13,13 @@ export const createServiceOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'User ID and orderFor are required.' });
     }
 
-    // If the user selected 'self', retrieve their saved phone number
     let userPhoneNumber = phoneNumber;
     if (orderFor === 'self') {
       const user = await User.findOne({ userId });
-
       if (!user || !user.phoneNumber) {
         return res.status(400).json({ success: false, message: 'Phone number is required for self orders but not found.' });
       }
-
-      userPhoneNumber = user.phoneNumber; // Use the phone number from the user's profile
+      userPhoneNumber = user.phoneNumber;
     }
 
     // If order is for others, city and phoneNumber are required
@@ -42,26 +39,27 @@ export const createServiceOrder = async (req, res) => {
       }
     }
 
-    // Generate a unique 7-character serviceId
+    // Generate a unique serviceId
     const serviceId = nanoid(7);
 
-    // Create a new service order
+    // Create a new service order (but don't award points yet)
     const newServiceOrder = new ServiceOrder({
       userId,
       serviceId,
-      city: orderFor === 'other' ? city : '', // Save city only if orderFor is 'other'
-      phoneNumber: userPhoneNumber, // Use retrieved phone number for 'self' or provided one for 'other'
-      orderFor, // Save orderFor (self/other)
-      status: 'pending', // Set default status
+      city: orderFor === 'other' ? city : '',
+      phoneNumber: userPhoneNumber,
+      orderFor,
+      status: 'pending',  // Default status is pending
+      points: 10000,  // Points to be awarded upon completion
     });
 
     // Save the service order to the database
     await newServiceOrder.save();
 
-    // Send a notification to Telegram
+    // Send a notification to Telegram (optional)
     await sendServiceOrderNotificationToTelegram(userId, newServiceOrder);
 
-    // Respond with the newly created service order
+    // Respond with the newly created service order (no points awarded yet)
     res.status(201).json({ success: true, data: newServiceOrder });
   } catch (error) {
     console.error('Error creating service order:', error);
@@ -69,27 +67,25 @@ export const createServiceOrder = async (req, res) => {
   }
 };
 
+
+
 // Send a notification message to Telegram with order details
 const sendServiceOrderNotificationToTelegram = async (userId, order) => {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN || "7350305630:AAEsjUdDvgDlsXhToZel8NoI3SCxpv5lIrE";
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = userId;
   const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
-  // Construct the message content
   let message = `
     🛒 *Service Order Confirmation*\n
     Service ID: ${order.serviceId}\n
     Order For: ${order.orderFor === 'self' ? 'Self' : 'Others'}\n
     ${order.orderFor === 'other' ? `*City*: ${order.city}\n` : ''}
     *Phone Number*: ${order.phoneNumber}\n
-    *Order Status*: ${order.status}
+    *Order Status*: ${order.status}\n
+    Points: 10000 (Pending)
   `;
 
-  // Log the message for debugging purposes
-  console.log('Message to send:', message);
-
   try {
-    // Send the message to Telegram
     await axios.post(apiUrl, {
       chat_id: chatId,
       text: message,
@@ -99,6 +95,7 @@ const sendServiceOrderNotificationToTelegram = async (userId, order) => {
     console.error("Error sending service order notification to Telegram:", error);
   }
 };
+
 
 
 export const getServiceOrders = async (req, res) => {

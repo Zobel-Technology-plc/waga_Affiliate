@@ -29,7 +29,12 @@ const serviceOrderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
+    enum: ['pending', 'complete'],
     default: 'pending',
+  },
+  points: {
+    type: Number,
+    default: 10000, // Points to be rewarded upon completion
   },
 }, { timestamps: true });
 
