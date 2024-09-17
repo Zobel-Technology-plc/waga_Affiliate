@@ -114,6 +114,7 @@ const History = () => {
                 </>
               ) : (
                 <>
+                  <p><strong>Service:</strong> {order.serviceName}</p>
                   <p><strong>City:</strong> {order.city}</p>
                   <p><strong>Phone Number:</strong> {order.phoneNumber}</p>
                   <p><strong>Created At:</strong> {new Date(order.createdAt).toLocaleString()}</p>

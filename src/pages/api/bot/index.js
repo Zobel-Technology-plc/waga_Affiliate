@@ -1,49 +1,18 @@
 import dbConnect from '../../../backend/config/dbConnect';
 import User from '../../../backend/models/user';
 import axios from 'axios';
-import path from 'path';
-import fs from 'fs';
-import FormData from 'form-data';
-import sharp from 'sharp';
 
+// Telegram bot token
 const botToken = "7350305630:AAEsjUdDvgDlsXhToZel8NoI3SCxpv5lIrE";  // Replace with your actual bot token
 
-// Function to resize and send an image to the user
-const sendImageToUser = async (chatId) => {
-  const apiUrl = `https://api.telegram.org/bot${botToken}/sendPhoto`;
-  const imagePath = path.resolve('./public/images/Zobel Technology Blue.png'); 
-
-  const resizedImagePath = path.resolve('./public/images/Zobel_Tech_Resized.png');
-  try {
-    await sharp(imagePath)
-      .resize(800, 600) // Resize the image to 800x600
-      .toFile(resizedImagePath);
-  } catch (error) {
-    console.error('Error processing image:', error);
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('chat_id', chatId);
-  formData.append('photo', fs.createReadStream(resizedImagePath));
-  formData.append('caption', 'Please post this image to your story and send us a confirmation message.');
-
-  try {
-    await axios.post(apiUrl, formData, {
-      headers: formData.getHeaders(),
-    });
-  } catch (error) {
-    console.error('Error sending image:', error);
-  }
-};
-
 // Function to send a text message to the user
-const sendMessage = async (chatId, text) => {
+const sendMessage = async (chatId, text, replyMarkup = {}) => {
   const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
   try {
     await axios.post(apiUrl, {
       chat_id: chatId,
       text,
+      reply_markup: replyMarkup, // Optional reply markup
     });
   } catch (error) {
     console.error('Error sending message:', error);
@@ -52,7 +21,7 @@ const sendMessage = async (chatId, text) => {
 
 // Function to request the user's phone number
 const requestPhoneNumber = async (chatId, userId) => {
-  const inviteLink = `https://t.me/waganextbot?start=${userId}`;
+  const inviteLink = `https://t.me/yourbot?start=${userId}`;
 
   const requestPhoneNumberMessage = {
     chat_id: chatId,
@@ -92,13 +61,12 @@ const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
 
     const inviter = await User.findOneAndUpdate(
       { userId: inviterUserId },
-      { $inc: { points: 50000 } },
+      { $inc: { points: 50000 } }, // Increment points for inviter
       { new: true }
     );
 
     if (inviter) {
-      // Modify message to include the joiner's name
-      await sendMessage(inviterUserId, `Congratulations! You've earned 1000 points for inviting ${joinerName}.`);
+      await sendMessage(inviterUserId, `Congratulations! You've earned 50000 points for inviting ${joinerName}.`);
     }
 
     await User.findOneAndUpdate(
@@ -117,6 +85,7 @@ const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
   }
 };
 
+// Main handler function
 export default async function handler(req, res) {
   console.log('Request received:', req.body);
 
@@ -136,60 +105,68 @@ export default async function handler(req, res) {
 
     await dbConnect();
 
+    // Start command handler
     if (text && text.startsWith('/start')) {
       console.log('Start command received');
       const inviterUserId = text.split(' ')[1];
 
       if (inviterUserId) {
-        // Handle invite link logic and pass the joiner's name
         const inviteResult = await handleInviteLink(userId, inviterUserId, chatId, joinerName);
         if (!inviteResult.success) {
           return res.status(200).json({ success: true, message: inviteResult.message });
         }
       }
 
-      // Request phone number after handling invite
       const phoneNumberRequested = await requestPhoneNumber(chatId, userId);
       if (phoneNumberRequested) {
         return res.status(200).json({ success: true, message: 'Phone number requested' });
       } else {
         return res.status(500).json({ success: false, message: 'Failed to send phone number request' });
       }
+
+    // Handle contact (phone number) sharing
     } else if (message.contact) {
       const phoneNumber = message.contact.phone_number;
 
       try {
+        // Save phone number in the database
         await User.findOneAndUpdate(
           { userId },
           { phoneNumber },
           { upsert: true, new: true }
         );
 
-        // Send the image after the contact is shared
-        await sendImageToUser(chatId);
-        return res.status(200).json({ success: true, message: 'Phone number saved and image sent' });
+        // Remove the keyboard and ask for the city
+        await sendMessage(chatId, 'Thanks for sharing your phone number! Now, please enter your city:', {
+          remove_keyboard: true,
+        });
+
+        return res.status(200).json({ success: true, message: 'Phone number saved, asking for city and keyboard removed' });
       } catch (error) {
-        console.error('Error saving phone number or sending image:', error);
-        return res.status(500).json({ success: false, message: 'Failed to save phone number or send image' });
+        console.error('Error saving phone number or removing keyboard:', error);
+        return res.status(500).json({ success: false, message: 'Failed to save phone number or remove keyboard' });
       }
-    } else if (text === 'I posted the image') {
+
+    // Handle city input from user
+    } else if (text && !text.startsWith('/start') && !message.contact) {
       try {
+        // Save the city in the database
         await User.findOneAndUpdate(
           { userId },
-          { $inc: { points: 500 }, hasPostedStory: true },
-          { new: true }
+          { city: text }, // Save city entered by the user
+          { upsert: true, new: true }
         );
 
-        // Send a thank you message after awarding points
-        await sendMessage(chatId, 'Thank you for posting the image! You have earned 500 points.');
-        return res.status(200).json({ success: true, message: 'Points awarded and thank you message sent' });
+        // Thank the user for registering
+        await sendMessage(chatId, 'Thank you for registering!');
+
+        return res.status(200).json({ success: true, message: 'City saved, registration complete' });
       } catch (error) {
-        console.error('Error updating user status:', error);
-        return res.status(500).json({ success: false, message: 'Failed to update user status or send thank you message' });
+        console.error('Error saving city or sending thank you message:', error);
+        return res.status(500).json({ success: false, message: 'Failed to save city or send thank you message' });
       }
-    } else {
-      return res.status(200).json({ success: true, message: 'Command received' });
-    }
+
+    } 
   } else {
     res.status(405).json({ success: false, message: 'Method Not Allowed' });
   }

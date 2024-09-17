@@ -20,15 +20,22 @@ export const createServiceOrder = async (req, res) => {
     }
 
     let userPhoneNumber = phoneNumber;
+    let userCity = city; // Use the city from the body for "other" orders
+
+    // Fetch user data if the order is for "self"
     if (orderFor === 'self') {
       const user = await User.findOne({ userId });
-      if (!user || !user.phoneNumber) {
+
+      if (!user || !user.phoneNumber || !user.city) {
         return res.status(400).json({
           success: false,
-          message: 'Phone number is required for self orders but not found in the user profile.',
+          message: 'Phone number and city are required for self orders but not found in the user profile.',
         });
       }
+
+      // Use the user's saved phone number and city for self orders
       userPhoneNumber = user.phoneNumber;
+      userCity = user.city;
     }
 
     // Validate city and phone number for 'other' orders
@@ -59,7 +66,7 @@ export const createServiceOrder = async (req, res) => {
       userId,
       serviceId: orderId,
       serviceName,  // Save serviceName in the order
-      city: orderFor === 'other' ? city : '',
+      city: userCity,  // Use the user's city for "self" or the provided city for "other"
       phoneNumber: userPhoneNumber,
       orderFor,
       status: 'pending',
@@ -90,7 +97,8 @@ const sendServiceOrderNotificationToTelegram = async (userId, order) => {
     🛒 *Service Order Confirmation*\n
     Service: ${order.serviceName}\n
     Service ID: ${order.serviceId}\n
-    Order For: ${order.orderFor === 'self' ? 'Self' : 'Others'}\n
+    City : ${order.city}\n
+    Order For: ${order.orderFor === 'self' ? 'Self' : 'Others'}
     ${order.orderFor === 'other' ? `*City*: ${order.city}\n` : ''}
     *Phone Number*: ${order.phoneNumber}\n
     *Order Status*: ${order.status}\n
@@ -107,6 +115,7 @@ const sendServiceOrderNotificationToTelegram = async (userId, order) => {
     console.error("Error sending service order notification to Telegram:", error);
   }
 };
+
 
 
 
