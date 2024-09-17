@@ -49,7 +49,7 @@ const Profile = () => {
   return (
     <div className="container">
       <h1 className="profile-title">Profile</h1>
-      <div className="profile-card mb-9">
+      <div className="profile-card mb-10">
         <div className="profile-header">
           <img
             src={userData.photo_url || '/images/default_avatar.png'}
