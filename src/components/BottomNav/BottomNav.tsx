@@ -9,7 +9,7 @@ import './app.css';
 const BottomNav: React.FC = () => {
   const [activeLink, setActiveLink] = useState<string>('/');
   const scrollDirection = useScrollingEffect();
-  const navClass = scrollDirection === 'up' ? '' : 'opacity-25 duration-500';
+  const navClass = scrollDirection === 'up' ? '' : '';
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
