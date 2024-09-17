@@ -10,6 +10,7 @@ const Profile = () => {
   const [points, setPoints] = useState(0);
   const [commission, setCommission] = useState(0); // State for commission
   const [phoneNumber, setPhoneNumber] = useState(''); // State for phone number
+  const [City, setCity]= useState('')
 
   useEffect(() => {
     // Fetch the user data from Telegram WebApp SDK
@@ -30,7 +31,8 @@ const Profile = () => {
           const data = await response.json();
           setPoints(data.data.points || 0);
           setCommission(data.data.commission || 0);
-          setPhoneNumber(data.data.phoneNumber || ''); // Set the fetched phone number
+          setPhoneNumber(data.data.phoneNumber || ''); 
+          setCity(data.data.City|| '')// Set the fetched phone number
         } catch (error) {
           console.error('Error fetching user profile:', error);
         }
@@ -47,7 +49,7 @@ const Profile = () => {
   return (
     <div className="container">
       <h1 className="profile-title">Profile</h1>
-      <div className="profile-card">
+      <div className="profile-card mb-10">
         <div className="profile-header">
           <img
             src={userData.photo_url || '/images/default_avatar.png'}
@@ -68,6 +70,7 @@ const Profile = () => {
             {userData.last_name && <li><strong>Last Name:</strong> {userData.last_name}</li>}
             <li><strong>Username:</strong> @{userData.username}</li>
             <li><strong>Phone Number:</strong> {phoneNumber}</li> {/* Display phone number */}
+            <li><strong>City:</strong> {City}</li>
             <li><strong>Total Points:</strong> {points}</li> {/* Display total points */}
             <li><strong>Total Commission:</strong> {commission.toFixed(2)} birr</li> {/* Display total commission */}
           </ul>

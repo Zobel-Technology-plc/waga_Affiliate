@@ -21,6 +21,7 @@ export default async function handler(req, res) {
         firstName: user.firstName,
         lastName: user.lastName,
         username: user.username,
+        City:user.city,
         phoneNumber: user.phoneNumber,
         points: user.points,
         commission: user.commission,

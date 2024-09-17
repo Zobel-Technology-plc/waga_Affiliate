@@ -3,7 +3,7 @@ const nextConfig = {
 
     env: {
         API_URL: "https://wagamart.azurewebsites.net/",
-        DB_URI: "mongodb+srv://kaleabnew21:kaleab1221@mart.tywhp.mongodb.net/?retryWrites=true&w=majority&appName=Mart"
+        DB_URI: "mongodb://wagadb:E4ioEaEnRfY1FgJ9uLWefww5HF3IRftijqNYpkCZkz2PCXIbznGNZecpy299FHSGyjR3WouvoEUgACDbPfNlrw==@wagadb.mongo.cosmos.azure.com:10255/?ssl=true&retrywrites=false&replicaSet=globaldb&maxIdleTimeMS=120000&appName=@wagadb@"
     },
     images: {
         domains: ['res.cloudinary.com']
