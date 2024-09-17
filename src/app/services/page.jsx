@@ -61,21 +61,22 @@ const Services = () => {
       <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
         {services.map((service) => (
           <div key={service._id} className="bg-white shadow-md rounded-md p-4">
-            <Link href={`/serviceorder?serviceId=${service._id}&serviceImage=${encodeURIComponent(service.image)}&userId=${userId}`}>
-              <div className="relative w-full h-60">
-                <Image
-                  src={service.image}
-                  alt={service.name}
-                  layout="fill"
-                  objectFit="cover"
-                  className="rounded-md"
-                />
-              </div>
+            <Link href={`/serviceorder?serviceId=${service._id}&serviceImage=${encodeURIComponent(service.image)}&serviceName=${encodeURIComponent(service.name)}&userId=${userId}`}>
+                <div className="relative w-full h-60">
+                  <Image
+                    src={service.image}
+                    alt={service.name}
+                    layout="fill"
+                    objectFit="cover"
+                    className="rounded-md"
+                  />
+                </div>
             </Link>
+
             <h3 className="text-lg font-bold mt-4">{service.name}</h3>
             <p className="text-gray-600">Starting at {service.startingPrice} birr</p>
             <p className="text-gray-600">Commission: 10%</p> {/* Display 10% commission */}
-            <p className="text-gray-600">Points: 10000</p>
+            <p className="text-gray-600">Points: 10,000</p>
           </div>
         ))}
       </div>

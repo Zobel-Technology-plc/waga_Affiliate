@@ -10,6 +10,10 @@ const serviceOrderSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  serviceName: {  // Add service name field
+    type: String,
+    required: true,
+  },
   city: {
     type: String,
     required: function() {

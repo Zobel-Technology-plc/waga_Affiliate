@@ -10,6 +10,7 @@ const ServiceOrder = () => {
   const searchParams = useSearchParams();
   const [serviceId, setServiceId] = useState('');
   const [serviceImage, setServiceImage] = useState('');
+  const [serviceName, setServiceName] = useState('');  // Capture service name
   const [city, setCity] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [userId, setUserId] = useState(null);
@@ -24,16 +25,13 @@ const ServiceOrder = () => {
   useEffect(() => {
     const serviceIdParam = searchParams.get('serviceId');
     const serviceImageParam = searchParams.get('serviceImage');
+    const serviceNameParam = searchParams.get('serviceName');  // Capture serviceName from URL
     const userIdParam = searchParams.get('userId');
-    if (serviceIdParam) {
-      setServiceId(serviceIdParam);
-    }
-    if (serviceImageParam) {
-      setServiceImage(decodeURIComponent(serviceImageParam));
-    }
-    if (userIdParam) {
-      setUserId(userIdParam);
-    }
+    
+    if (serviceIdParam) setServiceId(serviceIdParam);
+    if (serviceImageParam) setServiceImage(decodeURIComponent(serviceImageParam));
+    if (serviceNameParam) setServiceName(serviceNameParam);  // Set the serviceName
+    if (userIdParam) setUserId(userIdParam);
   }, [searchParams]);
 
   const handleOrder = async () => {
@@ -42,18 +40,19 @@ const ServiceOrder = () => {
         console.error("User ID is not available. Cannot place order.");
         return;
       }
-
+  
       const orderDetails = {
         userId,
         serviceId,
-        city: orderFor === 'other' ? city : '',  // Include city only if 'other'
-        phoneNumber: orderFor === 'other' ? phoneNumber : '',  // Include phone only if 'other'
-        orderFor,  // Include orderFor in the payload
-        status: "pending",  // Default status
+        serviceName,  // Include the service name
+        city: orderFor === 'other' ? city : '',
+        phoneNumber: orderFor === 'other' ? phoneNumber : '',
+        orderFor,
+        status: "pending",
       };
-
-      console.log("Order Details:", orderDetails);
-
+  
+      console.log("Order Details Sent:", orderDetails);  // Log the details
+  
       const response = await fetch("/api/services/serviceorder", {
         method: "POST",
         headers: {
@@ -61,21 +60,19 @@ const ServiceOrder = () => {
         },
         body: JSON.stringify(orderDetails),
       });
-
+  
       if (response.ok) {
         console.log("Order created successfully");
-
-        // Redirect to confirmation page
         router.push('/order-confirmed');
       } else {
-        console.error("Failed to create order:", response.statusText);
         const errorData = await response.json();
-        console.error("Error details:", errorData);
+        console.error("Failed to create order:", errorData);
       }
     } catch (error) {
       console.error("Error creating order:", error);
     }
   };
+  
 
   return (
     <div className="p-4">
