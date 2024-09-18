@@ -194,30 +194,30 @@ const Cart = () => {
                           </figure>
                         </div>
                         <div className="flex items-center space-x-4">
-                          <div className="flex items-center">
+                          <div className="flex items-center border border-gray-300 rounded-md overflow-hiddenr">
                             <button
-                              className="bg-gray-300 text-gray-600 hover:text-gray-700 hover:bg-gray-400 h-full w-10 md:w-12 rounded-l cursor-pointer outline-none"
+                              className="bg-gray-200 text-gray-700 hover:text-gray-900 hover:bg-gray-300 h-full w-12 rounded-l-md cursor-pointer outline-none transition-all duration-200 ease-in-out"
                               onClick={() => decreaseQty(cartItem)}
                             >
-                              <span className="m-auto text-xl font-thin">−</span>
+                              <span className="m-auto text-2xl font-semibold">−</span>
                             </button>
                             <input
                               type="number"
-                              className="outline-none focus:outline-none text-center w-12 bg-gray-300 font-semibold text-md hover:text-black focus:text-black md:text-base cursor-default flex items-center text-gray-900"
+                              className="outline-none text-center w-14 bg-white font-semibold text-lg hover:text-black focus:text-black text-gray-900 cursor-default flex items-center"
                               name="custom-input-number"
                               value={cartItem.quantity}
                               readOnly
                             />
                             <button
-                              className="bg-gray-300 text-gray-600 hover:text-gray-700 hover:bg-gray-400 h-full w-10 md:w-12 rounded-r cursor-pointer"
+                              className="bg-gray-200 text-gray-700 hover:text-gray-900 hover:bg-gray-300 h-full w-12 rounded-r-md cursor-pointer outline-none transition-all duration-200 ease-in-out"
                               onClick={() => increaseQty(cartItem)}
                             >
-                              <span className="m-auto text-xl font-thin">+</span>
+                              <span className="m-auto text-2xl font-semibold">+</span>
                             </button>
                           </div>
                           <div className="text-right">
                             <p className="font-semibold not-italic">
-                              {(cartItem.price * cartItem.quantity).toFixed(2)} Birr
+                              birr{(cartItem.price * cartItem.quantity).toFixed(2)}
                             </p>
                             <small className="text-gray-400">
                               birr{cartItem.price} / per item
