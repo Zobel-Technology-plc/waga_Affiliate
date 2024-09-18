@@ -217,10 +217,10 @@ const Cart = () => {
                           </div>
                           <div className="text-right">
                             <p className="font-semibold not-italic">
-                              birr{(cartItem.price * cartItem.quantity).toFixed(2)}
+                              {(cartItem.price * cartItem.quantity).toFixed(2)} birr
                             </p>
                             <small className="text-gray-400">
-                              birr{cartItem.price} / per item
+                              {cartItem.price} / per item birr
                             </small>
                           </div>
                         </div>
