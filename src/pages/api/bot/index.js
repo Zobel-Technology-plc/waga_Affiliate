@@ -3,7 +3,7 @@ import User from '../../../backend/models/user';
 import axios from 'axios';
 
 // Telegram bot token
-const botToken = "7350305630:AAEsjUdDvgDlsXhToZel8NoI3SCxpv5lIrE";  // Replace with your actual bot token
+const botToken = "7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg";  // Replace with your actual bot token
 
 // Function to send a text message to the user
 const sendMessage = async (chatId, text, replyMarkup = {}) => {

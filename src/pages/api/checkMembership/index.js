@@ -11,8 +11,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ message: 'User ID is required' });
   }
 
-  const TELEGRAM_BOT_TOKEN = '7350305630:AAEsjUdDvgDlsXhToZel8NoI3SCxpv5lIrE';
-  const TELEGRAM_CHANNEL_ID = '@dz_ech';
+  const TELEGRAM_BOT_TOKEN = '7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg';
+  const TELEGRAM_CHANNEL_ID = '@WagaExpress';
 
   try {
     const response = await fetch(
