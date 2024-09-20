@@ -50,6 +50,11 @@ const Services = () => {
             </Link>
           </li>
           <li>
+            <Link href="/categories" className="text-white hover:text-gray-300 m-5 ">
+              Categories
+            </Link>
+          </li>
+          <li>
             <Link href="/services" className="text-white hover:text-gray-300 ml-11">
               Services
             </Link>

@@ -1,28 +1,31 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
+
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import Filters from "../../components/layouts/Filters";
-import CusstomPagination from '../../components/layouts/CusstomPagination'; // Import the custom pagination component
+import CusstomPagination from '../../components/layouts/CusstomPagination'; 
 
-const CategoriesPage = () => {
-  const [categories, setCategories] = useState([]);
-  const [totalCategoriesCount, setTotalCategoriesCount] = useState(0); // Store total count of categories
-  const searchParams = useSearchParams();
+const Categories = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // Get all search params (e.g., page, category, min price, max price, ratings)
+  const [categories, setCategories] = useState([]);
+  const [totalCategoriesCount, setTotalCategoriesCount] = useState(0);
+  const [loading, setLoading] = useState(true);  // Manage loading state
+
   const currentPage = Number(searchParams.get('page')) || 1;
-  const selectedCategory = searchParams.get('category') || ''; // Get selected category from URL
+  const selectedCategory = searchParams.get('category') || '';
   const minPrice = searchParams.get('min') || '';
   const maxPrice = searchParams.get('max') || '';
   const ratings = searchParams.get('ratings') || '';
 
-  const categoriesPerPage = 9; // Define how many categories to show per page
+  const categoriesPerPage = 9;
 
   useEffect(() => {
     const fetchCategories = async () => {
+      setLoading(true);  // Start loading when fetching begins
       try {
         const query = new URLSearchParams({
           page: currentPage,
@@ -38,41 +41,43 @@ const CategoriesPage = () => {
 
         if (data.success) {
           setCategories(data.categories);
-          setTotalCategoriesCount(data.totalCategoriesCount); // Assuming the API response includes total categories count
+          setTotalCategoriesCount(data.totalCategoriesCount);
         } else {
           console.error('Failed to fetch categories');
         }
       } catch (error) {
         console.error('Error fetching categories:', error);
+      } finally {
+        setLoading(false);  // Stop loading after fetch is done
       }
     };
 
     fetchCategories();
-  }, [currentPage, selectedCategory, minPrice, maxPrice, ratings]); // Fetch categories whenever filters change
+  }, [currentPage, selectedCategory, minPrice, maxPrice, ratings]);
+
+  if (loading) {
+    return <div>Loading...</div>;  // Display loading state
+  }
 
   return (
     <>
       <nav className="bg-gray-800 p-4 mt-2">
         <ul className="flex space-x-4">
           <li>
-            <Link href="/" className="text-white hover:text-gray-300 m-5 ">
-              Products
-            </Link>
+            <Link href="/" className="text-white hover:text-gray-300 m-5">Products</Link>
           </li>
           <li>
-            <Link href="/categories" className="text-white hover:text-gray-300 m-5 ">
-              Categories
-            </Link>
+            <Link href="/categories" className="text-white hover:text-gray-300 m-5">Categories</Link>
           </li>
           <li>
-            <Link href="/services" className="text-white hover:text-gray-300 ml-9">
-              Services
-            </Link>
+            <Link href="/services" className="text-white hover:text-gray-300 ml-9">Services</Link>
           </li>
         </ul>
       </nav>
+
       <Filters />
       <h1 className="text-2xl font-bold m-7 text-center">Categories</h1>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 mb-10">
         {categories.map((category) => (
           <div
@@ -94,16 +99,21 @@ const CategoriesPage = () => {
         ))}
       </div>
 
-      {/* Add a div to give more space at the bottom */}
-      <div className="pb-32"> {/* Add padding here to prevent bottom nav overlap */}
+      <div className="pb-32"> 
         <CusstomPagination
           resPerPage={categoriesPerPage}
-          productsCount={totalCategoriesCount} // Use the total count of categories for pagination
-          dynamicPath="/categories" // Ensure this points to the categories page
+          productsCount={totalCategoriesCount}
+          dynamicPath="/categories"
         />
       </div>
     </>
   );
 };
 
-export default CategoriesPage;
+export default function CategoriesPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Categories />
+    </Suspense>
+  );
+}
