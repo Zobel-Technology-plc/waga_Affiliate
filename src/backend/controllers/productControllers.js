@@ -5,6 +5,8 @@ import APIFilters from "../utils/APIFilters";
 
 export const newProduct = async (req, res) => {
   try {
+    console.log(req.body); // To verify subcategory field in the request
+
     const product = await Product.create(req.body);
     res.status(201).json({
       success: true,
@@ -15,6 +17,7 @@ export const newProduct = async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
+
 
 export const getProducts = async (req, res) => {
   try {

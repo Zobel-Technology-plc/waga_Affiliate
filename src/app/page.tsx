@@ -43,12 +43,17 @@ const HomePage = async ({ searchParams }: { searchParams: SearchParams }) => {
       <nav className="bg-gray-800 p-4 mt-2">
         <ul className="flex space-x-4">
           <li>
-            <Link href="/" className="text-white hover:text-gray-300 m-14 ">
+            <Link href="/" className="text-white hover:text-gray-300 m-5 ">
               Products
             </Link>
           </li>
           <li>
-            <Link href="/services" className="text-white hover:text-gray-300 ml-11">
+            <Link href="/categories" className="text-white hover:text-gray-300 m-5 ">
+              Categories
+            </Link>
+          </li>
+          <li>
+            <Link href="/services" className="text-white hover:text-gray-300 ml-9">
               Services
             </Link>
           </li>
