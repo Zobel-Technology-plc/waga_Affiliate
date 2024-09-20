@@ -1,6 +1,6 @@
 // api/subcategories/index.js
 import dbConnect from '../../../backend/config/dbConnect';
-import Subcategory from '../../../backend/models/Subcategory';
+import Subcategory from '../../../backend/models/subcategory';
 
 export default async function handler(req, res) {
   await dbConnect();
