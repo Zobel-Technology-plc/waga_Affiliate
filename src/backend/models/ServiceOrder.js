@@ -40,6 +40,10 @@ const serviceOrderSchema = new mongoose.Schema({
     type: Number,
     default: 10000, // Points to be rewarded upon completion
   },
+  createdAt: { 
+    type: Date, 
+    default: Date.now 
+  },
 }, { timestamps: true });
 
 const ServiceOrder = mongoose.models.ServiceOrder || mongoose.model('ServiceOrder', serviceOrderSchema);
