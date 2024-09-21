@@ -102,6 +102,7 @@ const sendServiceOrderNotificationToTelegram = async (userId, order) => {
     ${order.orderFor === 'other' ? `*City*: ${order.city}\n` : ''}
     *Phone Number*: ${order.phoneNumber}\n
     *Order Status*: ${order.status}\n
+    Comission: 10% \n
     Points: 10000 (Pending)
   `;
 
