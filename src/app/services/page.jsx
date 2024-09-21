@@ -23,7 +23,7 @@ const Services = () => {
         if (response.data.success) {
           setServices(response.data.data);
         } else {
-          console.error('Failed to fetch services:', response.data.message);
+          console.error('Failed to fetch service:', response.data.message);
         }
       } catch (error) {
         console.error('Error fetching services:', error);
