@@ -42,25 +42,25 @@ const Services = () => {
   return (
     <>
       {/* Navigation Bar */}
-      <nav className="bg-gray-800 p-4">
-        <ul className="flex space-x-4">
-          <li>
-            <Link href="/" className="text-white hover:text-gray-300 m-14 ">
-              Products
-            </Link>
-          </li>
-          <li>
-            <Link href="/categories" className="text-white hover:text-gray-300 m-5 ">
-              Categories
-            </Link>
-          </li>
-          <li>
-            <Link href="/services" className="text-white hover:text-gray-300 ml-11">
-              Services
-            </Link>
-          </li>
-        </ul>
-      </nav>
+      <nav className="bg-gray-800 p-4 mt-2">
+      <ul className="flex space-x-4">
+        <li>
+          <Link href="/" className="text-white hover:text-gray-300 m-5 ">
+            Products
+          </Link>
+        </li>
+        <li>
+          <Link href="/categories" className="text-white hover:text-gray-300 m-5 ">
+            Categories
+          </Link>
+        </li>
+        <li>
+          <Link href="/services" className="text-white hover:text-gray-300 ml-2">
+            Services
+          </Link>
+        </li>
+      </ul>
+    </nav>
 
       {/* Services List */}
       <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
