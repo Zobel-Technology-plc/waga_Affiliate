@@ -41,5 +41,7 @@ const orderSchema = new mongoose.Schema({
   },
 });
 
+orderSchema.index({ createdAt: 1 }); 
+
 // Export the model
 export default mongoose.models.Order || mongoose.model('Order', orderSchema);

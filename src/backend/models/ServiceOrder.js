@@ -46,6 +46,8 @@ const serviceOrderSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
+serviceOrderSchema.index({ createdAt: 1 }); 
+
 const ServiceOrder = mongoose.models.ServiceOrder || mongoose.model('ServiceOrder', serviceOrderSchema);
 
 export default ServiceOrder;
