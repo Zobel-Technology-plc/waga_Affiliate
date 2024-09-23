@@ -13,7 +13,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, message: 'User ID is required' });
     }
 
-    const inviteLink = `https://t.me/waganextbot?start=${userId}`;
+    const inviteLink = `https://t.me/Waga_affiliate_bot?start=${userId}`;
 
     res.status(201).json({ success: true, inviteLink });
   } else {

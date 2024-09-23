@@ -21,7 +21,7 @@ const sendMessage = async (chatId, text, replyMarkup = {}) => {
 
 // Function to request the user's phone number
 const requestPhoneNumber = async (chatId, userId) => {
-  const inviteLink = `https://t.me/yourbot?start=${userId}`;
+  const inviteLink = `https://t.me/Waga_affiliate_bot?start=${userId}`;
 
   const requestPhoneNumberMessage = {
     chat_id: chatId,
