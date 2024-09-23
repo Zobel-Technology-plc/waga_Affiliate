@@ -89,7 +89,7 @@ export const createServiceOrder = async (req, res) => {
 
 // Send a notification message to Telegram with order details
 const sendServiceOrderNotificationToTelegram = async (userId, order) => {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  const botToken = process.env.TELEGRAM_BOT_TOKEN || "7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg";
   const chatId = userId;
   const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
