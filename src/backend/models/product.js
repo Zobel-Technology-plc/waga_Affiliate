@@ -12,6 +12,10 @@ const productSchema = new mongoose.Schema({
   },
   price: {
     type: Number,
+    required: [false, 'Please enter product price'],
+  },
+  commission: {
+    type: Number,
     required: [true, 'Please enter product price'],
   },
   images: [
