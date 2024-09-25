@@ -65,10 +65,10 @@ const CategoryPage = ({ params }) => {
           alt="Back to Categories"
           width={30}
           height={30}
-          className="hover:opacity-80 cursor-pointer"
+          className="hover:opacity-80 cursor-pointer mr-10"
           onClick={() => router.back()}
         />
-        <h1 className="text-2xl font-bold ml-6 text-center">{params.category} Subcategories</h1>
+        <h1 className="text-2xl font-bold ml-14 text-center">{params.category}</h1>
       </div>
 
       <div className="container">
