@@ -88,32 +88,35 @@ const Cart = () => {
         price: (item.price * item.quantity).toFixed(2), // Total price for each item
         product: item.product,
       }));
-
+  
       const userId = userData?.id;
       if (!userId) {
         console.error("User ID is not available. Cannot place order.");
         return;
       }
-      if (orderItems.length === 0 || totalAmount <= 0) {
-        console.error("Invalid order details. Cannot place order.");
+      if (orderItems.length === 0) {
+        console.error("Cart is empty. Cannot place order.");
         return;
       }
-
+  
+      // Handle NaN for totalAmount
+      const validTotalAmount = isNaN(totalAmount) ? "0" : totalAmount;
+  
       // Calculate commission amount
       const commissionamount = cart.cartItems.reduce(
         (acc, item) => acc + Number(item.quantity) * Number(productCommissions[item.product] || 0),
         0
       ).toFixed(2);
-
+  
       let orderDetails = {
         userId,
         orderItems,
-        totalAmount,
+        totalAmount: validTotalAmount, // Use validTotalAmount
         commissionamount: Number(commissionamount),
         commissionStatus: 'pending',
         phoneNumber: phoneNumber,  // Use phone number from state
       };
-
+  
       // If "other" is selected, require address and phone number
       if (selectedOption === "other") {
         if (!address || !phoneNumber) {
@@ -126,7 +129,7 @@ const Cart = () => {
           phoneNumber,
         };
       }
-
+  
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: {
@@ -134,7 +137,7 @@ const Cart = () => {
         },
         body: JSON.stringify(orderDetails),
       });
-
+  
       if (response.ok) {
         clearCart();
         router.push("/order-confirmed");
@@ -147,7 +150,7 @@ const Cart = () => {
       console.error("Error creating order:", error);
     }
   };
-
+  
   return (
     <>
       <section className="py-5 sm:py-7 bg-blue-100">
