@@ -63,11 +63,14 @@ const ProductItem = ({ product }) => {
           </Link>
         </div>
         <div className="md:w-1/4 flex flex-col justify-center items-center md:items-start border-t md:border-t-0 md:border-l border-gray-200 p-5">
-          <span className="text-xl font-semibold text-black">
-            {product?.price} Birr 
-          </span>
+          {/* Conditionally render price only if product.price is greater than 0 */}
+          {product?.price > 0 && (
+            <span className="text-xl font-semibold text-black">
+              {product.price} Birr
+            </span>
+          )}
           <span className="text-xl text-black">
-          Commission: {product?.commission} birr 
+            Commission: {product?.commission} birr
           </span>
           <p className="text-green-500">Free Delivery</p>
           <div className="my-3">
