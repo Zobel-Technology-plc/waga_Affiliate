@@ -53,12 +53,25 @@ const sendOrderNotificationToTelegram = async (userId, order) => {
   // Construct the message content
   let message = `
     🛒 *Order Confirmation*\n
-    Order ID: ${order.orderId}\n
-    Total Amount: ${order.totalAmount} birr\n
-    Payment Status: ${order.paymentStatus}\n
-    Commission: ${order.commissionamount} birr (Pending)\n\n
-    *Order Items:*\n${order.orderItems.map(item => `- ${item.name} (${item.quantity}x): ${(order.totalAmount / item.quantity).toFixed(2)} birr`).join('\n')}
-  `;
+    Order ID: ${order.orderId}\n`;
+
+  // Only include total amount if it's greater than 0
+  if (order.totalAmount > 0) {
+    message += `Total Amount: ${order.totalAmount} birr\n`;
+  }
+
+  message += `Payment Status: ${order.paymentStatus}\n`;
+  message += `Commission: ${order.commissionamount} birr (Pending)\n\n`;
+
+  // Add order items to the message, excluding price if it's 0
+  message += `*Order Items:*\n${order.orderItems.map(item => {
+    // Only include price if it's greater than 0, otherwise just include name and quantity
+    if (order.totalAmount / item.quantity > 0) {
+      return `- ${item.name} (${item.quantity}x): ${(order.totalAmount / item.quantity).toFixed(2)} birr`;
+    } else {
+      return `- ${item.name} (${item.quantity}x)`;
+    }
+  }).join('\n')}`;
 
   // Include address and phone number if provided
   if (order.address && order.phoneNumber) {
@@ -77,6 +90,7 @@ const sendOrderNotificationToTelegram = async (userId, order) => {
     console.error("Error sending order notification to Telegram:", error);
   }
 };
+
 
 
 export const getOrders = async (req, res) => {

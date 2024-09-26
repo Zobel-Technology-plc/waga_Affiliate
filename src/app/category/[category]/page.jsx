@@ -1,11 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client';
-import React, { useEffect, useState } from 'react';
+
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import CusstomPagination from '../../../components/layouts/CusstomPagination';
 
+// CategoryPage Component
 const CategoryPage = ({ params }) => {
   const [subcategories, setSubcategories] = useState([]);
   const [totalSubcategories, setTotalSubcategories] = useState(0);
@@ -38,6 +40,7 @@ const CategoryPage = ({ params }) => {
 
   return (
     <>
+      {/* Navigation */}
       <nav className="bg-gray-800 p-4 mt-2">
         <ul className="flex space-x-4">
           <li>
@@ -71,6 +74,7 @@ const CategoryPage = ({ params }) => {
         <h1 className="text-2xl font-bold ml-14 text-center">{params.category}</h1>
       </div>
 
+      {/* Subcategories List */}
       <div className="container">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4">
           {subcategories.map((subcategory) => (
@@ -105,4 +109,11 @@ const CategoryPage = ({ params }) => {
   );
 };
 
-export default CategoryPage;
+// Suspense Wrapper for CategoryPage
+export default function CategoryPageWrapper({ params }) {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CategoryPage params={params} />
+    </Suspense>
+  );
+}
