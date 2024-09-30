@@ -14,6 +14,7 @@ export default async function handler(req, res) {
         userId,
         action,
         points,
+        joinerName: joinerName || null,
         timestamp: new Date(),
       });
 

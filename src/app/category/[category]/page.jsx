@@ -26,7 +26,7 @@ const CategoryPage = ({ params }) => {
 
         if (data.success) {
           setSubcategories(data.subcategories);
-          setTotalSubcategories(data.totalSubcategories); // Total number of subcategories
+          setTotalSubcategories(data.subcategories.length); // Update with the number of subcategories returned
         } else {
           console.error('Failed to fetch subcategories:', data.message);
         }
@@ -99,7 +99,7 @@ const CategoryPage = ({ params }) => {
 
         {/* Pagination */}
         <CusstomPagination
-          resPerPage={3}
+          resPerPage={resPerPage}
           productsCount={totalSubcategories}
           dynamicPath={`/category/${params.category}`}
           className="mt-10"

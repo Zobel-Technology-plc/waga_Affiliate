@@ -14,6 +14,10 @@ const UserActionSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  joinerName: {
+    type: String,
+    required: false, // Not all actions will have a joinerName
+  },
   timestamp: {
     type: Date,
     default: Date.now,

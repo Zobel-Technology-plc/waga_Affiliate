@@ -1,6 +1,6 @@
-// api/subcategories/index.js
 import dbConnect from '../../../backend/config/dbConnect';
 import Subcategory from '../../../backend/models/Subcategory';
+import Product from '../../../backend/models/Product'; // Import the Product model
 
 export default async function handler(req, res) {
   await dbConnect();
@@ -36,23 +36,45 @@ const createSubcategory = async (req, res) => {
   }
 };
 
-// Get all subcategories by category
+// Get all subcategories by category that have products
 const getSubcategories = async (req, res) => {
   const { category } = req.query;
-  console.log('Querying subcategories for category:', category);
 
   try {
-    const subcategories = await Subcategory.find(category ? { category } : {});
-    console.log('Found subcategories:', subcategories);
-    
-    if (subcategories.length === 0) {
-      return res.status(404).json({ message: 'No subcategories found' });
+    const subcategoriesWithProducts = await Subcategory.aggregate([
+      {
+        $match: category ? { category } : {} // Filter by category if provided
+      },
+      {
+        $lookup: {
+          from: 'products', // Link to the products collection
+          localField: 'name',
+          foreignField: 'subcategory',
+          as: 'products'
+        }
+      },
+      {
+        $match: {
+          'products.0': { $exists: true } // Only return subcategories that have products
+        }
+      },
+      {
+        $project: {
+          name: 1,
+          image: 1,
+          category: 1,
+          productCount: { $size: '$products' } // Optional: Include the count of products in each subcategory
+        }
+      }
+    ]);
+
+    if (subcategoriesWithProducts.length === 0) {
+      return res.status(404).json({ message: 'No subcategories with products found' });
     }
 
-    res.status(200).json({ success: true, subcategories });
+    res.status(200).json({ success: true, subcategories: subcategoriesWithProducts });
   } catch (error) {
     console.error('Error fetching subcategories:', error);
     res.status(500).json({ message: 'Error fetching subcategories', error });
   }
 };
-

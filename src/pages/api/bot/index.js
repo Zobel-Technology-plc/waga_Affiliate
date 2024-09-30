@@ -1,5 +1,6 @@
 import dbConnect from '../../../backend/config/dbConnect';
 import User from '../../../backend/models/user';
+import UserAction from '../../../backend/models/useraction'; // Import the UserAction model
 import axios from 'axios';
 
 // Telegram bot token
@@ -53,12 +54,16 @@ const requestPhoneNumber = async (chatId, userId) => {
 // Function to handle invite link logic
 const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
   try {
+    // Fetch the invited user
     const user = await User.findOne({ userId });
+
+    // Check if the user has already joined or shared their phone number
     if (user && (user.hasJoinedViaInvite || user.phoneNumber)) {
       await sendMessage(chatId, 'You have already joined or are already a member.');
       return { success: false, message: 'You have already joined or are already a member' };
     }
 
+    // Update inviter's points and notify the inviter
     const inviter = await User.findOneAndUpdate(
       { userId: inviterUserId },
       { $inc: { points: 50000 } }, // Increment points for inviter
@@ -66,15 +71,28 @@ const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
     );
 
     if (inviter) {
+      // Notify inviter about the points earned
       await sendMessage(inviterUserId, `Congratulations! You've earned 50000 points for inviting ${joinerName}.`);
+
+      // Save the invite action in the UserAction model
+      const newAction = new UserAction({
+        userId: inviterUserId, // The inviter's userId
+        action: `Invited ${joinerName}`, // Action description
+        points: 50000, // Points awarded for the action
+        joinerName, // Save the joiner's name
+        timestamp: new Date(),
+      });
+      await newAction.save(); // Save the action to the database
     }
 
+    // Mark the invited user as having joined via the invite
     await User.findOneAndUpdate(
       { userId },
-      { hasJoinedViaInvite: true },
+      { hasJoinedViaInvite: true }, // Mark user as having joined via invite
       { new: true }
     );
 
+    // Send a welcome message to the new user
     await sendMessage(chatId, 'Welcome! You have joined via an invite link.');
     console.log('User joined via invite link and confirmation message sent:', chatId);
 
@@ -108,15 +126,17 @@ export default async function handler(req, res) {
     // Start command handler
     if (text && text.startsWith('/start')) {
       console.log('Start command received');
-      const inviterUserId = text.split(' ')[1];
+      const inviterUserId = text.split(' ')[1]; // Extract inviter userId from the invite link
 
       if (inviterUserId) {
+        // Handle the invite link logic
         const inviteResult = await handleInviteLink(userId, inviterUserId, chatId, joinerName);
         if (!inviteResult.success) {
           return res.status(200).json({ success: true, message: inviteResult.message });
         }
       }
 
+      // Request the user's phone number after handling invite
       const phoneNumberRequested = await requestPhoneNumber(chatId, userId);
       if (phoneNumberRequested) {
         return res.status(200).json({ success: true, message: 'Phone number requested' });
@@ -129,10 +149,10 @@ export default async function handler(req, res) {
       const phoneNumber = message.contact.phone_number;
 
       try {
-        // Save phone number in the database
+        // Save the phone number in the database
         await User.findOneAndUpdate(
           { userId },
-          { phoneNumber },
+          { phoneNumber }, // Save phone number
           { upsert: true, new: true }
         );
 
@@ -147,7 +167,7 @@ export default async function handler(req, res) {
         return res.status(500).json({ success: false, message: 'Failed to save phone number or remove keyboard' });
       }
 
-    // Handle city input from user
+    // Handle city input from the user
     } else if (text && !text.startsWith('/start') && !message.contact) {
       try {
         // Save the city in the database
@@ -166,7 +186,7 @@ export default async function handler(req, res) {
         return res.status(500).json({ success: false, message: 'Failed to save city or send thank you message' });
       }
 
-    } 
+    }
   } else {
     res.status(405).json({ success: false, message: 'Method Not Allowed' });
   }
