@@ -105,7 +105,7 @@ const Filters = () => {
           {/* Category Filter */}
           <h3 className="font-semibold mt-4 mb-2">Category</h3>
           <ul className="space-y-1">
-            {["Electronics", "Laptops", "Toys", "Office", "Beauty"].map((category) => (
+            {["Electronics", "Constraction"].map((category) => (
               <li key={category}>
                 <label className="flex items-center">
                   <input

@@ -1,4 +1,3 @@
-// backend/models/Product.js
 import mongoose from 'mongoose';
 
 const productSchema = new mongoose.Schema({
@@ -16,7 +15,7 @@ const productSchema = new mongoose.Schema({
   },
   commission: {
     type: Number,
-    required: [true, 'Please enter product price'],
+    required: [true, 'Please enter product commission'],
   },
   images: [
     {
@@ -24,7 +23,7 @@ const productSchema = new mongoose.Schema({
       url: { type: String },
     },
   ],
-  category: {  // Store category as a string
+  category: {
     type: String,
     required: [true, 'Please select a category'],
   },
@@ -43,6 +42,10 @@ const productSchema = new mongoose.Schema({
   ratings: {
     type: Number,
     default: 0,
+  },
+  freeDelivery: {
+    type: Boolean,
+    default: false, // Free delivery is false by default
   },
 });
 

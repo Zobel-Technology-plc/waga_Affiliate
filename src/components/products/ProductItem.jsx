@@ -63,7 +63,6 @@ const ProductItem = ({ product }) => {
           </Link>
         </div>
         <div className="md:w-1/4 flex flex-col justify-center items-center md:items-start border-t md:border-t-0 md:border-l border-gray-200 p-5">
-          {/* Conditionally render price only if product.price is greater than 0 */}
           {product?.price > 0 && (
             <span className="text-xl font-semibold text-black">
               {product.price} Birr
@@ -72,7 +71,8 @@ const ProductItem = ({ product }) => {
           <span className="text-xl text-black">
             Commission: {product?.commission} birr
           </span>
-          <p className="text-green-500">Free Delivery</p>
+          {/* Conditionally render free delivery */}
+          {product?.freeDelivery && <p className="text-green-500">Free Delivery</p>}
           <div className="my-3">
             {inCart ? (
               <button
@@ -93,7 +93,6 @@ const ProductItem = ({ product }) => {
         </div>
       </div>
 
-      {/* Notification Display */}
       {notification && (
         <div className="absolute top-0 right-0 bg-green-500 text-white p-2 rounded-md">
           {notification}
