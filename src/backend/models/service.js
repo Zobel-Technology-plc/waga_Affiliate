@@ -13,6 +13,11 @@ const serviceSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  commission:{
+    type:Number,
+    required:true
+  }
+  
 });
 
 const Service = mongoose.models.Service || mongoose.model('Service', serviceSchema);

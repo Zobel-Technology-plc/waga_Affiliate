@@ -70,7 +70,7 @@ const SubcategoryPage = ({ params }) => {
           className="hover:opacity-80 cursor-pointer"
           onClick={() => router.back()}
         />
-        <h1 className="text-2xl font-bold ml-10 text-center">{params.subcategory} Products</h1>
+        <h1 className="text-2xl font-bold ml-10 text-center">{params.subcategory}</h1>
       </div>
 
       <div className="container">

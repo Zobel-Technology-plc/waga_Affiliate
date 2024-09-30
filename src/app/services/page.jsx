@@ -80,7 +80,7 @@ const Services = () => {
 
             <h3 className="text-lg font-bold mt-4">{service.name}</h3>
             <p className="text-gray-600">Starting at {service.startingPrice} birr</p>
-            <p className="text-gray-600">Commission: 10%</p> {/* Display 10% commission */}
+            <p className="text-gray-600">Commission: {service.commission}%</p> {/* Display 10% commission */}
             <p className="text-gray-600">Points: 10,000</p>
           </div>
         ))}
