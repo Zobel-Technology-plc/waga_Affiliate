@@ -16,6 +16,10 @@ const serviceSchema = new mongoose.Schema({
   commission:{
     type:Number,
     required:true
+  },
+  point:{
+    type:Number,
+    required:true,
   }
   
 });

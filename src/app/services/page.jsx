@@ -55,7 +55,7 @@ const Services = () => {
           </Link>
         </li>
         <li>
-          <Link href="/services" className="text-white hover:text-gray-300 ml-2">
+          <Link href="/services" className="text-white hover:text-gray-300 ml-9">
             Services
           </Link>
         </li>
@@ -79,9 +79,9 @@ const Services = () => {
             </Link>
 
             <h3 className="text-lg font-bold mt-4">{service.name}</h3>
-            <p className="text-gray-600">Starting at {service.startingPrice} birr</p>
-            <p className="text-gray-600">Commission: {service.commission}%</p> {/* Display 10% commission */}
-            <p className="text-gray-600">Points: 10,000</p>
+            <p className="text-gray-600">Starting at {new Intl.NumberFormat().format(service.startingPrice)} birr</p>
+            <p className="text-gray-600">Commission: {new Intl.NumberFormat().format(service.commission)}%</p> {/* Display 10% commission */}
+            <p className="text-gray-600">Points: {new Intl.NumberFormat().format(service.point)}</p>
           </div>
         ))}
       </div>
