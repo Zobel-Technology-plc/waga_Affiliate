@@ -74,15 +74,15 @@ const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
       // Notify inviter about the points earned
       await sendMessage(inviterUserId, `Congratulations! You've earned 50000 points for inviting ${joinerName}.`);
 
-      // Save the invite action in the UserAction model
+      // Save the invite action in the UserAction model with joinerUserId instead of joinerName
       const newAction = new UserAction({
-        userId: inviterUserId, // The inviter's userId
-        action: `Invited ${joinerName}`, // Action description
-        points: 50000, // Points awarded for the action
-        joinerName, // Save the joiner's name
+        userId: inviterUserId,        // The inviter's userId
+        action: `Invited ${joinerName}`, // Action description, still using joinerName for message clarity
+        points: 50000,                // Points awarded for the action
+        joinerUserId: userId,         // Save the joinerUserId instead of joinerName
         timestamp: new Date(),
       });
-      await newAction.save(); // Save the action to the database
+      await newAction.save();         // Save the action to the database
     }
 
     // Mark the invited user as having joined via the invite
