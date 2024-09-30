@@ -1,6 +1,5 @@
 import dbConnect from '../../../backend/config/dbConnect';
 import Subcategory from '../../../backend/models/Subcategory';
-import Product from '../../../backend/models/Product'; // Import the Product model
 
 export default async function handler(req, res) {
   await dbConnect();
