@@ -1,27 +1,31 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-'use client';
+'use client'
 import React, { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import ProductItem from '../../../../components/products/ProductItem';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter, useSearchParams } from 'next/navigation';
 import CusstomPagination from '../../../../components/layouts/CusstomPagination';
 
 const SubcategoryPage = ({ params }) => {
   const [products, setProducts] = useState([]);
   const [totalProducts, setTotalProducts] = useState(0);
-  const [resPerPage, setResPerPage] = useState(9); // Example: 9 products per page
+  const [resPerPage] = useState(9); // Example: 9 products per page
 
   const router = useRouter();
   const searchParams = useSearchParams();
   let page = searchParams.get('page') || 1;
   page = Number(page);
 
+  // Decode category and subcategory to handle non-ASCII characters
+  const decodedCategory = decodeURIComponent(params.category);
+  const decodedSubcategory = decodeURIComponent(params.subcategory);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await fetch(
-          `/api/products/category?category=${params.category}&subcategory=${params.subcategory}&page=${page}&limit=${resPerPage}`
+          `/api/products/category?category=${encodeURIComponent(decodedCategory)}&subcategory=${encodeURIComponent(decodedSubcategory)}&page=${page}&limit=${resPerPage}`
         );
         const data = await res.json();
         if (data.success) {
@@ -36,7 +40,7 @@ const SubcategoryPage = ({ params }) => {
     };
 
     fetchProducts();
-  }, [params.category, params.subcategory, page]);
+  }, [decodedCategory, decodedSubcategory, page]);
 
   return (
     <>
@@ -70,7 +74,7 @@ const SubcategoryPage = ({ params }) => {
           className="hover:opacity-80 cursor-pointer"
           onClick={() => router.back()}
         />
-        <h1 className="text-2xl font-bold ml-10 text-center">{params.subcategory}</h1>
+        <h1 className="text-center text-2xl font-bold ml-14 ">{decodedSubcategory}</h1>
       </div>
 
       <div className="container">
@@ -84,7 +88,7 @@ const SubcategoryPage = ({ params }) => {
         <CusstomPagination
           resPerPage={resPerPage}
           productsCount={totalProducts}
-          dynamicPath={`/category/${params.category}/${params.subcategory}`}
+          dynamicPath={`/category/${encodeURIComponent(decodedCategory)}/${encodeURIComponent(decodedSubcategory)}`}
         />
       </div>
     </>
