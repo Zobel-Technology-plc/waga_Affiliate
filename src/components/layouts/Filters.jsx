@@ -105,7 +105,7 @@ const Filters = () => {
           {/* Category Filter */}
           <h3 className="font-semibold mt-4 mb-2">Category</h3>
           <ul className="space-y-1">
-            {["Electronics", "Constraction"].map((category) => (
+            {["Electronics", "Construction"].map((category) => (
               <li key={category}>
                 <label className="flex items-center">
                   <input
@@ -164,7 +164,7 @@ const Filters = () => {
         {/* Category Filter */}
         <h3 className="font-semibold mt-4 mb-2">Category</h3>
         <ul className="space-y-1">
-          {["Electronics", "Laptops", "Toys", "Office", "Beauty"].map((category) => (
+          {["Electronics", "Construction"].map((category) => (
             <li key={category}>
               <label className="flex items-center">
                 <input
@@ -180,36 +180,7 @@ const Filters = () => {
             </li>
           ))}
         </ul>
-
-        {/* Ratings Filter */}
-        <hr className="my-4" />
-        <h3 className="font-semibold mb-2">Ratings</h3>
-        <ul className="space-y-1">
-          {[5, 4, 3, 2, 1].map((rating) => (
-            <li key={rating}>
-              <label className="flex items-center">
-                <input
-                  name="ratings"
-                  type="checkbox"
-                  value={rating}
-                  className="h-4 w-4"
-                  defaultChecked={checkHandler("ratings", `${rating}`)}
-                  onClick={(e) => handleClick(e.target)}
-                />
-                <span className="ml-2 text-gray-500">
-                  <StarRatings
-                    rating={rating}
-                    starRatedColor="#ffb829"
-                    numberOfStars={5}
-                    starDimension="20px"
-                    starSpacing="2px"
-                    name="rating"
-                  />
-                </span>
-              </label>
-            </li>
-          ))}
-        </ul>
+        
       </div>
     </aside>
   );
