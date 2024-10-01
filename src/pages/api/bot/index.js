@@ -63,13 +63,14 @@ const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
       return { success: false, message: 'You have already joined or are already a member' };
     }
 
-    // Check if the inviter has already invited this user
-    const existingInvite = await UserAction.findOne({
-      userId: inviterUserId,
-      joinerUserId: userId,
-    });
+    // Atomically check if the inviter has already invited this user and create the action if not
+    const existingInvite = await UserAction.findOneAndUpdate(
+      { userId: inviterUserId, joinerUserId: userId },
+      {},  // Do nothing if it already exists
+      { upsert: true, new: true, setDefaultsOnInsert: true }  // Create if doesn't exist
+    );
 
-    if (existingInvite) {
+    if (!existingInvite.isNew) {
       // If the invite already exists, don't award points again
       await sendMessage(chatId, 'You have already been invited by this person.');
       return { success: false, message: 'This user was already invited by you.' };
@@ -86,16 +87,16 @@ const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
       // Notify inviter about the points earned
       await sendMessage(inviterUserId, `Congratulations! You've earned 50000 points for inviting ${joinerName}.`);
 
-      // Save the invite action in the UserAction model
-      const newAction = new UserAction({
-        userId: inviterUserId,        // The inviter's userId
-        action: `Invited ${joinerName}`, // Action description
-        points: 50000,                // Points awarded for the action
-        joinerUserId: userId,         // Save the joinerUserId
-        timestamp: new Date(),
-      });
-
-      await newAction.save();         // Save the action to the database
+      // Save the invite action in the UserAction model (it's already saved with upsert)
+      await UserAction.findOneAndUpdate(
+        { userId: inviterUserId, joinerUserId: userId },
+        {
+          action: `Invited ${joinerName}`,  // Action description
+          points: 50000,                    // Points awarded for the action
+          timestamp: new Date(),
+        },
+        { upsert: true, new: true }
+      );
     }
 
     // Mark the invited user as having joined via the invite
@@ -115,6 +116,7 @@ const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
     return { success: false, message: 'Failed to handle invite link' };
   }
 };
+
 
 
 // Main handler function
