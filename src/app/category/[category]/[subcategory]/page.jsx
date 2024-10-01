@@ -47,13 +47,13 @@ const SubcategoryPage = ({ params }) => {
       <nav className="bg-gray-800 p-4 mt-2">
         <ul className="flex space-x-4">
           <li>
-            <Link href="/" className="text-white hover:text-gray-300 m-5">
-              Products
+            <Link href="/" className="text-white hover:text-gray-300 m-5 ">
+            Categories
             </Link>
           </li>
           <li>
-            <Link href="/categories" className="text-white hover:text-gray-300 m-5">
-              Categories
+            <Link href="/product" className="text-white hover:text-gray-300 m-5 ">
+              Products
             </Link>
           </li>
           <li>

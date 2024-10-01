@@ -114,7 +114,7 @@ const Cart = () => {
         totalAmount: validTotalAmount, // Use validTotalAmount
         commissionamount: Number(commissionamount),
         commissionStatus: 'pending',
-        phoneNumber: phoneNumber,  // Use phone number from state
+        orderFor: selectedOption,  // Use phone number from state
       };
   
       // If "other" is selected, require address and phone number

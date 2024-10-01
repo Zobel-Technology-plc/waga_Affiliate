@@ -9,15 +9,31 @@ export const newOrder = async (req, res) => {
   console.log('Request body:', req.body);
 
   try {
+    // Initialize variables to hold the final phone number and address values
     let userPhoneNumber = phoneNumber;
+    let userAddress = address;
 
-    // If order is for 'self', retrieve the phone number from the user's profile if not provided
+    // If the order is for 'self', retrieve the phone number and city from the user's profile
     if (orderFor === 'self') {
       const user = await User.findOne({ userId });
-      if (!user || !user.phoneNumber) {
-        return res.status(400).json({ success: false, message: 'Phone number is required for self orders but not found.' });
+
+      if (!user) {
+        return res.status(400).json({ success: false, message: 'User not found.' });
       }
-      userPhoneNumber = user.phoneNumber;  // Use phone number from user's profile
+
+      // Use the phone number from the user's profile if not provided in the request body
+      userPhoneNumber = user.phoneNumber || phoneNumber;
+
+      // Use the user's saved city as the address
+      userAddress = user.city || '';  // Default to empty string if no city is available
+
+      if (!userPhoneNumber) {
+        return res.status(400).json({ success: false, message: 'Phone number is required but not available for self orders.' });
+      }
+
+      if (!userAddress) {
+        return res.status(400).json({ success: false, message: 'City is required but not available for self orders.' });
+      }
     }
 
     // Create a new order with commission set to "pending"
@@ -27,14 +43,14 @@ export const newOrder = async (req, res) => {
       totalAmount,
       commissionamount,
       commissionStatus: 'pending',  // Set the commission status to "pending"
-      address: orderFor === 'other' ? address : '',  // Address only needed if ordering for "other"
+      address: orderFor === 'other' ? address : userAddress,  // Use the address based on order type
       phoneNumber: userPhoneNumber,  // Use retrieved or provided phone number
       paymentStatus: 'Pending',  // Set payment status to "Pending"
     });
 
     console.log('Created order:', order);
 
-    // Send order details to Telegram
+    // Send order details to Telegram (assuming this function exists)
     await sendOrderNotificationToTelegram(userId, order);
 
     res.status(201).json({ success: true, data: order });
@@ -43,7 +59,6 @@ export const newOrder = async (req, res) => {
     res.status(400).json({ success: false, message: 'Order creation failed' });
   }
 };
-
 // Send a notification message to Telegram with order details
 const sendOrderNotificationToTelegram = async (userId, order) => {
   const botToken = process.env.TELEGRAM_BOT_TOKEN || "7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg";
@@ -61,7 +76,7 @@ const sendOrderNotificationToTelegram = async (userId, order) => {
   }
 
   message += `Payment Status: ${order.paymentStatus}\n`;
-  message += `Commission: ${order.commissionamount} birr (Pending)\n\n`;
+  message += `Commission: ${order.commissionamount} birr (Pending)\n`;
 
   // Add order items to the message, excluding price if it's 0
   message += `*Order Items:*\n${order.orderItems.map(item => {
@@ -75,7 +90,7 @@ const sendOrderNotificationToTelegram = async (userId, order) => {
 
   // Include address and phone number if provided
   if (order.address && order.phoneNumber) {
-    message += `\n*Shipping Details:*\nAddress: ${order.address}\nPhone Number: ${order.phoneNumber}\n`;
+    message += `\n\n*Shipping Details:*\nAddress: ${order.address}\nPhone Number: ${order.phoneNumber}\n`;
   }
 
   console.log('Message to send:', message);
