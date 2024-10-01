@@ -63,6 +63,18 @@ const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
       return { success: false, message: 'You have already joined or are already a member' };
     }
 
+    // Check if the inviter has already invited this user
+    const existingInvite = await UserAction.findOne({
+      userId: inviterUserId,
+      joinerUserId: userId,
+    });
+
+    if (existingInvite) {
+      // If the invite already exists, don't award points again
+      await sendMessage(chatId, 'You have already been invited by this person.');
+      return { success: false, message: 'This user was already invited by you.' };
+    }
+
     // Update inviter's points and notify the inviter
     const inviter = await User.findOneAndUpdate(
       { userId: inviterUserId },
@@ -74,14 +86,15 @@ const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
       // Notify inviter about the points earned
       await sendMessage(inviterUserId, `Congratulations! You've earned 50000 points for inviting ${joinerName}.`);
 
-      // Save the invite action in the UserAction model with joinerUserId instead of joinerName
+      // Save the invite action in the UserAction model
       const newAction = new UserAction({
         userId: inviterUserId,        // The inviter's userId
-        action: `Invited ${joinerName}`, // Action description, still using joinerName for message clarity
+        action: `Invited ${joinerName}`, // Action description
         points: 50000,                // Points awarded for the action
-        joinerUserId: userId,         // Save the joinerUserId instead of joinerName
+        joinerUserId: userId,         // Save the joinerUserId
         timestamp: new Date(),
       });
+
       await newAction.save();         // Save the action to the database
     }
 
@@ -102,6 +115,7 @@ const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
     return { success: false, message: 'Failed to handle invite link' };
   }
 };
+
 
 // Main handler function
 export default async function handler(req, res) {
