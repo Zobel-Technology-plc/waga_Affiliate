@@ -28,13 +28,13 @@ const requestPhoneNumber = async (chatId, userId) => {
     chat_id: chatId,
     text: `Please share your phone number to continue:\nHere is your unique invitation link: ${inviteLink}`,
     reply_markup: {
-      one_time_keyboard: true,
+      
       keyboard: [
         [
           {
             text: 'Share Phone Number',
             request_contact: true,
-            one_time_keyboard: true,
+            
           },
         ],
       ],
