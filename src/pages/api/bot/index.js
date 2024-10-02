@@ -1,6 +1,6 @@
 import dbConnect from '../../../backend/config/dbConnect';
 import User from '../../../backend/models/user';
-import UserAction from '../../../backend/models/useraction'; // Import the UserAction model
+import UserAction from '../../../backend/models/useraction';
 import axios from 'axios';
 
 // Telegram bot token
@@ -13,7 +13,7 @@ const sendMessage = async (chatId, text, replyMarkup = {}) => {
     await axios.post(apiUrl, {
       chat_id: chatId,
       text,
-      reply_markup: replyMarkup, // Optional reply markup
+      reply_markup: replyMarkup,
     });
   } catch (error) {
     console.error('Error sending message:', error);
@@ -28,13 +28,11 @@ const requestPhoneNumber = async (chatId, userId) => {
     chat_id: chatId,
     text: `Please share your phone number to continue:\nHere is your unique invitation link: ${inviteLink}`,
     reply_markup: {
-      
       keyboard: [
         [
           {
             text: 'Share Phone Number',
             request_contact: true,
-            
           },
         ],
       ],
@@ -54,6 +52,8 @@ const requestPhoneNumber = async (chatId, userId) => {
 // Function to handle invite link logic
 const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
   try {
+    await dbConnect();
+
     // Fetch the invited user
     const user = await User.findOne({ userId });
 
@@ -64,17 +64,17 @@ const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
       return { success: false, message: 'User is already a member or has already joined via invite' };
     }
 
-    // Mark the invited user as having joined via the invite immediately
+    // Mark the invited user as having joined via the invite
     await User.findOneAndUpdate(
       { userId },
-      { hasJoinedViaInvite: true }, // Mark user as having joined via invite
+      { hasJoinedViaInvite: true },
       { new: true }
     );
 
-    // Now, update inviter's points and notify the inviter
+    // Update inviter's points and notify the inviter
     const inviter = await User.findOneAndUpdate(
       { userId: inviterUserId },
-      { $inc: { points: 50000 } }, // Increment points for inviter
+      { $inc: { points: 50000 } },
       { new: true }
     );
 
@@ -84,13 +84,13 @@ const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
 
       // Save the invite action in the UserAction model
       const newAction = new UserAction({
-        userId: inviterUserId,        // The inviter's userId
-        action: `Invited ${joinerName}`, // Action description
-        points: 50000,                // Points awarded for the action
-        joinerUserId: userId,         // Save the joinerUserId instead of joinerName
+        userId: inviterUserId,
+        action: `Invited ${joinerName}`,
+        points: 50000,
+        joinerUserId: userId,   // Save the joinerUserId (instead of joinerName)
         timestamp: new Date(),
       });
-      await newAction.save();         // Save the action to the database
+      await newAction.save();
     }
 
     // Send a welcome message to the new user
@@ -153,7 +153,7 @@ export default async function handler(req, res) {
         // Save the phone number in the database
         await User.findOneAndUpdate(
           { userId },
-          { phoneNumber }, // Save phone number
+          { phoneNumber },
           { upsert: true, new: true }
         );
 
@@ -174,7 +174,7 @@ export default async function handler(req, res) {
         // Save the city in the database
         await User.findOneAndUpdate(
           { userId },
-          { city: text }, // Save city entered by the user
+          { city: text },
           { upsert: true, new: true }
         );
 
