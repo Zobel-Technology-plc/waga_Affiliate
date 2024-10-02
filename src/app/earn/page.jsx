@@ -40,7 +40,7 @@ const Modal = ({
         </button>
         <h2>{option.text}</h2>
         <p>Earn points by completing this action.</p>
-        <h1>{option.points}</h1>
+        <h1>{new Intl.NumberFormat().format(option.points)}</h1>
         <Image
           className={styles.image}
           src={option.icon}
@@ -223,24 +223,24 @@ const EarnPage = () => {
 
   const handleCheckClick = async (event, option, joinClicked) => {
     event.preventDefault();
-  
+
     // Open the link in a new tab
     if (option.link) {
       window.open(option.link, '_blank');
     }
-  
+
     // If the action is not completed and the user has not clicked "Join"
     if (!completedActions[option.text] && !joinClicked) {
       setJoinClicked(true);
       localStorage.setItem('joinClicked', true);
     }
-  
+
     // Check membership and save action if "Join" was clicked and the action is not yet completed
     if (!completedActions[option.text] && joinClicked) {
       try {
         const response = await fetch(`/api/checkMembership?userId=${userId}`);
         const data = await response.json();
-  
+
         if (data.isMember) {
           const saveActionResponse = await fetch('/api/user/actions', {
             method: 'POST',
@@ -249,7 +249,7 @@ const EarnPage = () => {
             },
             body: JSON.stringify({ userId, action: option.text, points: option.points }),
           });
-  
+
           if (saveActionResponse.ok) {
             setCompletedActions((prev) => ({ ...prev, [option.text]: true }));
           } else {
@@ -264,7 +264,6 @@ const EarnPage = () => {
       }
     }
   };
-  
 
   const handleCardClick = (option) => {
     setSelectedOption(option);
