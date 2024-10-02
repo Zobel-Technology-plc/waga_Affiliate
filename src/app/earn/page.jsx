@@ -40,7 +40,7 @@ const Modal = ({
         </button>
         <h2>{option.text}</h2>
         <p>Earn points by completing this action.</p>
-        <h1>{new Intl.NumberFormat().format(option.points)}</h1>
+        <h1>{option.points}</h1>
         <Image
           className={styles.image}
           src={option.icon}
