@@ -1,61 +1,106 @@
+// File: api/users/action.js
+
 import dbConnect from '../../../backend/config/dbConnect';
-import User from '../../../backend/models/user'; // Assuming you have a User model
-import UserAction from '../../../backend/models/useraction';
+import User from '../../../backend/models/user';
+import UserAction from '../../../backend/models/useraction'; // Import the UserAction model
 
 export default async function handler(req, res) {
-  await dbConnect();
+  console.log('Request received:', req.body);
 
+  // Check if the request method is POST
   if (req.method === 'POST') {
-    try {
-      const { userId, action, points } = req.body;
+    const { actionType, userId, joinerUserId, points } = req.body;
 
-      // Save the action to the database
-      const newAction = new UserAction({
-        userId,
-        action,
-        points,
-        joinerUserId: joinerName || null,
-        timestamp: new Date(),
-      });
-
-      await newAction.save();
-
-      // Update the user's total points
-      const user = await User.findOne({ userId });
-      if (user) {
-        user.points = (user.points || 0) + points;
-        await user.save();
-      } else {
-        // If user doesn't exist, create a new one with points
-        await User.create({ userId, points });
-      }
-
-      res.status(200).json({ message: 'Action saved successfully!' });
-    } catch (error) {
-      console.error('Error saving action:', error.message);
-      res.status(500).json({ message: 'Internal Server Error' });
+    // Ensure we have the required fields for any action
+    if (!userId || !actionType) {
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
-  } else if (req.method === 'GET') {
+
+    await dbConnect();
+
     try {
-      const { userId } = req.query;
+      // Handle different types of actions
+      switch (actionType) {
+        case 'invite':
+          // Handle user invite actions (from bot invite logic)
+          if (!joinerUserId) {
+            return res.status(400).json({ success: false, message: 'Missing joinerUserId for invite action' });
+          }
 
-      // Fetch user points
-      const user = await User.findOne({ userId });
+          const user = await User.findOne({ userId });
 
-      if (user) {
-        // Fetch all actions performed by this user
-        const actions = await UserAction.find({ userId }).select('action -_id');
-        const completedActions = actions.map((action) => action.action);
+          // Check if the invited user has already joined via invite or is already a member
+          if (user && (user.hasJoinedViaInvite || user.phoneNumber)) {
+            return res.status(200).json({
+              success: false,
+              message: 'User is already a member or has already joined via invite',
+            });
+          }
 
-        res.status(200).json({ points: user.points, completedActions });
-      } else {
-        res.status(404).json({ points: 0, completedActions: [] });
+          // Mark the invited user as having joined via the invite
+          await User.findOneAndUpdate(
+            { userId: joinerUserId },
+            { hasJoinedViaInvite: true }, // Mark user as having joined via invite
+            { new: true }
+          );
+
+          // Update inviter's points and log the action
+          const inviter = await User.findOneAndUpdate(
+            { userId },
+            { $inc: { points: points || 50000 } }, // Increment points for inviter
+            { new: true }
+          );
+
+          // Save the invite action in UserAction model
+          const inviteAction = new UserAction({
+            userId,                    // The inviter's userId
+            action: `Invited user ${joinerUserId}`, // Action description
+            points: points || 50000,    // Default points if not provided
+            joinerUserId,               // Track the user who joined
+            timestamp: new Date(),
+          });
+          await inviteAction.save();
+
+          return res.status(200).json({
+            success: true,
+            message: 'Invite action recorded successfully, points awarded',
+            points: points || 50000,
+          });
+
+        case 'earn':
+          // Handle earning points (from earn page)
+          const earnUser = await User.findOneAndUpdate(
+            { userId },
+            { $inc: { points: points || 0 } }, // Increment points based on request
+            { new: true, upsert: true } // Create user if not exists
+          );
+
+          // Save the earning action in UserAction model
+          const earnAction = new UserAction({
+            userId,               // The user who earned points
+            action: 'Earn points', // Action description
+            points: points || 0,   // Points earned
+            timestamp: new Date(),
+          });
+          await earnAction.save();
+
+          return res.status(200).json({
+            success: true,
+            message: 'Points earned successfully',
+            points: points || 0,
+          });
+
+        default:
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid action type',
+          });
       }
     } catch (error) {
-      console.error('Error fetching points:', error.message);
-      res.status(500).json({ success: false, message: 'Internal Server Error' });
+      console.error('Error handling user action:', error);
+      return res.status(500).json({ success: false, message: 'Failed to handle user action' });
     }
   } else {
-    res.status(405).json({ message: 'Method Not Allowed' });
+    res.status(405).json({ success: false, message: 'Method Not Allowed' });
   }
 }
