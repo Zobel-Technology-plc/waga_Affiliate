@@ -23,7 +23,7 @@ const Header = () => {
           <div className="flex-shrink-0 mr-5">
             <a href="/">
               <Image
-                src="/images/Waga.png"
+                src="https://res.cloudinary.com/dp7u7sr3a/image/upload/v1727934466/WagaLogo_lobzcv.png"
                 height="0"
                 width="60"
                 alt="BuyItNow"
