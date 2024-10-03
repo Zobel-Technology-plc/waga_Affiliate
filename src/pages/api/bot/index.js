@@ -172,7 +172,7 @@ export default async function handler(req, res) {
     } else if (text && !text.startsWith('/start') && !message.contact) {
       try {
         // Save the city in the database
-        const updatedUser = await User.findOneAndUpdate(
+        await User.findOneAndUpdate(
           { userId },
           { city: text },
           { upsert: true, new: true }
