@@ -1,7 +1,6 @@
-
 'use client';
 
-import React, { useState , useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { FaInstagram, FaTelegramPlane, FaFacebook } from 'react-icons/fa';
 import styles from './index.module.css';
@@ -96,7 +95,7 @@ const EarnPage = () => {
   const [joinClicked, setJoinClicked] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && WebApp.initDataUnsafe.user) {
+    if (typeof window !== 'undefined' && typeof WebApp !== 'undefined' && WebApp?.initDataUnsafe?.user) {
       setUserId(WebApp.initDataUnsafe.user.id);
 
       const generateInviteLink = async () => {
