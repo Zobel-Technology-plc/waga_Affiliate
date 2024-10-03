@@ -1,8 +1,8 @@
+// Modal Component
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
-import WebApp from '@twa-dev/sdk';
 import { FaInstagram, FaTelegramPlane, FaFacebook } from 'react-icons/fa';
 import styles from './index.module.css';
 
@@ -71,11 +71,12 @@ const Modal = ({
           <button
             id={option.text}
             className={`${styles.joinButton} ${
-              completedActions[option.text] || joinClicked ? styles.checkButton : ''
+              completedActions[option.text] ? styles.doneButton : joinClicked ? styles.checkButton : ''
             }`}
             onClick={(e) => handleCheckClick(e, option, joinClicked)}
+            disabled={completedActions[option.text]} // Disable if action is completed
           >
-            {completedActions[option.text] ? 'Check' : joinClicked ? 'Check' : 'Join'}
+            {completedActions[option.text] ? 'Done' : joinClicked ? 'Check' : 'Join'}
           </button>
         )}
       </div>
@@ -83,6 +84,7 @@ const Modal = ({
   );
 };
 
+// EarnPage Component
 const EarnPage = () => {
   const [userId, setUserId] = useState(null);
   const [options, setOptions] = useState([]);
@@ -154,7 +156,7 @@ const EarnPage = () => {
           if (data.isMember) {
             setCompletedActions((prev) => ({
               ...prev,
-              [data.completedAction]: true,
+              'Join our TG channel': true, // Set "Done" state for Telegram
             }));
           }
         } catch (error) {
@@ -191,76 +193,68 @@ const EarnPage = () => {
     }
   }, [userId, options]);
 
-  useEffect(() => {
-    const storedJoinState = localStorage.getItem('joinClicked');
-    if (storedJoinState) {
-      setJoinClicked(JSON.parse(storedJoinState));
-    }
-  }, []);
-
-  const handleInviteClick = async () => {
-    if (!userId) return;
-
-    try {
-      const response = await fetch(`/api/invite`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setInviteLink(data.inviteLink);
-        window.open(data.inviteLink, '_blank');
-      }
-    } catch (error) {
-      console.error('Error generating invite link:', error);
-    }
-  };
-
   const handleCheckClick = async (event, option, joinClicked) => {
     event.preventDefault();
+
+    if (completedActions[option.text]) {
+      return; // Do nothing if action is already completed
+    }
 
     // Open the link in a new tab
     if (option.link) {
       window.open(option.link, '_blank');
     }
 
-    // If the action is not completed and the user has not clicked "Join"
-    if (!completedActions[option.text] && !joinClicked) {
+    if (!joinClicked) {
       setJoinClicked(true);
-      localStorage.setItem('joinClicked', true);
+      return; // User needs to come back and click "Check"
     }
 
-    // Check membership and save action if "Join" was clicked and the action is not yet completed
-    if (!completedActions[option.text] && joinClicked) {
+    if (option.text === 'Join our TG channel') {
+      // Verify Telegram membership before marking action as complete
       try {
         const response = await fetch(`/api/checkMembership?userId=${userId}`);
         const data = await response.json();
 
         if (data.isMember) {
+          // Save the action with 0 points for the Telegram join
           const saveActionResponse = await fetch('/api/user/actions', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ userId, action: option.text, points: option.points }),
+            body: JSON.stringify({ userId, actionType: 'earn', action: option.text, points: 0 }),
           });
 
           if (saveActionResponse.ok) {
             setCompletedActions((prev) => ({ ...prev, [option.text]: true }));
           } else {
-            const saveData = await saveActionResponse.json();
-            console.error('Failed to save action:', saveData.message);
+            console.error('Failed to save action');
           }
         } else {
           console.error('User is not a member of the Telegram channel.');
         }
       } catch (error) {
-        console.error('Error checking membership or saving action:', error);
+        console.error('Error verifying membership or saving action:', error);
+      }
+    } else {
+      // Handle other action types (not Telegram)
+      try {
+        const saveActionResponse = await fetch('/api/user/actions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId, actionType: 'earn', action: option.text, points: option.points }),
+        });
+
+        if (saveActionResponse.ok) {
+          setCompletedActions((prev) => ({ ...prev, [option.text]: true }));
+        } else {
+          console.error('Failed to save action');
+        }
+      } catch (error) {
+        console.error('Error saving action:', error);
       }
     }
   };
