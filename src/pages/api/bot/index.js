@@ -31,7 +31,7 @@ const requestPhoneNumber = async (chatId, userId) => {
       keyboard: [
         [
           {
-            text: 'Share Phone Number',
+            text: ' 📞 Share Phone Number',
             request_contact: true,
           },
         ],
