@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   }
 
   const TELEGRAM_BOT_TOKEN = '7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg';
-  const TELEGRAM_CHANNEL_ID = '@WagaExpress';
+  const TELEGRAM_CHANNEL_ID = '@Waga_affiliate_bot';
 
   try {
     const response = await fetch(
