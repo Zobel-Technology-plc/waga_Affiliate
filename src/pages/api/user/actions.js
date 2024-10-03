@@ -1,5 +1,3 @@
-// File: api/users/action.js
-
 import dbConnect from '../../../backend/config/dbConnect';
 import User from '../../../backend/models/user';
 import UserAction from '../../../backend/models/useraction'; // Import the UserAction model
@@ -7,7 +5,9 @@ import UserAction from '../../../backend/models/useraction'; // Import the UserA
 export default async function handler(req, res) {
   console.log('Request received:', req.body);
 
-  // Check if the request method is POST
+  await dbConnect();
+
+  // Handle POST request (for creating actions)
   if (req.method === 'POST') {
     const { actionType, userId, joinerUserId, points } = req.body;
 
@@ -15,8 +15,6 @@ export default async function handler(req, res) {
     if (!userId || !actionType) {
       return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
-
-    await dbConnect();
 
     try {
       // Handle different types of actions
@@ -67,28 +65,28 @@ export default async function handler(req, res) {
             points: points || 50000,
           });
 
-        case 'earn':
-          // Handle earning points (from earn page)
-          const earnUser = await User.findOneAndUpdate(
-            { userId },
-            { $inc: { points: points || 0 } }, // Increment points based on request
-            { new: true, upsert: true } // Create user if not exists
-          );
-
-          // Save the earning action in UserAction model
-          const earnAction = new UserAction({
-            userId,               // The user who earned points
-            action: 'Earn points', // Action description
-            points: points || 0,   // Points earned
-            timestamp: new Date(),
-          });
-          await earnAction.save();
-
-          return res.status(200).json({
-            success: true,
-            message: 'Points earned successfully',
-            points: points || 0,
-          });
+          case 'earn':
+            // Handle earning points (from earn page)
+            const earnUser = await User.findOneAndUpdate(
+              { userId },
+              { $inc: { points: points || 0 } }, // Increment points based on request
+              { new: true, upsert: true } // Create user if not exists
+            );
+          
+            // Save the earning action in UserAction model with the correct action name
+            const earnAction = new UserAction({
+              userId,              
+              action: req.body.action, 
+              points: points || 0,  
+              timestamp: new Date(),
+            });
+            await earnAction.save();
+          
+            return res.status(200).json({
+              success: true,
+              message: 'Points earned successfully',
+              points: points || 0,
+            });          
 
         default:
           return res.status(400).json({
@@ -100,7 +98,41 @@ export default async function handler(req, res) {
       console.error('Error handling user action:', error);
       return res.status(500).json({ success: false, message: 'Failed to handle user action' });
     }
-  } else {
+  } 
+  
+  // Handle GET request (for retrieving actions)
+  else if (req.method === 'GET') {
+    const { userId } = req.query;
+
+    // Ensure we have a userId for the GET request
+    if (!userId) {
+      return res.status(400).json({ success: false, message: 'Missing userId in request' });
+    }
+
+    try {
+      // Fetch user actions from the UserAction model
+      const userActions = await UserAction.find({ userId }).select('action points -_id');
+
+      if (!userActions || userActions.length === 0) {
+        return res.status(404).json({ success: false, message: 'No actions found for this user' });
+      }
+
+      // Return the actions and points
+      return res.status(200).json({
+        success: true,
+        actions: userActions.map(action => ({
+          action: action.action,
+          points: action.points
+        }))
+      });
+    } catch (error) {
+      console.error('Error fetching user actions:', error);
+      return res.status(500).json({ success: false, message: 'Failed to fetch user actions' });
+    }
+  } 
+  
+  // Method not allowed
+  else {
     res.status(405).json({ success: false, message: 'Method Not Allowed' });
   }
 }

@@ -26,7 +26,7 @@ const requestPhoneNumber = async (chatId, userId) => {
 
   const requestPhoneNumberMessage = {
     chat_id: chatId,
-    text: `Please share your phone number to continue:\nHere is your unique invitation link: ${inviteLink}`,
+    text: `እንኳን ደህና መጡ እባኮ ከታች የተከመጠውን Share Phone Number በመንካት ይቀጥሉ:\n`,
     reply_markup: {
       keyboard: [
         [
@@ -158,7 +158,7 @@ export default async function handler(req, res) {
         );
 
         // Remove the keyboard and ask for the city
-        await sendMessage(chatId, 'Thanks for sharing your phone number! Now, please enter your city:', {
+        await sendMessage(chatId, 'ስልክዎን ስለሰጡን እናመሰግናለን! አሁን, ያሉበትን ከተማ ያስገቡ:', {
           remove_keyboard: true,
         });
 
@@ -179,7 +179,7 @@ export default async function handler(req, res) {
         );
 
         // Thank the user for registering
-        await sendMessage(chatId, 'Thank you for registering!');
+        await sendMessage(chatId, `ስለተመዘገቡ እናመሰናለን!\n ይህ የ እርስዎ የተለየ የ መጋበዣ ሊንክ ነው: ${inviteLink} \n Waga የሚለውን በመጫን ይቅጥሉ`);
 
         return res.status(200).json({ success: true, message: 'City saved, registration complete' });
       } catch (error) {
