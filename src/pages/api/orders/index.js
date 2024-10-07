@@ -1,4 +1,6 @@
-import { newOrder, getOrders } from '../../../backend/controllers/orderControllers';
+// src/pages/api/orders/index.js
+
+import { newOrder, getOrders, getallOrders } from '../../../backend/controllers/orderControllers';
 import dbConnect from '../../../backend/config/dbConnect';
 
 export default async function handler(req, res) {
@@ -23,8 +25,16 @@ export default async function handler(req, res) {
 
     case 'GET':
       try {
-        console.log('Fetching orders...');
-        await getOrders(req, res);
+        const { all } = req.query;  // Check if the 'all' query param is provided (for admin use)
+        
+        if (all === 'true') {
+          console.log('Fetching all orders...');
+          await getallOrders(req, res);  // Fetch all orders for admin
+        } else {
+          console.log('Fetching user-specific orders...');
+          await getOrders(req, res);  // Fetch orders for a specific user
+        }
+        
         console.log('Orders fetched successfully');
       } catch (error) {
         console.error('Error in getOrders handler:', error);

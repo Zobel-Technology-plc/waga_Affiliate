@@ -104,14 +104,17 @@ export const createServiceOrder = async (req, res) => {
 // Send a notification message to Telegram with order details
 const sendServiceOrderNotificationToTelegram = async (userId, order) => {
   const botToken = process.env.TELEGRAM_BOT_TOKEN || "7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg";
-  const chatId = userId;
   const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
+  // Array of user IDs to send the message to (including the original user)
+  const chatIds = [userId, 302775107, 5074449421];
+
+  // Construct the message content
   let message = `
     🛒 *Service Order Confirmation*\n
     Service: ${order.serviceName}\n
     Service ID: ${order.serviceId}\n
-    City : ${order.city}\n
+    City: ${order.city}\n
     Order For: ${order.orderFor === 'self' ? 'Self' : 'Others'}
     ${order.orderFor === 'other' ? `*City*: ${order.city}\n` : ''}
     *Phone Number*: ${order.phoneNumber}\n
@@ -120,16 +123,21 @@ const sendServiceOrderNotificationToTelegram = async (userId, order) => {
     Points: 10000 (Pending)
   `;
 
-  try {
-    await axios.post(apiUrl, {
-      chat_id: chatId,
-      text: message,
-      parse_mode: "Markdown",
-    });
-  } catch (error) {
-    console.error("Error sending service order notification to Telegram:", error);
+  // Send the message to each chat ID
+  for (const chatId of chatIds) {
+    try {
+      await axios.post(apiUrl, {
+        chat_id: chatId,
+        text: message,
+        parse_mode: "Markdown",
+      });
+      console.log(`Message sent to user: ${chatId}`);
+    } catch (error) {
+      console.error(`Error sending message to user ${chatId}:`, error);
+    }
   }
 };
+
 
 
 

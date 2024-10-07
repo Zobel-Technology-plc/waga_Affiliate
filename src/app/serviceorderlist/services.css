@@ -1,0 +1,72 @@
+/* General Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+  }
+  
+  th, td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+  }
+  
+  thead th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+  
+  tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  /* Button Styling */
+  .update-btn, .complete-btn, .save-btn, .cancel-btn {
+    padding: 10px;
+    width: 100px;
+    cursor: pointer;
+    border: none;
+    color: white;
+    margin-right: 10px;
+  }
+  
+  .update-btn {
+    background-color: green;
+  }
+  
+  .complete-btn.blue {
+    background-color: blue;
+  }
+  
+  .complete-btn.gray {
+    background-color: gray;
+    cursor: not-allowed;
+  }
+  
+  .save-btn {
+    background-color: blue;
+  }
+  
+  .cancel-btn {
+    background-color: red;
+  }
+  
+  /* Pagination Styling */
+  .pagination {
+    margin: 20px 0;
+    text-align: center;
+  }
+  
+  .pagination button {
+    padding: 8px 16px;
+    margin: 0 5px;
+    background-color: #f4f4f4;
+    border: 1px solid #ddd;
+    cursor: pointer;
+  }
+  
+  .pagination button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  

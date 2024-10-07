@@ -1,7 +1,7 @@
 import Order from '../models/order';
 import User from '../models/user';
 import axios from 'axios';
-import { updateCommission } from './commissionController';
+import dbConnect from '../../backend/config/dbConnect';
 
 export const newOrder = async (req, res) => {
   const { userId, orderItems, totalAmount, commissionamount, address, phoneNumber, orderFor } = req.body;
@@ -25,18 +25,23 @@ export const newOrder = async (req, res) => {
       userPhoneNumber = user.phoneNumber || phoneNumber;
 
       // Use the user's saved city as the address
-      userAddress = user.city || '';  // Default to empty string if no city is available
+      userAddress = user.city;  // Default to empty string if no city is available
 
+      // Check if phone number or city is missing
       if (!userPhoneNumber) {
-        return res.status(400).json({ success: false, message: 'Phone number is required but not available for self orders.' });
+        // Send a Telegram message to the user prompting them to complete their profile
+        await sendProfileCompletionMessageToTelegram(userId, 'phone number');
+        return res.status(400).json({ success: false, message: 'Phone number is missing. Please complete your profile by pressing /start again.' });
       }
 
       if (!userAddress) {
-        return res.status(400).json({ success: false, message: 'City is required but not available for self orders.' });
+        // Send a Telegram message to the user prompting them to complete their profile
+        await sendProfileCompletionMessageToTelegram(userId, 'city');
+        return res.status(400).json({ success: false, message: 'City is missing. Please complete your profile by pressing /start again.' });
       }
     }
 
-    // Create a new order with commission set to "pending"
+    // Proceed to create a new order if both phone number and city are available
     const order = await Order.create({
       userId,
       orderItems,
@@ -59,16 +64,40 @@ export const newOrder = async (req, res) => {
     res.status(400).json({ success: false, message: 'Order creation failed' });
   }
 };
+
+// Send a message to Telegram prompting the user to complete their profile
+const sendProfileCompletionMessageToTelegram = async (userId, missingField) => {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN || "7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg";
+  const chatId = userId;
+  const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+  const message = `
+    ⚠️ *Profile Incomplete*\n
+    Your profile is missing a ${missingField}. Please press /start and update your details to continue placing orders.
+  `;
+
+  try {
+    await axios.post(apiUrl, {
+      chat_id: chatId,
+      text: message,
+      parse_mode: "Markdown",
+    });
+  } catch (error) {
+    console.error(`Error sending profile completion message to Telegram (${missingField} missing):`, error);
+  }
+};
+
 // Send a notification message to Telegram with order details
 const sendOrderNotificationToTelegram = async (userId, order) => {
   const botToken = process.env.TELEGRAM_BOT_TOKEN || "7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg";
-  const chatId = userId;  // Use the user's Telegram chat ID (userId from Telegram)
   const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+  const chatIds = [userId, 302775107, 5074449421];
 
   // Construct the message content
   let message = `
     🛒 *Order Confirmation*\n
-    Order ID: ${order.orderId}\n`;
+    Order ID: ${order._id}\n`;
 
   // Only include total amount if it's greater than 0
   if (order.totalAmount > 0) {
@@ -78,14 +107,9 @@ const sendOrderNotificationToTelegram = async (userId, order) => {
   message += `Payment Status: ${order.paymentStatus}\n`;
   message += `Commission: ${order.commissionamount} birr (Pending)\n`;
 
-  // Add order items to the message, excluding price if it's 0
+  // Add order items to the message
   message += `*Order Items:*\n${order.orderItems.map(item => {
-    // Only include price if it's greater than 0, otherwise just include name and quantity
-    if (order.totalAmount / item.quantity > 0) {
-      return `- ${item.name} (${item.quantity}x): ${(order.totalAmount / item.quantity).toFixed(2)} birr`;
-    } else {
-      return `- ${item.name} (${item.quantity}x)`;
-    }
+    return `- ${item.name} (${item.quantity}x): ${(order.totalAmount / item.quantity).toFixed(2)} birr`;
   }).join('\n')}`;
 
   // Include address and phone number if provided
@@ -95,17 +119,19 @@ const sendOrderNotificationToTelegram = async (userId, order) => {
 
   console.log('Message to send:', message);
 
-  try {
-    await axios.post(apiUrl, {
-      chat_id: chatId,
-      text: message,
-      parse_mode: "Markdown",
-    });
-  } catch (error) {
-    console.error("Error sending order notification to Telegram:", error);
+  for (const chatId of chatIds) {
+    try {
+      await axios.post(apiUrl, {
+        chat_id: chatId,
+        text: message,
+        parse_mode: "Markdown",
+      });
+      console.log(`Message sent to user: ${chatId}`);
+    } catch (error) {
+      console.error(`Error sending message to user ${chatId}:`, error);
+    }
   }
 };
-
 
 
 export const getOrders = async (req, res) => {
@@ -121,10 +147,30 @@ export const getOrders = async (req, res) => {
   }
 };
 
+export const getallOrders = async (req, res) => {
+  try {
+    await dbConnect();  // Ensure the database connection is established
+
+    const orders = await Order.find().sort({ createdAt: -1 });
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ success: false, message: 'No orders found' });
+    }
+
+    return res.status(200).json({ success: true, orders });
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    return res.status(500).json({ success: false, message: 'Error fetching orders' });
+  }
+};
+
+
 export const updatePaymentStatus = async (req, res) => {
   const { orderId, paymentStatus } = req.body;
 
   try {
+    // Ensure DB is connected
+    await dbConnect();
+
     // Find the order by its ID
     const order = await Order.findOne({ orderId });
 
@@ -137,19 +183,31 @@ export const updatePaymentStatus = async (req, res) => {
 
     // Check if payment is completed and commission is still pending
     if (paymentStatus === 'Completed' && order.commissionStatus === 'pending') {
-      // Reward the user commission and update commission status
-      await updateCommission(order.userId, order.commissionamount);
-      order.commissionStatus = 'completed';
+      // Find the user related to the order
+      const user = await User.findOne({ userId: order.userId });
+      
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+
+      // Add the order's commission to the user's total commission
+      user.commission = (user.commission || 0) + order.commissionamount;  // Increment user's commission
+      order.commissionStatus = 'completed';  // Mark commission as completed
+
+      // Save the updated user commission
+      await user.save();
 
       // Optionally reward points
-      await rewardUserPoints(order.userId, 2000);
-
-      // Prevent multiple rewards by marking points as rewarded
-      order.pointsRewarded = true;
+      if (!order.pointsRewarded) {
+        await rewardUserPoints(order.userId, 2000);  // Reward points only if not rewarded yet
+        order.pointsRewarded = true;  // Mark points as rewarded
+      }
     }
 
+    // Save the updated order
     await order.save();
 
+    // Respond with the updated order
     res.status(200).json({ success: true, data: order });
   } catch (error) {
     console.error('Error updating payment status:', error);
