@@ -10,20 +10,20 @@ const serviceOrderSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  serviceName: {  // Add service name field
+  serviceName: {
     type: String,
     required: true,
   },
   city: {
     type: String,
     required: function() {
-      return this.orderFor === 'other'; // City is required only if the order is for others
+      return this.orderFor === 'other';
     },
   },
   phoneNumber: {
     type: String,
     required: function() {
-      return this.orderFor === 'other'; // Phone number is required only if the order is for others
+      return this.orderFor === 'other';
     },
   },
   orderFor: {
@@ -38,15 +38,32 @@ const serviceOrderSchema = new mongoose.Schema({
   },
   points: {
     type: Number,
-    default: 10000, // Points to be rewarded upon completion
+    default: 10000,
+  },
+  commission: {
+    type: Number,
+    required: true, // Required to store the commission amount
+  },
+  commissionStatus: {
+    type: String,
+    enum: ['pending', 'paid'],
+    default: 'pending', // Default to 'pending'
+  },
+  totalAmount: {
+    type: Number,
+    required: true, // Required to store the total amount
   },
   createdAt: { 
     type: Date, 
     default: Date.now 
   },
+  updatedAt: { 
+    type: Date, 
+    default: Date.now 
+  }
 }, { timestamps: true });
 
-serviceOrderSchema.index({ createdAt: 1 }); 
+serviceOrderSchema.index({ createdAt: 1 });
 
 const ServiceOrder = mongoose.models.ServiceOrder || mongoose.model('ServiceOrder', serviceOrderSchema);
 

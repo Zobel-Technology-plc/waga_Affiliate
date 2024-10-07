@@ -1,6 +1,7 @@
 import ServiceOrder from '../models/ServiceOrder';
 import User from '../models/user';
 import axios from 'axios';
+import Service from '../models/service';
 import { nanoid } from 'nanoid';
 
 // Create a new service order and send a Telegram notification
@@ -46,6 +47,17 @@ export const createServiceOrder = async (req, res) => {
       });
     }
 
+    // Fetch the service details to get the starting price and commission
+    const service = await Service.findById(serviceId);
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service not found.',
+      });
+    }
+
+    const { startingPrice, commission } = service;
+
     const lastOrder = await ServiceOrder.findOne({ userId }).sort({ createdAt: -1 });
 
     if (lastOrder) {
@@ -61,7 +73,7 @@ export const createServiceOrder = async (req, res) => {
     // Generate a unique serviceId
     const orderId = nanoid(7);
 
-    // Create the new service order
+    // Create the new service order with totalAmount and commission
     const newServiceOrder = new ServiceOrder({
       userId,
       serviceId: orderId,
@@ -71,6 +83,8 @@ export const createServiceOrder = async (req, res) => {
       orderFor,
       status: 'pending',
       points: 10000,
+      commission,  // Use commission from the service
+      totalAmount: startingPrice,  // Use the starting price as total amount
     });
 
     // Save the service order
@@ -102,7 +116,7 @@ const sendServiceOrderNotificationToTelegram = async (userId, order) => {
     ${order.orderFor === 'other' ? `*City*: ${order.city}\n` : ''}
     *Phone Number*: ${order.phoneNumber}\n
     *Order Status*: ${order.status}\n
-    Comission: 10% \n
+    Commission: ${order.commission} %\n
     Points: 10000 (Pending)
   `;
 
@@ -131,6 +145,18 @@ export const getServiceOrders = async (req, res) => {
 
     // Fetch service orders for the user
     const serviceOrders = await ServiceOrder.find({ userId }).sort({ createdAt: -1 });
+
+    // Respond with the fetched orders
+    res.status(200).json({ success: true, data: serviceOrders });
+  } catch (error) {
+    console.error('Error fetching service orders:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch service orders.' });
+  }
+};
+export const getallServiceOrders = async (req, res) => {
+  try {
+    // Fetch service orders for the user
+    const serviceOrders = await ServiceOrder.find({ }).sort({ createdAt: -1 });
 
     // Respond with the fetched orders
     res.status(200).json({ success: true, data: serviceOrders });
