@@ -28,9 +28,12 @@ export const createServiceOrder = async (req, res) => {
       const user = await User.findOne({ userId });
 
       if (!user || !user.phoneNumber || !user.city) {
+        // If phone number or city is missing, send a Telegram message
+        await sendIncompleteRegistrationNotificationToTelegram(userId);
+
         return res.status(400).json({
           success: false,
-          message: 'Phone number and city are required for self orders but not found in the user profile.',
+          message: 'Phone number and city are required for self orders but not found in the user profile. Please complete your registration.',
         });
       }
 
@@ -98,6 +101,29 @@ export const createServiceOrder = async (req, res) => {
   } catch (error) {
     console.error('Error creating service order:', error);
     res.status(500).json({ success: false, message: 'Failed to create service order due to server error.' });
+  }
+};
+
+// Function to send an incomplete registration notification via Telegram
+const sendIncompleteRegistrationNotificationToTelegram = async (userId) => {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN || "7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg";
+  const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+  // Message to notify the user they need to complete registration
+  const message = `
+    ⚠️ *Incomplete Registration*\n
+    ውድ ደንበኛችን፤ ስልክ ቁጥር ወይም ከተማዎትን አላስገቡም እባክዎትን /start የሚለውን በመጫን ምዝገባዎትን ያጠናቁ
+  `;
+
+  try {
+    await axios.post(apiUrl, {
+      chat_id: userId,  // Assuming userId is their Telegram chat ID
+      text: message,
+      parse_mode: "Markdown",
+    });
+    console.log(`Incomplete registration message sent to user: ${userId}`);
+  } catch (error) {
+    console.error(`Error sending message to user ${userId}:`, error);
   }
 };
 

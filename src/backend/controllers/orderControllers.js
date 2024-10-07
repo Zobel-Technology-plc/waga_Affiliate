@@ -73,7 +73,7 @@ const sendProfileCompletionMessageToTelegram = async (userId, missingField) => {
 
   const message = `
     ⚠️ *Profile Incomplete*\n
-    Your profile is missing a ${missingField}. Please press /start and update your details to continue placing orders.
+    ${missingField} አላስገቡም፤ እባክዎ /start የሚለውን በመጫን መዝገባዎትን ያጠናቁ፡፡
   `;
 
   try {

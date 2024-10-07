@@ -120,8 +120,9 @@ const OrdersListPage = () => {
                 <th>City</th>
                 <th>Commission</th>
                 <th>Commission Status</th>
-                <th>Payment Status</th>
                 <th>Order Items</th>
+                <th>Time</th>
+                <th>Date</th>
                 <th>Total Amount</th>
                 <th>Actions</th>
               </tr>
@@ -157,7 +158,6 @@ const OrdersListPage = () => {
                     )}
                   </td>
                   <td>{order.commissionStatus}</td>
-                  <td>{order.paymentStatus}</td>
                   <td>
                     <ul>
                       {order.orderItems.map((item) => (
@@ -167,6 +167,8 @@ const OrdersListPage = () => {
                       ))}
                     </ul>
                   </td>
+                  <td>{new Date(order.createdAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric' })}</td>
+                  <td>{new Date(order.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'long' })}</td>
                   <td>
                     {editingOrder === order._id ? (
                       <input

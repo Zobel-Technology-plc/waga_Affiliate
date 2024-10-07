@@ -1,5 +1,5 @@
 import dbConnect from '../../../../backend/config/dbConnect';
-import ServiceOrder from '../../../../backend/models/ServiceOrder'; // Ensure this model name is correct
+import ServiceOrder from '../../../../backend/models/ServiceOrder';
 
 export default async function handler(req, res) {
   const { id } = req.query;
@@ -11,8 +11,8 @@ export default async function handler(req, res) {
     try {
       // Build an update object dynamically, only including fields that are provided
       const updateFields = {};
-      if (city !== undefined) updateFields.address = city;  // Updating address (city)
-      if (commission !== undefined) updateFields.commissionAmount = commission;  // Ensure camelCase naming
+      if (city !== undefined) updateFields.city = city;  // Updating address (city)
+      if (commission !== undefined) updateFields.commission = commission;  // Ensure "commission" matches model
       if (totalAmount !== undefined) updateFields.totalAmount = totalAmount;
 
       const updatedServiceOrder = await ServiceOrder.findByIdAndUpdate(

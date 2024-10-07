@@ -48,7 +48,7 @@ const ServiceOrdersListPage = () => {
   
     // Only include fields that have been updated
     if (updatedCity) updateData.city = updatedCity;
-    if (updatedCommission) updateData.commission = updatedCommission;
+    if (updatedCommission) updateData.commission = updatedCommission;  // Use "commission"
     if (updatedTotalAmount) updateData.totalAmount = updatedTotalAmount;
   
     try {
@@ -69,7 +69,7 @@ const ServiceOrdersListPage = () => {
     } catch (error) {
       console.error('Error updating order:', error);
     }
-  };
+  };  
   
 
   const handleCompleteOrder = async (serviceId, userId, points) => {
@@ -123,8 +123,8 @@ const ServiceOrdersListPage = () => {
                 <th>Orderfor</th>
                 <th>Commission</th>
                 <th>CommissionStatus</th>
-                <th>PaymentStatus</th>
                 <th>Points</th>
+                <th>Time</th>
                 <th>Date</th>
                 <th>Total Amount</th>
                 
@@ -162,8 +162,8 @@ const ServiceOrdersListPage = () => {
                     )} %
                   </td>
                   <td>{order.commissionStatus}</td>
-                  <td>{order.status}</td>
                   <td>{order.points}</td>
+                  <td>{new Date(order.createdAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric' })}</td>
                   <td>{new Date(order.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'long' })}</td>
                   <td>{editingOrder === order._id ? (
                       <input
