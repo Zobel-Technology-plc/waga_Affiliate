@@ -137,7 +137,12 @@ const ServiceOrdersListPage = () => {
                   <td>{indexOfFirstOrder + index + 1}</td>
                   <td>{order.serviceId}</td>
                   <td>{order.serviceName}</td>
-                  <td>{order.phoneNumber}</td>
+                  <td>
+                    {/* Make phone number clickable */}
+                    <a href={`tel:${order.phoneNumber}`}>
+                      {order.phoneNumber}
+                    </a>
+                  </td>
                   <td>{editingOrder === order._id ? (
                       <input
                         type="text"

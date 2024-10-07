@@ -132,7 +132,12 @@ const OrdersListPage = () => {
                 <tr key={order._id}>
                   <td>{indexOfFirstOrder + index + 1}</td> {/* Display the order number */}
                   <td>{order.orderId}</td>
-                  <td>{order.phoneNumber}</td>
+                  <td>
+                    {/* Make phone number clickable */}
+                    <a href={`tel:${order.phoneNumber}`}>
+                      {order.phoneNumber}
+                    </a>
+                  </td>
                   <td>
                     {editingOrder === order._id ? (
                       <input
