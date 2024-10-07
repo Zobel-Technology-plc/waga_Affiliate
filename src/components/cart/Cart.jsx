@@ -15,6 +15,7 @@ const Cart = () => {
   const [address, setAddress] = useState("");
   const [phoneNumber, setPhoneNumber] = useState(""); // Initialize phoneNumber state
   const [productCommissions, setProductCommissions] = useState({});
+  const [notification, setNotification] = useState("");
 
   // Fetch user data from Telegram WebApp SDK
   useEffect(() => {
@@ -116,11 +117,33 @@ const Cart = () => {
         commissionStatus: 'pending',
         orderFor: selectedOption,  // Use phone number from state
       };
+
+      if (selectedOption === "self") {
+        if (!address || !phoneNumber) {
+          // Display notification for missing phone number
+          const missingField = !address ? "City" : "Phone Number";
+          setNotification(`${missingField} አላስገቡም እባክዎ /start የሚለውን በመጫን ${missingField} ያስገቡ፡፡`);
+      
+          // Clear notification after 3 seconds
+          setTimeout(() => {
+            setNotification("");
+          }, 3000);
+      
+          return; // Prevent further execution if phone number is missing
+        }
+      }
+      
   
       // If "other" is selected, require address and phone number
       if (selectedOption === "other") {
         if (!address || !phoneNumber) {
-          console.error("Please provide address and phone number.");
+          const missingField = !address ? "City" : "Phone Number";
+          setNotification(`${missingField} አላስገቡም እባክዎ /start የሚለውን በመጫን ${missingField} ያስገቡ፡፡`);
+          
+          // Clear notification after 3 seconds
+          setTimeout(() => {
+            setNotification("");
+          }, 3000);
           return;
         }
         orderDetails = {
@@ -153,6 +176,12 @@ const Cart = () => {
   
   return (
     <>
+    {notification && (
+        <div className="fixed top-5 right-5 bg-red-500 text-white p-3 rounded-md shadow-lg z-50">
+          {notification}
+        </div>
+      )}
+
       <section className="py-5 sm:py-7 bg-blue-100">
         <div className="container max-w-screen-xl mx-auto px-4">
           <h2 className="text-3xl font-semibold mb-2">

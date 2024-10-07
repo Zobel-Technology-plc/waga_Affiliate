@@ -15,6 +15,7 @@ const ServiceOrder = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [userId, setUserId] = useState(null);
   const [orderFor, setOrderFor] = useState('self');  // New state for order type (self/other)
+  const [notification, setNotification] = useState("");
 
   useEffect(() => {
     if (typeof window !== 'undefined' && WebApp.initDataUnsafe.user) {
@@ -71,11 +72,46 @@ const ServiceOrder = () => {
     } catch (error) {
       console.error("Error creating order:", error);
     }
+
+    if (orderFor === "self") {
+      if (!city || !phoneNumber) {
+        // Display notification for missing phone number
+        const missingField = !city ? "City" : "Phone Number";
+        setNotification(`${missingField} አላስገቡም እባክዎ /start የሚለውን በመጫን ${missingField} ያስገቡ፡፡`);
+    
+        // Clear notification after 3 seconds
+        setTimeout(() => {
+          setNotification("");
+        }, 3000);
+    
+        return; // Prevent further execution if phone number is missing
+      }
+    }
+    
+
+    // If "other" is selected, require address and phone number
+    if (orderFor === "other") {
+      if (!city || !phoneNumber) {
+        const missingField = !city ? "City" : "Phone Number";
+        setNotification(`${missingField} አላስገቡም እባክዎ /start የሚለውን በመጫን ${missingField} ያስገቡ፡፡`);
+        
+        // Clear notification after 3 seconds
+        setTimeout(() => {
+          setNotification("");
+        }, 3000);
+        return;
+      }
+    }
   };
   
 
   return (
     <div className="p-4">
+      {notification && (
+        <div className="fixed top-5 right-5 bg-red-500 text-white p-3 rounded-md shadow-lg z-50">
+          {notification}
+        </div>
+      )}
 
       {/* Back Button using PNG image */}
       <div className="mb-4 cursor-pointer" onClick={() => router.push('/services')}>
