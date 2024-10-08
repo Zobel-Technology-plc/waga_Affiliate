@@ -14,7 +14,6 @@ const OrdersListPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 10; // Number of orders displayed per page
 
-  // Fetch orders from the backend
   const fetchOrders = async () => {
     try {
       const response = await fetch('/api/orders?all=true');
