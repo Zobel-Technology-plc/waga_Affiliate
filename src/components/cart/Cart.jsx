@@ -10,24 +10,41 @@ import WebApp from "@twa-dev/sdk"; // Import the Telegram WebApp SDK
 const Cart = () => {
   const { cart, addItemToCart, deleteItemFromCart, clearCart } = useContext(CartContext);
   const router = useRouter();
-  const [userData, setUserData] = useState(null);
+  const [userData, setUserData] = useState(null); // Holds user data from backend
   const [selectedOption, setSelectedOption] = useState("self");
-  const [address, setAddress] = useState("");
+  const [city, setCity] = useState(""); // Use city instead of address
   const [phoneNumber, setPhoneNumber] = useState(""); // Initialize phoneNumber state
   const [productCommissions, setProductCommissions] = useState({});
   const [notification, setNotification] = useState("");
 
-  // Fetch user data from Telegram WebApp SDK
+  // Fetch userId from Telegram WebApp SDK
   useEffect(() => {
     if (typeof window !== "undefined" && WebApp.initDataUnsafe.user) {
-      setUserData(WebApp.initDataUnsafe.user);
-
-      // Use the user's shared phone number if available
-      if (WebApp.initDataUnsafe.user.phone_number) {
-        setPhoneNumber(WebApp.initDataUnsafe.user.phone_number);
-      }
+      const userId = WebApp.initDataUnsafe.user.id; // Get userId from Telegram SDK
+      fetchUserData(userId); // Fetch user data from backend using this userId
     }
   }, []);
+
+  // Fetch user data from MongoDB backend using userId from Telegram SDK
+  const fetchUserData = async (userId) => {
+    try {
+      const response = await fetch(`/api/users/${userId}`);
+      const data = await response.json();
+      
+      if (data.success && data.user) {
+        setUserData(data.user);
+        // Pre-fill phoneNumber and city when the user selects "self"
+        if (selectedOption === "self") {
+          setPhoneNumber(data.user.phoneNumber);
+          setCity(data.user.city);
+        }
+      } else {
+        console.error("Failed to fetch user data:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
 
   // Fetch product commissions based on the cart items
   useEffect(() => {
@@ -89,8 +106,8 @@ const Cart = () => {
         price: (item.price * item.quantity).toFixed(2), // Total price for each item
         product: item.product,
       }));
-  
-      const userId = userData?.id;
+
+      const userId = userData?._id;
       if (!userId) {
         console.error("User ID is not available. Cannot place order.");
         return;
@@ -99,16 +116,16 @@ const Cart = () => {
         console.error("Cart is empty. Cannot place order.");
         return;
       }
-  
+
       // Handle NaN for totalAmount
       const validTotalAmount = isNaN(totalAmount) ? "0" : totalAmount;
-  
+
       // Calculate commission amount
       const commissionamount = cart.cartItems.reduce(
         (acc, item) => acc + Number(item.quantity) * Number(productCommissions[item.product] || 0),
         0
       ).toFixed(2);
-  
+
       let orderDetails = {
         userId,
         orderItems,
@@ -116,28 +133,13 @@ const Cart = () => {
         commissionamount: Number(commissionamount),
         commissionStatus: 'pending',
         orderFor: selectedOption,  // Use phone number from state
+        phoneNumber,
+        city,
       };
 
-      if (selectedOption === "self") {
-        if (!address || !phoneNumber) {
-          // Display notification for missing phone number
-          const missingField = !address ? "City" : "Phone Number";
-          setNotification(`${missingField} አላስገቡም እባክዎ /start የሚለውን በመጫን ${missingField} ያስገቡ፡፡`);
-      
-          // Clear notification after 3 seconds
-          setTimeout(() => {
-            setNotification("");
-          }, 3000);
-      
-          return; // Prevent further execution if phone number is missing
-        }
-      }
-      
-  
-      // If "other" is selected, require address and phone number
       if (selectedOption === "other") {
-        if (!address || !phoneNumber) {
-          const missingField = !address ? "City" : "Phone Number";
+        if (!city || !phoneNumber) {
+          const missingField = !city ? "City" : "Phone Number";
           setNotification(`${missingField} አላስገቡም እባክዎ /start የሚለውን በመጫን ${missingField} ያስገቡ፡፡`);
           
           // Clear notification after 3 seconds
@@ -146,13 +148,8 @@ const Cart = () => {
           }, 3000);
           return;
         }
-        orderDetails = {
-          ...orderDetails,
-          address,
-          phoneNumber,
-        };
       }
-  
+
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: {
@@ -160,7 +157,7 @@ const Cart = () => {
         },
         body: JSON.stringify(orderDetails),
       });
-  
+
       if (response.ok) {
         clearCart();
         router.push("/order-confirmed");
@@ -173,7 +170,7 @@ const Cart = () => {
       console.error("Error creating order:", error);
     }
   };
-  
+
   return (
     <>
     {notification && (
@@ -226,7 +223,7 @@ const Cart = () => {
         </figure>
       </div>
       <div className="flex items-center space-x-4">
-        <div className="flex items-center border border-gray-300 rounded-md overflow-hiddenr">
+        <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
           <button
             className="bg-gray-200 text-gray-700 hover:text-gray-900 hover:bg-gray-300 h-full w-12 rounded-l-md cursor-pointer outline-none transition-all duration-200 ease-in-out"
             onClick={() => decreaseQty(cartItem)}
@@ -337,19 +334,19 @@ const Cart = () => {
     </label>
   </div>
 
-  {/* Display Address and Phone Number Form if "Other" is selected */}
+  {/* Display City and Phone Number Form if "Other" is selected */}
   {selectedOption === "other" && (
     <div className="mb-5">
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700">
-          Address
+          City
         </label>
         <input
           type="text"
           className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          placeholder="Enter the address"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          placeholder="Enter the city"
         />
       </div>
       <div className="mb-4">
