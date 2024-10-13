@@ -3,6 +3,7 @@ import User from '../models/user';
 import axios from 'axios';
 import dbConnect from '../../backend/config/dbConnect';
 
+// Create a new order
 export const newOrder = async (req, res) => {
   const { userId, orderItems, totalAmount, commissionamount, address, phoneNumber, orderFor } = req.body;
 
@@ -11,46 +12,44 @@ export const newOrder = async (req, res) => {
   try {
     // Initialize variables to hold the final phone number and address values
     let userPhoneNumber = phoneNumber;
-    let userAddress = address;
+    let userCity = address;  // Address will hold the city for self or other orders
 
-    // If the order is for 'self', retrieve the phone number and city from the user's profile
+    // Fetch user data if the order is for "self"
     if (orderFor === 'self') {
       const user = await User.findOne({ userId });
 
-      if (!user) {
-        return res.status(400).json({ success: false, message: 'User not found.' });
+      // Validate that the user exists and has a phone number and city saved in their profile
+      if (!user || !user.phoneNumber || !user.city) {
+        await sendProfileCompletionMessageToTelegram(userId);
+        return res.status(400).json({
+          success: false,
+          message: 'Phone number and city are required for self orders but not found in the user profile. Please complete your registration.',
+        });
       }
 
-      // Use the phone number from the user's profile if not provided in the request body
-      userPhoneNumber = user.phoneNumber || phoneNumber;
-
-      // Use the user's saved city as the address
-      userAddress = user.city;  // Default to empty string if no city is available
-
-      // Check if phone number or city is missing
-      if (!userPhoneNumber) {
-        // Send a Telegram message to the user prompting them to complete their profile
-        await sendProfileCompletionMessageToTelegram(userId, 'phone number');
-        return res.status(400).json({ success: false, message: 'Phone number is missing. Please complete your profile by pressing /start again.' });
-      }
-
-      if (!userAddress) {
-        // Send a Telegram message to the user prompting them to complete their profile
-        await sendProfileCompletionMessageToTelegram(userId, 'city');
-        return res.status(400).json({ success: false, message: 'City is missing. Please complete your profile by pressing /start again.' });
-      }
+      // Use the user's saved phone number and city
+      userPhoneNumber = user.phoneNumber;
+      userCity = user.city;
     }
 
-    // Proceed to create a new order if both phone number and city are available
+    // Validate city and phone number for 'other' orders
+    if (orderFor === 'other' && (!address || !phoneNumber)) {
+      return res.status(400).json({
+        success: false,
+        message: 'City and Phone Number are required when ordering for others.',
+      });
+    }
+
+    // Proceed to create a new order
     const order = await Order.create({
       userId,
       orderItems,
       totalAmount,
       commissionamount,
-      commissionStatus: 'pending',  // Set the commission status to "pending"
-      address: orderFor === 'other' ? address : userAddress,  // Use the address based on order type
-      phoneNumber: userPhoneNumber,  // Use retrieved or provided phone number
-      paymentStatus: 'Pending',  // Set payment status to "Pending"
+      commissionStatus: 'pending',
+      address: userCity,  // Use the user's city for "self" or the provided city for "other"
+      phoneNumber: userPhoneNumber,  // Use the user's phone number for "self" or the provided one for "other"
+      paymentStatus: 'Pending',
     });
 
     console.log('Created order:', order);
@@ -65,66 +64,51 @@ export const newOrder = async (req, res) => {
   }
 };
 
-// Send a message to Telegram prompting the user to complete their profile
-const sendProfileCompletionMessageToTelegram = async (userId, missingField) => {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN || "7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg";
+// Function to send a Telegram message prompting the user to complete their profile
+const sendProfileCompletionMessageToTelegram = async (userId) => {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN || '7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg';
   const chatId = userId;
   const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
   const message = `
     ⚠️ *Profile Incomplete*\n
-    ${missingField} አላስገቡም፤ እባክዎ /start የሚለውን በመጫን መዝገባዎትን ያጠናቁ፡፡
+    ውድ ደንበኛችን፤ ስልክ ቁጥር ወይም ከተማዎትን አላስገቡም፤ እባክዎትን /start የሚለውን በመጫን ምዝገባዎትን ያጠናቁ፡፡
   `;
 
   try {
     await axios.post(apiUrl, {
       chat_id: chatId,
       text: message,
-      parse_mode: "Markdown",
+      parse_mode: 'Markdown',
     });
+    console.log(`Profile completion message sent to user: ${userId}`);
   } catch (error) {
-    console.error(`Error sending profile completion message to Telegram (${missingField} missing):`, error);
+    console.error(`Error sending profile completion message to Telegram (${userId}):`, error);
   }
 };
 
 // Send a notification message to Telegram with order details
 const sendOrderNotificationToTelegram = async (userId, order) => {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN || "7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg";
+  const botToken = process.env.TELEGRAM_BOT_TOKEN || '7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg';
   const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
   const chatIds = [userId, 302775107, 5074449421];
 
-  // Construct the message content
   let message = `
     🛒 *Order Confirmation*\n
-    Order ID: ${order._id}\n`;
-
-  // Only include total amount if it's greater than 0
-  if (order.totalAmount > 0) {
-    message += `Total Amount: ${order.totalAmount} birr\n`;
-  }
-
-  message += `Payment Status: ${order.paymentStatus}\n`;
-  message += `Commission: ${order.commissionamount} birr (Pending)\n`;
-
-  // Add order items to the message
-  message += `*Order Items:*\n${order.orderItems.map(item => {
-    return `- ${item.name} (${item.quantity}x): ${(order.totalAmount / item.quantity).toFixed(2)} birr`;
-  }).join('\n')}`;
-
-  // Include address and phone number if provided
-  if (order.address && order.phoneNumber) {
-    message += `\n\n*Shipping Details:*\nAddress: ${order.address}\nPhone Number: ${order.phoneNumber}\n`;
-  }
-
-  console.log('Message to send:', message);
+    Order ID: ${order._id}\n
+    Total Amount: ${order.totalAmount} birr\n
+    Payment Status: ${order.paymentStatus}\n
+    Commission: ${order.commissionamount} birr (Pending)\n
+    Shipping Details:\nAddress: ${order.address}\nPhone Number: ${order.phoneNumber}\n
+  `;
 
   for (const chatId of chatIds) {
     try {
       await axios.post(apiUrl, {
         chat_id: chatId,
         text: message,
-        parse_mode: "Markdown",
+        parse_mode: 'Markdown',
       });
       console.log(`Message sent to user: ${chatId}`);
     } catch (error) {
@@ -132,6 +116,7 @@ const sendOrderNotificationToTelegram = async (userId, order) => {
     }
   }
 };
+
 
 
 export const getOrders = async (req, res) => {
