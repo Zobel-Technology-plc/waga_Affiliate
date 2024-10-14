@@ -29,8 +29,13 @@ const orderSchema = new mongoose.Schema({
     enum: ['pending', 'completed'],
     default: 'pending',  // Initially set commission to 'pending'
   },
-  address: { type: String, required: true, },
+  city: { type: String, required: true, },
   phoneNumber: { type: String },
+  orderFor: {
+    type: String,
+    enum: ['self', 'other'],
+    required: true,
+  },
   paymentStatus: {
     type: String,
     default: 'Pending',

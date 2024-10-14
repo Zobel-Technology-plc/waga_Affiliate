@@ -57,11 +57,11 @@ const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
     // Fetch the invited user
     const user = await User.findOne({ userId });
 
-    // Check if the user has already joined via invite or is already a member of the bot
-    if (user && (user.hasJoinedViaInvite || user.phoneNumber)) {
-      await sendMessage(chatId, 'You are already a member or have already joined via an invite.');
-      console.log(`User ${userId} is already a member or joined via invite.`);
-      return { success: false, message: 'User is already a member or has already joined via invite' };
+    // Check if the user has already joined via invite, is a member, or has already started the bot
+    if (user && (user.hasJoinedViaInvite || user.phoneNumber || user.hasStartedBot)) {
+      await sendMessage(chatId, 'You are already a member, have already joined via an invite, or have already started the bot.');
+      console.log(`User ${userId} is already a member, joined via invite, or has started the bot.`);
+      return { success: false, message: 'User is already a member, has joined via invite, or started the bot' };
     }
 
     // Check if inviter has already invited the joining user
@@ -136,6 +136,13 @@ export default async function handler(req, res) {
     if (text && text.startsWith('/start')) {
       console.log('Start command received');
       const inviterUserId = text.split(' ')[1]; // Extract inviter userId from the invite link
+
+      // Mark user as having started the bot
+      await User.findOneAndUpdate(
+        { userId },
+        { hasStartedBot: true },
+        { upsert: true, new: true }
+      );
 
       if (inviterUserId) {
         // Handle the invite link logic
