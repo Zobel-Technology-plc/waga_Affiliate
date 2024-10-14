@@ -64,6 +64,14 @@ const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
       return { success: false, message: 'User is already a member or has already joined via invite' };
     }
 
+    // Check if inviter has already invited the joining user
+    const existingInvite = await UserAction.findOne({ userId: inviterUserId, joinerUserId: userId });
+    if (existingInvite) {
+      console.log(`User ${inviterUserId} has already invited ${userId}. No points awarded.`);
+      await sendMessage(inviterUserId, `You've already invited ${joinerName}. No additional points awarded.`);
+      return { success: false, message: 'Inviter has already invited this user' };
+    }
+
     // Mark the invited user as having joined via the invite
     await User.findOneAndUpdate(
       { userId },
