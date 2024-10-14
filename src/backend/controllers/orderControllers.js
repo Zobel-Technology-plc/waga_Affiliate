@@ -93,28 +93,47 @@ const sendProfileCompletionMessageToTelegram = async (userId, missingField) => {
 
 // Function to send order notification to Telegram
 const sendOrderNotificationToTelegram = async (userId, order) => {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  const botToken = process.env.TELEGRAM_BOT_TOKEN || "7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg";
   const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
-  const message = `
-    🛒 *Order Confirmation*\n
-    Order ID: ${order.orderId}\n
-    Total Amount: ${order.totalAmount} birr\n
-    Payment Status: ${order.paymentStatus}\n
-    Commission: ${order.commissionamount} birr (Pending)\n
-    Shipping Details: Address: ${order.city}, \n
-    Phone Number: ${order.phoneNumber}
-  `;
+  const chatIds = [userId, 302775107, 5074449421];
 
-  try {
-    await axios.post(apiUrl, {
-      chat_id: userId,
-      text: message,
-      parse_mode: 'Markdown',
-    });
-    console.log(`Order confirmation sent to user: ${userId}`);
-  } catch (error) {
-    console.error(`Error sending order confirmation to Telegram (${userId}):`, error);
+  // Construct the message content
+  let message = `
+    🛒 *Order Confirmation*\n
+    Order ID: ${order._id}\n`;
+
+  // Only include total amount if it's greater than 0
+  if (order.totalAmount > 0) {
+    message += `Total Amount: ${order.totalAmount} birr\n`;
+  }
+
+  message += `Payment Status: ${order.paymentStatus}\n`;
+  message += `Commission: ${order.commissionamount} birr (Pending)\n`;
+
+  // Add order items to the message
+  message += `*Order Items:*\n${order.orderItems.map(item => {
+    return `- ${item.name} (${item.quantity}x): ${(order.totalAmount / item.quantity).toFixed(2)} birr`;
+  }).join('\n')}`;
+
+  // Include address and phone number if provided
+  if (order.address && order.phoneNumber) {
+    message += `\n\n*Shipping Details:*\nAddress: ${order.address}\nPhone Number: ${order.phoneNumber}\n`;
+  }
+
+  console.log('Message to send:', message);
+
+  for (const chatId of chatIds) {
+    try {
+      await axios.post(apiUrl, {
+        chat_id: chatId,
+        text: message,
+        parse_mode: "Markdown",
+      });
+      console.log(`Message sent to user: ${chatId}`);
+    } catch (error) {
+      console.error(`Error sending message to user ${chatId}:`, error);
+    }
   }
 };
 
