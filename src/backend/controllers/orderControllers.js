@@ -117,8 +117,8 @@ const sendOrderNotificationToTelegram = async (userId, order) => {
   }).join('\n')}`;
 
   // Include address and phone number if provided
-  if (order.address && order.phoneNumber) {
-    message += `\n\n*Shipping Details:*\nAddress: ${order.address}\nPhone Number: ${order.phoneNumber}\n`;
+  if (order.city && order.phoneNumber) {
+    message += `\n\n*Shipping Details:*\nAddress: ${order.city}\n Phone Number: ${order.phoneNumber}\n`;
   }
 
   console.log('Message to send:', message);
