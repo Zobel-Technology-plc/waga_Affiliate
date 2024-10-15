@@ -19,11 +19,8 @@ const OrdersListPage = () => {
       const response = await fetch('/api/orders?all=true');
       const data = await response.json();
       if (response.ok) {
-        // Sort orders by `createdAt`, most recent first
         const sortedOrders = data.orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setOrders(sortedOrders || []);
-
-        // Find completed orders from fetched data
         const completed = sortedOrders
           .filter((order) => order.commissionStatus === 'completed')
           .map((order) => order._id);
@@ -69,7 +66,6 @@ const OrdersListPage = () => {
       console.error('Error updating order:', error);
     }
   };
-  
 
   // Handle completing an order (including adding commission to the user)
   const handleCompleteOrder = async (orderId, userId, commissionAmount) => {
@@ -92,6 +88,26 @@ const OrdersListPage = () => {
       }
     } catch (error) {
       console.error('Error completing order:', error);
+    }
+  };
+
+  // Handle canceling an order
+  const handleCancelOrder = async (orderId) => {
+    try {
+      const response = await fetch(`/api/orders/${orderId}/cancel`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'canceled', commissionStatus: 'canceled' }), // Update status to canceled
+      });
+      if (response.ok) {
+        fetchOrders(); // Refresh the list after canceling
+      } else {
+        console.error('Failed to cancel order');
+      }
+    } catch (error) {
+      console.error('Error canceling order:', error);
     }
   };
 
@@ -132,10 +148,7 @@ const OrdersListPage = () => {
                   <td>{indexOfFirstOrder + index + 1}</td> {/* Display the order number */}
                   <td>{order.orderId}</td>
                   <td>
-                    {/* Make phone number clickable */}
-                    <a href={`tel:${order.phoneNumber}`}>
-                      {order.phoneNumber}
-                    </a>
+                    <a href={`tel:${order.phoneNumber}`}>{order.phoneNumber}</a>
                   </td>
                   <td>
                     {editingOrder === order._id ? (
@@ -143,10 +156,10 @@ const OrdersListPage = () => {
                         type="text"
                         value={updatedCity}
                         onChange={(e) => setUpdatedCity(e.target.value)}
-                        placeholder={order.address}
+                        placeholder={order.city}
                       />
                     ) : (
-                      order.address || 'N/A'
+                      order.city || 'N/A'
                     )}
                   </td>
                   <td>
@@ -161,7 +174,9 @@ const OrdersListPage = () => {
                       order.commissionamount
                     )}
                   </td>
-                  <td>{order.commissionStatus}</td>
+                  <td>
+                    {order.status === 'canceled' ? 'Canceled' : order.commissionStatus}
+                  </td>
                   <td>
                     <ul>
                       {order.orderItems.map((item) => (
@@ -193,12 +208,26 @@ const OrdersListPage = () => {
                       </>
                     ) : (
                       <>
-                        <button className="update-btn" onClick={() => setEditingOrder(order._id)}>Update</button>
                         <button
-                          className={completedOrders.includes(order._id) ? 'complete-btn gray' : 'complete-btn blue'}
-                          onClick={() => !completedOrders.includes(order._id) && handleCompleteOrder(order._id, order.userId, order.commissionamount)}
+                          className="update-btn"
+                          onClick={() => setEditingOrder(order._id)}
+                          disabled={order.commissionStatus === 'canceled' || order.status === 'canceled'} // Disable if commissionStatus or status is canceled
                         >
-                          {completedOrders.includes(order._id) ? 'Completed' : 'Complete'}
+                          Update
+                        </button>
+                        <button
+                          className={completedOrders.includes(order._id) || order.commissionStatus === 'canceled' || order.status === 'canceled' ? 'complete-btn gray' : 'complete-btn blue'}
+                          onClick={() => !completedOrders.includes(order._id) && handleCompleteOrder(order._id, order.userId, order.commissionamount)}
+                          disabled={order.commissionStatus === 'canceled' || order.status === 'canceled'} // Disable if commissionStatus or status is canceled
+                        >
+                          {completedOrders.includes(order._id) || order.commissionStatus === 'canceled' || order.status === 'canceled' ? 'Completed' : 'Complete'}
+                        </button>
+                        <button
+                          className="cancel-order-btn red"
+                          onClick={() => handleCancelOrder(order._id)}
+                          disabled={order.commissionStatus === 'canceled' || order.status === 'canceled'} // Disable if already canceled
+                        >
+                          {order.status === 'canceled' ? 'Canceled' : 'Cancel'}
                         </button>
                       </>
                     )}

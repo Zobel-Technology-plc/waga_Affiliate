@@ -1,72 +1,97 @@
 /* General Table Styling */
 table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
-  }
-  
-  th, td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #ddd;
-    text-align: left;
-  }
-  
-  thead th {
-    background-color: #f4f4f4;
-    font-weight: bold;
-  }
-  
-  tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-  
-  /* Button Styling */
-  .update-btn, .complete-btn, .save-btn, .cancel-btn {
-    padding: 10px;
-    width: 100px;
-    cursor: pointer;
-    border: none;
-    color: white;
-    margin-right: 10px;
-  }
-  
-  .update-btn {
-    background-color: green;
-  }
-  
-  .complete-btn.blue {
-    background-color: blue;
-  }
-  
-  .complete-btn.gray {
-    background-color: gray;
-    cursor: not-allowed;
-  }
-  
-  .save-btn {
-    background-color: blue;
-  }
-  
-  .cancel-btn {
-    background-color: red;
-  }
-  
-  /* Pagination Styling */
-  .pagination {
-    margin: 20px 0;
-    text-align: center;
-  }
-  
-  .pagination button {
-    padding: 8px 16px;
-    margin: 0 5px;
-    background-color: #f4f4f4;
-    border: 1px solid #ddd;
-    cursor: pointer;
-  }
-  
-  .pagination button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
-  
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+th, td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+thead th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* Button Styling */
+.update-btn, 
+.complete-btn, 
+.save-btn, 
+.cancel-btn, 
+.cancel-order-btn {
+  padding: 10px;
+  width: 100px;
+  cursor: pointer;
+  border: none;
+  color: white;
+  margin-right: 10px;
+  border-radius: 5px; /* Add rounded corners */
+}
+
+/* Update Button */
+.update-btn {
+  background-color: green;
+}
+
+/* Complete Button - Blue when active */
+.complete-btn.blue {
+  background-color: blue;
+}
+
+/* Complete Button - Gray when disabled */
+.complete-btn.gray,
+.update-btn:disabled {
+  background-color: gray;
+  cursor: not-allowed;
+  color: #888; /* Lighter text when disabled */
+}
+
+/* Save Button */
+.save-btn {
+  background-color: blue;
+}
+
+/* Cancel Button */
+.cancel-btn {
+  background-color: red;
+}
+
+/* Cancel Order Button */
+.cancel-order-btn.red {
+  background-color: #ff4d4f; /* Red background for Cancel */
+  color: white;
+  cursor: pointer;
+}
+
+/* Canceled Order - Gray out the Cancel button */
+.cancel-order-btn[disabled] {
+  background-color: gray;
+  cursor: not-allowed;
+  color: #888;
+}
+
+/* Pagination Styling */
+.pagination {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  margin: 0 5px;
+  background-color: #f4f4f4;
+  border: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

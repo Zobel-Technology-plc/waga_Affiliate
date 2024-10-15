@@ -26,7 +26,7 @@ const orderSchema = new mongoose.Schema({
   commissionamount: { type: Number },  // Store the commission amount
   commissionStatus: {  // Track the status of the commission
     type: String,
-    enum: ['pending', 'completed'],
+    enum: ['pending', 'completed' , 'canceled'],
     default: 'pending',  // Initially set commission to 'pending'
   },
   city: { type: String, required: true, },
