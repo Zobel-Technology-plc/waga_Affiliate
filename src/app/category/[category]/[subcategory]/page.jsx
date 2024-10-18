@@ -1,33 +1,39 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ProductItem from '../../../../components/products/ProductItem';
 import Link from 'next/link';
 import Image from 'next/image';
 import CusstomPagination from '../../../../components/layouts/CusstomPagination';
 
-const SubcategoryPage = ({ params }) => {
+const Subcategory = ({ params }) => {
   const [products, setProducts] = useState([]);
   const [totalProducts, setTotalProducts] = useState(0);
-  const [resPerPage] = useState(9); // Example: 9 products per page
-
+  const [loading, setLoading] = useState(true);
+  const resPerPage = 7; // Show 7 products per page
   const router = useRouter();
   const searchParams = useSearchParams();
-  let page = searchParams.get('page') || 1;
-  page = Number(page);
-
+  const currentPage = Number(searchParams.get('page')) || 1;
+  
   // Decode category and subcategory to handle non-ASCII characters
   const decodedCategory = decodeURIComponent(params.category);
   const decodedSubcategory = decodeURIComponent(params.subcategory);
 
   useEffect(() => {
     const fetchProducts = async () => {
+      setLoading(true); // Start loading
       try {
-        const res = await fetch(
-          `/api/products/category?category=${encodeURIComponent(decodedCategory)}&subcategory=${encodeURIComponent(decodedSubcategory)}&page=${page}&limit=${resPerPage}`
-        );
+        const query = new URLSearchParams({
+          category: decodedCategory,
+          subcategory: decodedSubcategory,
+          page: currentPage,
+          limit: resPerPage,
+        });
+
+        const res = await fetch(`/api/products/category?${query.toString()}`);
         const data = await res.json();
+
         if (data.success) {
           setProducts(data.products);
           setTotalProducts(data.totalProducts); // Total number of products
@@ -36,23 +42,29 @@ const SubcategoryPage = ({ params }) => {
         }
       } catch (error) {
         console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false); // Stop loading
       }
     };
 
     fetchProducts();
-  }, [decodedCategory, decodedSubcategory, page]);
+  }, [currentPage, decodedCategory, decodedSubcategory]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <>
       <nav className="bg-gray-800 p-4 mt-2">
         <ul className="flex space-x-4">
           <li>
-            <Link href="/" className="text-white hover:text-gray-300 m-5 ">
-            Categories
+            <Link href="/" className="text-white hover:text-gray-300 m-5">
+              Categories
             </Link>
           </li>
           <li>
-            <Link href="/product" className="text-white hover:text-gray-300 m-5 ">
+            <Link href="/product" className="text-white hover:text-gray-300 m-5">
               On Sale
             </Link>
           </li>
@@ -63,7 +75,6 @@ const SubcategoryPage = ({ params }) => {
           </li>
         </ul>
       </nav>
-
       {/* Back Button */}
       <div className="p-4 flex">
         <Image
@@ -76,22 +87,30 @@ const SubcategoryPage = ({ params }) => {
         />
         <h1 className="text-center text-2xl font-bold ml-14 ">{decodedSubcategory}</h1>
       </div>
-
       <div className="container">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {products.map((product) => (
             <ProductItem key={product._id} product={product} />
           ))}
         </div>
-
-        {/* Pagination */}
-        <CusstomPagination
-          resPerPage={resPerPage}
-          productsCount={totalProducts}
-          dynamicPath={`/category/${encodeURIComponent(decodedCategory)}/${encodeURIComponent(decodedSubcategory)}`}
-        />
+        {/* Pagination with bottom margin */}
+        <div className="mb-14"> {/* Add bottom margin */}
+          <CusstomPagination
+            resPerPage={resPerPage}
+            productsCount={totalProducts}
+            dynamicPath={`/category/${encodeURIComponent(decodedCategory)}/${encodeURIComponent(decodedSubcategory)}`}
+          />
+        </div>
       </div>
     </>
+  );
+};
+
+const SubcategoryPage = (props) => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Subcategory {...props} />
+    </Suspense>
   );
 };
 
