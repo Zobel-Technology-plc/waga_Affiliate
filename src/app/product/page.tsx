@@ -1,42 +1,48 @@
-// app/products/page.jsx
+'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
 import ListProducts from '../../components/products/ListProducts';
-import queryString from 'query-string';
 import Search from '../../components/layouts/Search';
 
-// Define the type for searchParams
-interface SearchParams {
-  ratings: any;
-  max: any;
-  min: any;
-  category: any;
-  keyword?: string;
-  page?: number;
-}
-
-const getProducts = async (searchParams: SearchParams) => {
-  const urlParams = {
-    keyword: searchParams.keyword,
-    page: searchParams.page,
-    category: searchParams.category,
-    "price[gte]": searchParams.min,
-    "price[lte]": searchParams.max,
-    "ratings[gte]": searchParams.ratings,
-  };
-
-  const searchQuery = queryString.stringify(urlParams);
-
-  const { data } = await axios.get(
-    `${process.env.API_URL}/api/products?${searchQuery}`
-  );
+const fetchOnSaleProducts = async (page: number) => {
+  const url = `/api/products?onSale=true`;
+  console.log('Fetching URL:', url);  // Log the URL
+  const { data } = await axios.get(url);
   return data;
 };
 
-const ProductsPage = async ({ searchParams }: { searchParams: SearchParams }) => {
-  const productsData = await getProducts(searchParams);
+const ProductsPage = () => {
+  const [productsData, setProductsData] = useState({});
+  const [loading, setLoading] = useState(true);  // Loading state
+  const [page, setPage] = useState(1);  // Pagination state
+  const [error] = useState(null);  // Error state
+
+  useEffect(() => {
+    const getProducts = async () => {
+      try {
+        setLoading(true);
+        const products = await fetchOnSaleProducts(page);
+        setProductsData(products);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        setLoading(false);
+      }
+    };
+    getProducts();
+  }, [page]);  // Fetch products on page change
+
+  const handleNextPage = () => {
+    setPage((prevPage) => prevPage + 1);  // Next page
+  };
+
+  const handlePreviousPage = () => {
+    if (page > 1) {
+      setPage((prevPage) => prevPage - 1);  // Previous page
+    }
+  };
 
   return (
     <>
@@ -45,13 +51,13 @@ const ProductsPage = async ({ searchParams }: { searchParams: SearchParams }) =>
       <nav className="bg-gray-800 p-4 mt-2">
         <ul className="flex space-x-4">
           <li>
-            <Link href="/" className="text-white hover:text-gray-300 m-5 ">
-            Categories
+            <Link href="/" className="text-white hover:text-gray-300 m-5">
+              Categories
             </Link>
           </li>
           <li>
-            <Link href="/product" className="text-white hover:text-gray-300 m-5 ">
-              Products
+            <Link href="/product" className="text-white hover:text-gray-300 m-5">
+              On Sale
             </Link>
           </li>
           <li>
@@ -62,8 +68,17 @@ const ProductsPage = async ({ searchParams }: { searchParams: SearchParams }) =>
         </ul>
       </nav>
 
-      {/* Product List */}
-      <ListProducts data={productsData} />
+      {/* Show loading, error, or product list */}
+      {loading ? (
+        <p>Loading products...</p>
+      ) : error ? (
+        <p>{error}</p>
+      ) : (
+        <>
+          <ListProducts data={productsData} />
+          {/* Pagination controls */}
+        </>
+      )}
     </>
   );
 };

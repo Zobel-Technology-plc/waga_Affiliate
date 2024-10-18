@@ -68,3 +68,45 @@ export const getProduct = async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
+
+export const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.query;
+
+    const updatedData = {
+      name: req.body.name,
+      price: req.body.price,
+      commission: req.body.commission,
+    };
+
+    const updatedProduct = await Product.findByIdAndUpdate(id, updatedData, {
+      new: true, // Return the updated document
+      runValidators: true, // Ensure validation rules are respected
+    });
+
+    if (!updatedProduct) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    res.status(200).json({ message: 'Product updated successfully', product: updatedProduct });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating product', error });
+  }
+};
+
+// Delete a product by ID
+export const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.query;
+
+    const deletedProduct = await Product.findByIdAndDelete(id);
+
+    if (!deletedProduct) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    res.status(200).json({ message: 'Product deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting product', error });
+  }
+};

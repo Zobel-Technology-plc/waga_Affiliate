@@ -1,0 +1,60 @@
+/* UserActionsPage.module.css */
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #333;
+  }
+  
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .th, .td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    color: #555;
+  }
+  
+  .th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+  
+  .tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .td {
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .link {
+    color: #0070f3;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  
+  .link:hover {
+    text-decoration: underline;
+  }
+  

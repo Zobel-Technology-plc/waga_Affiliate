@@ -1,15 +1,36 @@
 // pages/api/products/[id].js
 
 import dbConnect from '../../../backend/config/dbConnect';
-import { getProduct } from '../../../backend/controllers/productControllers';
+import {
+  getProduct,
+  updateProduct,
+  deleteProduct,
+} from '../../../backend/controllers/productControllers';
 
 export default async function handler(req, res) {
   await dbConnect();
 
-  if (req.method === 'GET') {
-    await getProduct(req, res);
-  } else {
-    res.setHeader('Allow', ['GET']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+  const { method } = req;
+
+  switch (method) {
+    case 'GET':
+      // Get a single product by ID
+      await getProduct(req, res);
+      break;
+    
+    case 'PUT':
+      // Update a product by ID
+      await updateProduct(req, res);
+      break;
+
+    case 'DELETE':
+      // Delete a product by ID
+      await deleteProduct(req, res);
+      break;
+
+    default:
+      res.setHeader('Allow', ['GET', 'PUT', 'DELETE']);
+      res.status(405).end(`Method ${req.method} Not Allowed`);
+      break;
   }
 }

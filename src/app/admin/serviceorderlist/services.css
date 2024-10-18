@@ -21,34 +21,43 @@ table {
   }
   
   /* Button Styling */
-  .update-btn, .complete-btn, .save-btn, .cancel-btn {
-    padding: 10px;
-    width: 100px;
-    cursor: pointer;
+  .action-buttons {
+    display: flex;
+    flex-direction: column; /* Stack buttons vertically */
+    gap: 8px; /* Add spacing between buttons */
+  }
+  
+  .save-btn, .cancel-btn, .update-btn, .complete-btn, .completed-btn {
+    padding: 6px 12px;
     border: none;
-    color: white;
-    margin-right: 10px;
-  }
-  
-  .update-btn {
-    background-color: green;
-  }
-  
-  .complete-btn.blue {
-    background-color: blue;
-  }
-  
-  .complete-btn.gray {
-    background-color: gray;
-    cursor: not-allowed;
+    border-radius: 4px;
+    cursor: pointer;
   }
   
   .save-btn {
-    background-color: blue;
+    background-color: #4CAF50;
+    color: white;
   }
   
   .cancel-btn {
-    background-color: red;
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .update-btn {
+    background-color: #008CBA;
+    color: white;
+  }
+  
+  .complete-btn {
+    background-color: #f0ad4e;
+    color: white;
+  }
+  
+  .completed-btn {
+    background-color: #5cb85c;
+    color: white;
+    cursor: not-allowed;
   }
   
   /* Pagination Styling */

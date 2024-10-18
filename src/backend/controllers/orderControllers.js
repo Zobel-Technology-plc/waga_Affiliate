@@ -2,6 +2,7 @@ import Order from '../models/order';
 import User from '../models/user';
 import axios from 'axios';
 import dbConnect from '../../backend/config/dbConnect';
+import moment from 'moment';
 
 export const newOrder = async (req, res) => {
   const { userId, orderItems, totalAmount, commissionamount, city, phoneNumber, orderFor } = req.body;
@@ -178,6 +179,9 @@ export const getallOrders = async (req, res) => {
 
 
 
+
+
+
 export const updatePaymentStatus = async (req, res) => {
   const { orderId, paymentStatus } = req.body;
 
@@ -246,7 +250,7 @@ const rewardUserPoints = async (userId, points) => {
 export const getPendingCommissions = async (req, res) => {
   try {
     // Fetch pending orders with commissionAmount and commissionStatus fields
-    const pendingOrders = await Order.find({ commissionStatus: 'pending' })
+    const pendingOrders = await Order.find({ commissionStatus: 'complete' })
                                      .select('commissionamount commissionStatus');
 
     // Calculate the total commission amount by summing over the pending orders
@@ -255,7 +259,7 @@ export const getPendingCommissions = async (req, res) => {
     }, 0);
 
     // Log the total commission amount to the console
-    console.log('Total Pending Commission Amount:', totalCommissionAmount);
+    console.log('Total Complete Commission Amount:', totalCommissionAmount);
 
     // Respond with the pending orders and the total commission amount
     res.status(200).json({
@@ -265,8 +269,33 @@ export const getPendingCommissions = async (req, res) => {
       orders: pendingOrders,
     });
   } catch (error) {
-    console.error('Error fetching pending commissions:', error);
+    console.error('Error fetching complete commissions:', error);
     res.status(500).json({ success: false, message: 'Error fetching pending commissions' });
+  }
+};
+
+export const getPendingOrders = async (req, res) => {
+  try {
+    await dbConnect();  // Ensure the database connection is established
+
+    // Fetch all orders and sort them by creation date (most recent first)
+    const orders = await Order.find({ commissionStatus: 'pending' })
+                                     .select('commissionamount commissionStatus');
+
+    // If no orders are found, return a 404 response
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ success: false, message: 'No orders found' });
+    }
+
+    // Return the total count of orders along with the order data
+    return res.status(200).json({ 
+      success: true, 
+      count: orders.length,  // Total number of orders
+      orders  // The actual order data
+    });
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    return res.status(500).json({ success: false, message: 'Error fetching orders' });
   }
 };
 

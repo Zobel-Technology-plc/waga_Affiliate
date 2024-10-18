@@ -53,7 +53,7 @@ const SubcategoryPage = ({ params }) => {
           </li>
           <li>
             <Link href="/product" className="text-white hover:text-gray-300 m-5 ">
-              Products
+              On Sale
             </Link>
           </li>
           <li>

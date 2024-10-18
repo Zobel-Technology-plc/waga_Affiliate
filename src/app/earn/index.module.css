@@ -1,3 +1,4 @@
+/* General container styling */
 .container {
     display: flex;
     flex-direction: column;
@@ -7,27 +8,29 @@
     width: 100%;
     padding: 20px;
     margin-bottom: 40px;
-}
-
-.container__header {
+  }
+  
+  .container__header {
     font-size: 2rem;
     margin-bottom: 30px;
-}
-
-.container__subheader {
+  }
+  
+  .container__subheader {
     font-size: 1.5rem;
     margin-bottom: 10rem;
-}
-
-.earnOptions {
+  }
+  
+  /* Flex options for earn options */
+  .earnOptions {
     display: flex;
     flex-direction: column;
     gap: 20px;
     padding-top: 30px;
     width: 100%;
-}
-
-.option {
+  }
+  
+  /* Individual options styling */
+  .option {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -36,37 +39,41 @@
     border-radius: 15px;
     color: white;
     width: 100%;
-}
-
-.image {
+  }
+  
+  /* Image styling */
+  .image {
     width: 100px; /* Increase the width */
     height: 80px; /* Increase the height */
     object-fit: contain;
     margin: 0 auto; /* Center the image horizontally */
-}
-
-.text {
+  }
+  
+  /* Text section */
+  .text {
     flex: 1;
     margin-left: 15px;
-}
-
-.text p {
-    margin-bottom: 20;
+  }
+  
+  .text p {
+    margin-bottom: 20px;
     font-size: 0.9rem;
-}
-
-.text span {
+  }
+  
+  .text span {
     font-size: 0.8rem;
     color: gold;
     margin-top: 5px;
     display: block;
-}
-
-.button {
+  }
+  
+  /* Button spacing */
+  .button {
     margin-left: 10px;
-}
-
-.joinButton {
+  }
+  
+  /* Join button styling */
+  .joinButton {
     background-color: #007bff; /* Match Binance color */
     color: white;
     border: none;
@@ -75,27 +82,28 @@
     cursor: pointer;
     width: 50%; /* Set button width to 50% */
     margin: 0 auto; /* Center the button horizontally */
-}
-
-.joinButton:hover {
+  }
+  
+  .joinButton:hover {
     background-color: #0056b3; /* Darker shade on hover */
-}
-
-.checkButton {
+  }
+  
+  /* Check button styling */
+  .checkButton {
     background-color: #28a745;
-}
-
-.checkButton:hover {
+  }
+  
+  .checkButton:hover {
     background-color: #218838;
-}
-
-/* Blurred background when the modal is open */
-.blurredBackground {
+  }
+  
+  /* Blurred background when modal is open */
+  .blurredBackground {
     filter: blur(5px); /* Apply a blur effect */
     transition: filter 0.3s ease-in-out; /* Smooth transition */
   }
   
-  /* Ensure the modal itself is not blurred */
+  /* Modal overlay styling */
   .modalOverlay {
     position: fixed;
     top: 0;
@@ -109,6 +117,7 @@
     z-index: 999; /* Keep it above the blurred content */
   }
   
+  /* Modal content styling */
   .modalContent {
     position: fixed;
     bottom: 0;
@@ -129,44 +138,44 @@
     height: 75%;
   }
   
-  
-
-
-.modalContent h2{
+  /* Modal content text styling */
+  .modalContent h2 {
     font-weight: bold;
     font-size: 35px;
     margin-top: 10px;
-}
-
-.modalContent h1{
+  }
+  
+  .modalContent h1 {
     font-weight: bold;
     font-size: 60px;
     margin-top: 15px;
     color: gold;
-}
-
-.modalContent img {
-    margin-bottom: 20px;
-    width: 100px; /* Increase the width */
-    height: 80px; /* Increase the height */
+  }
+  
+  /* Modal image styling */
+  .modalContent img {
+    margin-bottom: 30px;
+    width: 100px;
+    height: 80px;
     object-fit: contain;
-    margin-bottom: 30px; /* Margin below the image */
-}
-
-.modalContent p {
+  }
+  
+  /* Modal paragraph styling */
+  .modalContent p {
     font-size: 1.4rem;
-    margin-top: 20px;
-    margin-bottom: 20px; /* Increase margin for better spacing */
-    color: white; /* Ensure the text is white */
-}
-
-.modalContent span.points {
-    display: block; /* Ensure the points are on a separate line */
+    margin: 20px 0;
+    color: white;
+  }
+  
+  .modalContent span.points {
+    display: block;
     font-size: 2rem;
-    color: gold; /* Gold color for points */
-    margin-bottom: 20px; /* Add margin below the points */
-}
-.socialIcons {
+    color: gold;
+    margin-bottom: 20px;
+  }
+  
+  /* Social icons styling */
+  .socialIcons {
     margin-top: 20px;
     display: flex;
     justify-content: center; /* Center the icons horizontally */
@@ -181,7 +190,8 @@
   .icon:hover {
     color: #d8e8fa; /* Change this to the color you prefer on hover */
   }
-
+  
+  /* Close button styling */
   .closeButton {
     position: absolute;
     top: 10px;
@@ -190,16 +200,102 @@
     border: none;
     font-size: 20px;
     cursor: pointer;
-    color: white; /* Ensure the close button is visible */
-}
-
-.copyButton{
-    background-color: #007bff; /* Match Binance color */
+    color: white;
+  }
+  
+  /* Copy button styling */
+  .copyButton {
+    background-color: #007bff;
     color: white;
     border: none;
-    padding: 15px 0; /* Adjust padding for the button */
-    border-radius: 25px; /* Rounded button */
+    padding: 15px 0;
+    border-radius: 25px;
     cursor: pointer;
-    width: 30%; /* Set button width to 50% */
+    width: 30%;
     margin: 0 auto;
-}
+  }
+  
+  /* Responsive adjustments for smaller screens */
+  @media (max-width: 768px) {
+    .container__header {
+      font-size: 1.5rem;
+    }
+  
+    .container__subheader {
+      font-size: 1.2rem;
+    }
+  
+    .option {
+      flex-direction: column; /* Stack content vertically */
+      padding: 20px 30px;
+    }
+  
+    .image {
+      width: 80px; /* Adjust size for smaller screens */
+      height: 60px;
+    }
+  
+    .text p {
+      font-size: 0.8rem; /* Reduce text size */
+    }
+  
+    .joinButton {
+      width: 80%; /* Make the button full width on smaller screens */
+    }
+  
+    .modalContent h1 {
+      font-size: 40px; /* Adjust font size for mobile */
+    }
+  
+    .modalContent h2 {
+      font-size: 25px; /* Adjust font size for mobile */
+    }
+  
+    .modalContent p {
+      font-size: 1.2rem;
+    }
+  
+    .copyButton {
+      width: 80%; /* Make copy button full width */
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .container__header {
+      font-size: 1.2rem;
+    }
+  
+    .container__subheader {
+      font-size: 1rem;
+    }
+  
+    .option {
+      padding: 15px 20px;
+    }
+  
+    .image {
+      width: 70px;
+      height: 50px;
+    }
+  
+    .joinButton {
+      width: 90%; /* Full width for smaller phones */
+    }
+  
+    .modalContent h1 {
+      font-size: 35px;
+    }
+  
+    .modalContent h2 {
+      font-size: 20px;
+    }
+  
+    .modalContent p {
+      font-size: 1rem;
+    }
+  
+    .copyButton {
+      width: 90%; /* Full width copy button */
+    }
+  }
+  

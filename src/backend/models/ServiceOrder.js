@@ -33,7 +33,7 @@ const serviceOrderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'complete'],
+    enum: ['pending', 'complete','canceled'],
     default: 'pending',
   },
   points: {
@@ -46,7 +46,7 @@ const serviceOrderSchema = new mongoose.Schema({
   },
   commissionStatus: {
     type: String,
-    enum: ['pending', 'paid'],
+    enum: ['pending', 'paid','canceled'],
     default: 'pending', // Default to 'pending'
   },
   totalAmount: {

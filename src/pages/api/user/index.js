@@ -1,5 +1,4 @@
 // pages/api/users/index.js
-
 import dbConnect from '../../../backend/config/dbConnect';
 import User from '../../../backend/models/user';
 
@@ -7,7 +6,16 @@ export default async function handler(req, res) {
   await dbConnect();
 
   try {
-    const users = await User.find({});
+    const { last30days } = req.query;
+
+    let users;
+    if (last30days === 'true') {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      users = await User.find({ createdAt: { $gte: thirtyDaysAgo } });
+    } else {
+      users = await User.find({});
+    }
 
     res.status(200).json({
       success: true,

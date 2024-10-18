@@ -3,6 +3,7 @@ import User from '../models/user';
 import axios from 'axios';
 import Service from '../models/service';
 import { nanoid } from 'nanoid';
+import moment from 'moment';
 
 // Create a new service order and send a Telegram notification
 export const createServiceOrder = async (req, res) => {
@@ -197,5 +198,57 @@ export const getallServiceOrders = async (req, res) => {
   } catch (error) {
     console.error('Error fetching service orders:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch service orders.' });
+  }
+};
+
+export const getpendingServiceOrders = async (req, res) => {
+  try {
+    // Fetch service orders for the user
+    const serviceOrders = await ServiceOrder.find({ status: 'pending' })
+    .select('points status');
+
+    // Respond with the fetched orders
+    res.status(200).json({ success: true, data: serviceOrders });
+  } catch (error) {
+    console.error('Error fetching service orders:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch service orders.' });
+  }
+};
+
+export const getPendingStatus = async (req, res) => {
+  try {
+    // Fetch pending orders with commissionAmount and commissionStatus fields
+    const pendingOrders = await ServiceOrder.find({ status: 'complete' })
+                                     .select('points status');
+
+    // Calculate the total commission amount by summing over the pending orders
+    const totalPointAmount = pendingOrders.reduce((acc, order) => {
+      return acc + (order.points || 0); // Add commissionAmount if it exists, else 0
+    }, 0);
+
+    // Log the total commission amount to the console
+    console.log('Total Pending Commission Amount:', totalPointAmount);
+
+    // Respond with the pending orders and the total commission amount
+    res.status(200).json({
+      success: true,
+      count: pendingOrders.length,
+      totalPointAmount, // Include total commission in the response
+      orders: pendingOrders,
+    });
+  } catch (error) {
+    console.error('Error fetching pending commissions:', error);
+    res.status(500).json({ success: false, message: 'Error fetching pending commissions' });
+  }
+};
+
+export const getServiceOrdersFromLast30Days = async (req, res) => {
+  try {
+    const thirtyDaysAgo = moment().subtract(30, 'days').toDate();
+    const orders = await ServiceOrder.find({ createdAt: { $gte: thirtyDaysAgo } });
+    res.status(200).json({ success: true, orders });
+  } catch (error) {
+    console.error('Error fetching service orders from last 30 days:', error);
+    res.status(500).json({ success: false, message: 'Error fetching service orders from last 30 days' });
   }
 };

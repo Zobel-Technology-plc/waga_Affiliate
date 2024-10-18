@@ -47,6 +47,11 @@ const productSchema = new mongoose.Schema({
     type: Boolean,
     default: false, // Free delivery is false by default
   },
+  // Add the onSale field
+  onSale: {
+    type: Boolean,
+    default: false, // Product is not on sale by default
+  },
 });
 
 export default mongoose.models.Product || mongoose.model('Product', productSchema);

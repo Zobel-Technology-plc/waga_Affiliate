@@ -74,6 +74,7 @@ const ProductItem = ({ product }) => {
             </span>
             {/* Conditionally render free delivery */}
             {product?.freeDelivery && <p className="text-green-500">Free Delivery</p>}
+            {product?.onSale && <p className="text-green-300">On Sale</p>} 
             <div className="my-3">
               {inCart ? (
                 <button

@@ -1,7 +1,7 @@
 // app/users/page.jsx
-
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';  // Correct import for Next.js App Router
 import axios from 'axios';
 import styles from './UsersPage.module.css';
 
@@ -9,6 +9,9 @@ const UsersPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Initialize the router
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -47,11 +50,14 @@ const UsersPage = () => {
           {users.map((user, index) => (
             <tr key={user._id} className={styles.tr}>
               <td className={styles.td}>{index + 1}</td>
-              <td className={styles.td}>{user.userId}</td>
+              {/* Use router.push to navigate to dynamic route */}
+              <td className={styles.td} onClick={() => router.push(`/admin/user/${user.userId}`)}>
+                <a className={styles.link}>{user.userId}</a>
+              </td>
               <td className={styles.td}>{user.phoneNumber}</td>
               <td className={styles.td}>{user.city}</td>
               <td className={styles.td}>{user.commission}</td>
-              <td className={styles.td}>{user.points}</td>
+              <td className={styles.td}>{new Intl.NumberFormat().format(user.points)}</td>
             </tr>
           ))}
         </tbody>
