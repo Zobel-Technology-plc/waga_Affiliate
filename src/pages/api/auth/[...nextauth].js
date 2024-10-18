@@ -38,7 +38,7 @@ export default NextAuth({
   },
   jwt: {
     encryption: true, // Enable encryption
-    secret: process.env.NEXTAUTH_SECRET, // Ensure this is set in .env
+    secret: process.env.NEXTAUTH_SECRET || VO4WKRonCpGirgR8/4LFmQA+GqsE+h/HAPM4/0JQxgc, // Ensure this is set in .env
   },
   callbacks: {
     async jwt({ token, user }) {
