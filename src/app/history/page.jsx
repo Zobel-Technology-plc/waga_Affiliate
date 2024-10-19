@@ -108,7 +108,7 @@ const History = () => {
                         <p><strong>Product:</strong> {item.name}</p>
                         <p><strong>Quantity:</strong> {item.quantity}</p>
                         {(order.totalAmount / item.quantity).toFixed(2) > 0 && (
-      <p><strong>Price:</strong> {(order.totalAmount / item.quantity).toFixed(2)} birr</p>
+      <p><strong>Price:</strong> {(order.totalAmount).toFixed(2)} birr</p>
     )}
                       </li>
                     ))}

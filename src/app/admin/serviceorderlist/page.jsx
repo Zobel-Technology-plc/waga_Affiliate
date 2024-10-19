@@ -28,7 +28,9 @@ const ServiceOrdersListPage = () => {
       const response = await fetch('/api/services/serviceorder?all=true');
       const data = await response.json();
       if (response.ok) {
-        const sortedServiceOrders = data.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        // Filter for service orders with a 'pending' commissionStatus
+        const pendingOrders = data.data.filter(order => order.commissionStatus === 'pending');
+        const sortedServiceOrders = pendingOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setServiceOrders(sortedServiceOrders || []);
 
         const completedOrders = sortedServiceOrders

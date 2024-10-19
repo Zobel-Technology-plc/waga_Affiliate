@@ -37,7 +37,9 @@ const OrdersListPage = () => {
       const response = await fetch('/api/orders?all=true');
       const data = await response.json();
       if (response.ok) {
-        const sortedOrders = data.orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        // Filter out orders with a "pending" commission status
+        const pendingOrders = data.orders.filter(order => order.commissionStatus === 'pending');
+        const sortedOrders = pendingOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setOrders(sortedOrders || []);
         const completed = sortedOrders
           .filter((order) => order.commissionStatus === 'completed')
