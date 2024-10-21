@@ -7,9 +7,9 @@ import { promisify } from 'util';
 
 // Configure Cloudinary
 cloudinary.v2.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "dp7u7sr3a",
+  api_key: process.env.CLOUDINARY_API_KEY || "759198285855915",
+  api_secret: process.env.CLOUDINARY_API_SECRET || "NJ_K5L6nR53f1Vnq8zkyZwZTmk0",
 });
 
 // Function to upload image to Cloudinary
