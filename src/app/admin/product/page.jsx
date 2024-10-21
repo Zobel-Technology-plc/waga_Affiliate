@@ -58,12 +58,13 @@ const AdminProductPage = () => {
   }, []);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, type, checked, value } = e.target;
     setProduct({
       ...product,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     });
   };
+  
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -106,7 +107,7 @@ const AdminProductPage = () => {
           freeDelivery: false,
         });
         setImages([]);
-        router.push('/admin/creation-success?type=Product');
+        router.push('/admin/creation-success?type=product');
       }
     } catch (err) {
       setError(err.response?.data.message || 'Something went wrong');
@@ -308,16 +309,16 @@ const AdminProductPage = () => {
         </div>
 
         <div className="flex items-center">
-          <label htmlFor="freeDelivery" className="text-gray-700 mr-2">Free Delivery</label>
-          <input
-            type="checkbox"
-            id="freeDelivery"
-            name="freeDelivery"
-            checked={product.freeDelivery}
-            onChange={handleInputChange}
-            className="h-4 w-4"
-          />
-        </div>
+  <label htmlFor="freeDelivery" className="text-gray-700 mr-2">Free Delivery</label>
+  <input
+    type="checkbox"
+    id="freeDelivery"
+    name="freeDelivery"
+    checked={product.freeDelivery}
+    onChange={handleInputChange}
+    className="h-4 w-4"
+  />
+</div>
 
         <div className="flex items-center">
           <label htmlFor="OnSale" className="text-gray-700 mr-2">On Sale</label>

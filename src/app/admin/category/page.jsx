@@ -31,7 +31,7 @@ const AdminCategory = () => {
       setSuccessMessage(data.message);
       setName('');
       setImage(null);
-      router.push('/admin/creation-success?type=Category');
+      router.push('/admin/creation-success?type=category');
     } catch (error) {
       setErrorMessage(error.response.data.message || 'Error creating category');
     }
