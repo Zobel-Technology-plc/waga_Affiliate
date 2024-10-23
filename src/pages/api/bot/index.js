@@ -3,10 +3,8 @@ import User from '../../../backend/models/user';
 import UserAction from '../../../backend/models/useraction';
 import axios from 'axios';
 
-// Telegram bot token
-const botToken = "7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg";  // Replace with your actual bot token
+const botToken = "7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg";
 
-// Function to send a text message to the user
 const sendMessage = async (chatId, text, replyMarkup = {}) => {
   const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
   try {
@@ -20,10 +18,7 @@ const sendMessage = async (chatId, text, replyMarkup = {}) => {
   }
 };
 
-// Function to request the user's phone number
 const requestPhoneNumber = async (chatId, userId) => {
-  const inviteLink = `https://t.me/Waga_affiliate_bot?start=${userId}`;
-
   const requestPhoneNumberMessage = {
     chat_id: chatId,
     text: `እንኳን ደህና መጡ እባክዎ ከታች የተቀመጠውን Share Phone Number በመንካት ይቀጥሉ:\n`,
@@ -49,37 +44,28 @@ const requestPhoneNumber = async (chatId, userId) => {
   }
 };
 
-// Function to handle invite link logic
 const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
   try {
     await dbConnect();
-
-    // Fetch the invited user
     const user = await User.findOne({ userId });
 
-    // Check if the user has already joined via invite, is a member, or has already started the bot
     if (user && (user.hasJoinedViaInvite || user.phoneNumber || user.hasStartedBot)) {
       await sendMessage(chatId, 'You are already a member, have already joined via an invite, or have already started the bot.');
-      console.log(`User ${userId} is already a member, joined via invite, or has started the bot.`);
       return { success: false, message: 'User is already a member, has joined via invite, or started the bot' };
     }
 
-    // Check if inviter has already invited the joining user
     const existingInvite = await UserAction.findOne({ userId: inviterUserId, joinerUserId: userId });
     if (existingInvite) {
-      console.log(`User ${inviterUserId} has already invited ${userId}. No points awarded.`);
       await sendMessage(inviterUserId, `You've already invited ${joinerName}. No additional points awarded.`);
       return { success: false, message: 'Inviter has already invited this user' };
     }
 
-    // Mark the invited user as having joined via the invite
     await User.findOneAndUpdate(
       { userId },
       { hasJoinedViaInvite: true },
       { new: true }
     );
 
-    // Update inviter's points and notify the inviter
     const inviter = await User.findOneAndUpdate(
       { userId: inviterUserId },
       { $inc: { points: 50000 } },
@@ -87,24 +73,19 @@ const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
     );
 
     if (inviter) {
-      // Notify inviter about the points earned
       await sendMessage(inviterUserId, `Congratulations! You've earned 50000 points for inviting ${joinerName}.`);
 
-      // Save the invite action in the UserAction model
       const newAction = new UserAction({
         userId: inviterUserId,
         action: `Invited ${joinerName}`,
         points: 50000,
-        joinerUserId: userId,   // Save the joinerUserId (instead of joinerName)
+        joinerUserId: userId,
         timestamp: new Date(),
       });
       await newAction.save();
     }
 
-    // Send a welcome message to the new user
     await sendMessage(chatId, 'Welcome! You have joined via an invite link.');
-    console.log('User joined via invite link and confirmation message sent:', chatId);
-
     return { success: true, message: 'User joined via invite link' };
   } catch (error) {
     console.error('Error handling join via invite link:', error);
@@ -112,7 +93,6 @@ const handleInviteLink = async (userId, inviterUserId, chatId, joinerName) => {
   }
 };
 
-// Main handler function
 export default async function handler(req, res) {
   console.log('Request received:', req.body);
 
@@ -127,78 +107,70 @@ export default async function handler(req, res) {
     const userId = message.from.id;
     const text = message.text;
 
-    // Extract the joining user's first name or username
     const joinerName = message.from.first_name || message.from.username || 'A user';
 
     await dbConnect();
 
-    // Start command handler
     if (text && text.startsWith('/start')) {
       console.log('Start command received');
-      const inviterUserId = text.split(' ')[1]; // Extract inviter userId from the invite link
+      const inviterUserId = text.split(' ')[1];
 
-      // Mark user as having started the bot
       await User.findOneAndUpdate(
         { userId },
         { hasStartedBot: true },
         { upsert: true, new: true }
       );
 
+      let inviteHandled = false;
+
       if (inviterUserId) {
-        // Handle the invite link logic
         const inviteResult = await handleInviteLink(userId, inviterUserId, chatId, joinerName);
         if (!inviteResult.success) {
           return res.status(200).json({ success: true, message: inviteResult.message });
         }
+        inviteHandled = true;
       }
 
-      // Request the user's phone number after handling invite
       const phoneNumberRequested = await requestPhoneNumber(chatId, userId);
+
       if (phoneNumberRequested) {
-        return res.status(200).json({ success: true, message: 'Phone number requested' });
+        return res.status(200).json({ success: true, message: inviteHandled ? 'Invite handled, phone number requested' : 'Phone number requested' });
       } else {
         return res.status(500).json({ success: false, message: 'Failed to send phone number request' });
       }
 
-    // Handle contact (phone number) sharing
     } else if (message.contact) {
       const phoneNumber = message.contact.phone_number;
 
       try {
-        // Save the phone number in the database
         await User.findOneAndUpdate(
           { userId },
           { phoneNumber },
           { upsert: true, new: true }
         );
 
-        // Remove the keyboard and ask for the city
-        await sendMessage(chatId, 'የስልክ ቁጥርዎን ስለሰጡን እናመሰግናለን! በመቀጠል ፣ ያሉበትን ከተማ ያስገቡ:', {
+        await sendMessage(chatId, 'Thank you for sharing your phone number! Please enter your city:', {
           remove_keyboard: true,
         });
 
-        return res.status(200).json({ success: true, message: 'Phone number saved, asking for city and keyboard removed' });
+        return res.status(200).json({ success: true, message: 'Phone number saved, asking for city' });
       } catch (error) {
         console.error('Error saving phone number or removing keyboard:', error);
         return res.status(500).json({ success: false, message: 'Failed to save phone number or remove keyboard' });
       }
 
-    // Handle city input from the user
     } else if (text && !text.startsWith('/start') && !message.contact) {
       try {
-        // Save the city in the database
         await User.findOneAndUpdate(
           { userId },
           { city: text },
           { upsert: true, new: true }
         );
-    
-        // Generate the invite link based on the updated user's ID
+
         const inviteLink = `https://t.me/Waga_affiliate_bot?start=${userId}`;
-    
-        // Thank the user for registering and send their unique invite link
-        await sendMessage(chatId, `ስለተመዘገቡ እናመሰናለን!\n ይህ የእርስዎ የተለየ የመጋበዣ ሊንክ ነው: ${inviteLink} \n Waga የሚለውን በመጫን ይቀጥሉ`);
-    
+
+        await sendMessage(chatId, `Thank you for registering! Here is your invite link: ${inviteLink}`);
+
         return res.status(200).json({ success: true, message: 'City saved, registration complete' });
       } catch (error) {
         console.error('Error saving city or sending thank you message:', error);
