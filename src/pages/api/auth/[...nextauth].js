@@ -35,24 +35,34 @@ export default NextAuth({
   },
   session: {
     strategy: 'jwt',
+    maxAge: 30 * 60, // Set session max age to 30 minutes (30 * 60 seconds)
   },
   jwt: {
-    encryption: true, // Enable encryption
-    secret: process.env.NEXTAUTH_SECRET || "VO4WKRonCpGirgR8/4LFmQA+GqsE+h/HAPM4/0JQxgc", // Ensure this is set in .env
+    encryption: true,
+    secret: process.env.NEXTAUTH_SECRET || "VO4WKRonCpGirgR8/4LFmQA+GqsE+h/HAPM4/0JQxgc",
+    maxAge: 30 * 60, // Token expires after 30 minutes
   },
   callbacks: {
-    async jwt({ token, user }) {
-      // Attach the username to the JWT token if it exists
+    async jwt({ token, user, trigger }) {
+      // Attach user data to JWT if user exists
       if (user) {
         token.id = user.id;
-        token.username = user.username; // Add the username to the token
+        token.username = user.username;
       }
+
+      // Handle token renewal on session activity
+      const now = Date.now() / 1000;
+      if (now - token.iat > 30 * 60) {
+        // Invalidate the token after 30 minutes of inactivity
+        return null;
+      }
+
       return token;
     },
     async session({ session, token }) {
-      // Attach the user ID and username to the session
+      // Attach user data to the session
       session.user.id = token.id;
-      session.user.username = token.username; // Add username to the session object
+      session.user.username = token.username;
       return session;
     },
   },

@@ -111,9 +111,10 @@ export default async function handler(req, res) {
 
     await dbConnect();
 
+    // Handle /start command
     if (text && text.startsWith('/start')) {
       console.log('Start command received');
-      const inviterUserId = text.split(' ')[1];
+      const inviterUserId = text.split(' ')[1]; // Check if an inviterUserId is passed with the /start command
 
       await User.findOneAndUpdate(
         { userId },
@@ -123,6 +124,7 @@ export default async function handler(req, res) {
 
       let inviteHandled = false;
 
+      // If inviterUserId exists, handle the invite link logic
       if (inviterUserId) {
         const inviteResult = await handleInviteLink(userId, inviterUserId, chatId, joinerName);
         if (!inviteResult.success) {
@@ -131,14 +133,19 @@ export default async function handler(req, res) {
         inviteHandled = true;
       }
 
+      // Request phone number for all users (with or without invite link)
       const phoneNumberRequested = await requestPhoneNumber(chatId, userId);
 
       if (phoneNumberRequested) {
-        return res.status(200).json({ success: true, message: inviteHandled ? 'Invite handled, phone number requested' : 'Phone number requested' });
+        return res.status(200).json({
+          success: true,
+          message: inviteHandled ? 'Invite handled, phone number requested' : 'Phone number requested',
+        });
       } else {
         return res.status(500).json({ success: false, message: 'Failed to send phone number request' });
       }
 
+    // Handle contact (phone number) sharing
     } else if (message.contact) {
       const phoneNumber = message.contact.phone_number;
 
@@ -159,6 +166,7 @@ export default async function handler(req, res) {
         return res.status(500).json({ success: false, message: 'Failed to save phone number or remove keyboard' });
       }
 
+    // Handle city input from the user
     } else if (text && !text.startsWith('/start') && !message.contact) {
       try {
         await User.findOneAndUpdate(
