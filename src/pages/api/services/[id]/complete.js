@@ -53,7 +53,7 @@ export default async function handler(req, res) {
       const telegramApiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
       // Construct the message to notify user of completion
-      const message = `Dear user, your service order with ID: ${order.orderId} has been completed. Commission added: ${commissionAmount} and points earned: ${points}.`;
+      const message = `Dear user, your service order with ID: ${order.serviceId} has Arived. Commission added: ${commissionAmount} and points earned: ${points}.`;
 
       // Log the userId and the message for debugging
       console.log('Sending message to userId:', userId);

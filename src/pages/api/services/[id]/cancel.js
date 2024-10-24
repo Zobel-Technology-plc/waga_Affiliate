@@ -43,7 +43,7 @@ export default async function handler(req, res) {
       const telegramApiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
       // Construct the message
-      const message = `Dear user, your service order with ID: ${order.orderId} has been canceled.`;
+      const message = `Dear user, your service order with ID: ${order.serviceId} has been canceled.`;
 
       // Log userId and message for debugging
       console.log('Sending message to userId:', userId); // Log the userId

@@ -46,9 +46,12 @@ export const newOrder = async (req, res) => {
       });
     }
 
+    const orderId = nanoid(7);
+
     // Create a new order
     const order = await Order.create({
       userId,
+      orderId:orderId,
       orderItems,
       totalAmount,
       commissionamount,
@@ -102,7 +105,7 @@ const sendOrderNotificationToTelegram = async (userId, order) => {
   // Construct the message content
   let message = `
     🛒 *Order Confirmation*\n
-    Order ID: ${order._id}\n`;
+    Order ID: ${order.orderId}\n`;
 
   // Only include total amount if it's greater than 0
   if (order.totalAmount > 0) {
