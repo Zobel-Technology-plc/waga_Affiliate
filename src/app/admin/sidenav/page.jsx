@@ -112,7 +112,7 @@ const SideNav = () => {
           Subcategories
         </li>
 
-        <li className="p-2 mt-8 cursor-pointer" onClick={() => signOut()}>
+        <li className="p-2 mt-8 cursor-pointer" onClick={() => signOut({ callbackUrl: '/login' })}>
           Logout
         </li>
       </ul>

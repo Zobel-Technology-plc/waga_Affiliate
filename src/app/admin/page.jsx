@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-import AdminGraphPage from './graph/page'
+import AdminGraphPage from './graph/page';
 import Link from 'next/link';
 
 // Register Chart.js components
@@ -33,7 +33,7 @@ const AdminDashboard = () => {
   const [PendingorderCount, setPendingOrderCount] = useState(0);
   const [serviceOrderCount, setServiceOrderCount] = useState(0);
   const [pendigserviceOrderCount, setPendingServiceOrderCount] = useState(0);
-  const [pendingCommissionTotal, setPendingCommissionTotal] = useState(0);
+  const [pendingCommissionTotal, setPendingCommissionTotal] = useState(0); // Total commission state
   const [pendingPointTotal, setPendingPointTotal] = useState(0);
   
   // Arrays to store historical data for chart
@@ -124,17 +124,21 @@ const AdminDashboard = () => {
         }
       };
 
-      const fetchPendingCommissions = async () => {
+      // New function to fetch total commission from your API
+      const fetchTotalCommission = async () => {
         try {
-          const response = await fetch('/api/orders?commissionPending=true');
+          const response = await fetch('/api/user?hasCommission=true'); // Call your endpoint
           const data = await response.json();
+
           if (response.ok && data.success) {
-            const totalCommission = data.orders.reduce((acc, order) => acc + (order.commissionamount || 0), 0);
-            setPendingCommissionTotal(totalCommission);
-            return totalCommission;
+            setPendingCommissionTotal(data.totalCommission || 0); // Set total commission in state
+            return data.totalCommission || 0;
+          } else {
+            console.error('Failed to fetch commission data:', data.message);
+            return 0;
           }
         } catch (error) {
-          console.error('Error fetching pending commissions:', error);
+          console.error('Error fetching total commission:', error);
           return 0;
         }
       };
@@ -155,13 +159,13 @@ const AdminDashboard = () => {
       };
 
       // Fetch all data and update chart history
-      const [users, productOrders, serviceOrders, pendingCommissions, pendingPoints] = await Promise.all([
+      const [users, productOrders, serviceOrders, totalCommission, pendingPoints] = await Promise.all([
         fetchUserCount(),
         fetchOrderCount(),
         fetchPredningOrderCount(),
         fetchPendingServiceOrderCount(),
         fetchServiceOrderCount(),
-        fetchPendingCommissions(),
+        fetchTotalCommission(), // Fetch the total commission
         fetchPendingPoints()
       ]);
 
@@ -171,7 +175,7 @@ const AdminDashboard = () => {
         newState.users[newState.users.length - 1] = users;
         newState.productOrders[newState.productOrders.length - 1] = productOrders;
         newState.serviceOrders[newState.serviceOrders.length - 1] = serviceOrders;
-        newState.pendingCommissions[newState.pendingCommissions.length - 1] = pendingCommissions;
+        newState.pendingCommissions[newState.pendingCommissions.length - 1] = totalCommission;
         newState.pendingPoints[newState.pendingPoints.length - 1] = pendingPoints;
         return newState;
       });
@@ -247,14 +251,12 @@ const AdminDashboard = () => {
 
 <div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
   <Link href="admin/user">
-    
       <div className="absolute top-4 left-40 w-16 h-16 bg-blue-500 rounded-full"></div>
       <div>Total Users: {userCount}</div>
   </Link>
 </div>
 <div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
   <Link href="/admin/orderlist">
-    
       <div className="absolute top-4 left-40 w-16 h-16 bg-green-500 rounded-full"></div>
       <div>Total Product Orders: {PendingorderCount}</div>
   </Link>
@@ -267,14 +269,12 @@ const AdminDashboard = () => {
 </div>
 <div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
   <Link href="#">
-    
-      <div className="absolute top-4 left-40 w-16 h-16 bg-purple-500 rounded-full"></div>
-      <div>Commissions product: {new Intl.NumberFormat().format(pendingCommissionTotal)}</div>
+    <div className="absolute top-4 left-40 w-16 h-16 bg-purple-500 rounded-full"></div>
+    <div>Commissions product: {new Intl.NumberFormat().format(pendingCommissionTotal)}</div> {/* Updated to show totalCommission */}
   </Link>
 </div>
 <div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
   <Link href="#">
-    
       <div className="absolute top-4 left-40 w-16 h-16 bg-red-500 rounded-full"></div>
       <div>Point Service: {new Intl.NumberFormat().format(pendingPointTotal)}</div>
   </Link>
