@@ -3,6 +3,7 @@ import User from '../models/user';
 import axios from 'axios';
 import dbConnect from '../../backend/config/dbConnect';
 import moment from 'moment';
+import { nanoid } from 'nanoid';
 
 export const newOrder = async (req, res) => {
   const { userId, orderItems, totalAmount, commissionamount, city, phoneNumber, orderFor } = req.body;
