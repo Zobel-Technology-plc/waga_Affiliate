@@ -21,7 +21,7 @@ const sendMessage = async (chatId, text, replyMarkup = {}) => {
 const requestPhoneNumber = async (chatId, userId) => {
   const requestPhoneNumberMessage = {
     chat_id: chatId,
-    text: `እንኳን ደህና መጡ እባክዎ ከታች የተቀመጠውን Share Phone Number በመንካት ይቀጥሉ:\n`,
+    text: `እንኳን ደህና መጡ እባክዎ ከታች የተቀመጠውን   "SHARE PHONE NUMBER"  በመንካት ይቀጥሉ::\n`,
     reply_markup: {
       keyboard: [
         [
@@ -31,6 +31,7 @@ const requestPhoneNumber = async (chatId, userId) => {
           },
         ],
       ],
+      resize_keyboard: true,
     },
   };
 
@@ -156,7 +157,7 @@ export default async function handler(req, res) {
           { upsert: true, new: true }
         );
 
-        await sendMessage(chatId, 'Thank you for sharing your phone number! Please enter your city:', {
+        await sendMessage(chatId, 'ስልኮን ሼር ስላረጉ እናመሰግናለን! እባክዎ የሚኖሩበትን ከተማ ያስገቡ:', {
           remove_keyboard: true,
         });
 
@@ -177,7 +178,7 @@ export default async function handler(req, res) {
 
         const inviteLink = `https://t.me/Waga_affiliate_bot?start=${userId}`;
 
-        await sendMessage(chatId, `Thank you for registering! Here is your invite link: ${inviteLink}`);
+        await sendMessage(chatId, `ስለተመዘገቡ እናመሰግናለን! ይህ የእርሶ ልዩ መጋበዛ ማስፈንጥሪያ ነው: ${inviteLink}`);
 
         return res.status(200).json({ success: true, message: 'City saved, registration complete' });
       } catch (error) {
