@@ -100,7 +100,7 @@ const History = () => {
               {order.orderId ? (
                 <>
                   <p><strong>Total Amount:</strong> {order.totalAmount} birr</p>
-                  <p><strong>Status:</strong> {order.paymentStatus}</p>
+                  <p><strong>Status:</strong> {order.status}</p>
                   <p><strong>Created At:</strong> {new Date(order.createdAt).toLocaleString()}</p>
                   <ul className="mt-4">
                     {order.orderItems.map((item) => (

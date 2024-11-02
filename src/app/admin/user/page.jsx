@@ -1,10 +1,19 @@
-// UsersPage.js
 'use client';
+
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 import styles from './UsersPage.module.css';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -20,17 +29,19 @@ const UsersPage = () => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get('/api/user');
+
+        // Sort users in descending order by createdAt for the table (newest at the top)
         const sortedUsers = response.data.data.sort((a, b) => {
           if (!a.createdAt && !b.createdAt) return 0;
           if (!a.createdAt) return 1;
           if (!b.createdAt) return -1;
-          return new Date(a.createdAt) - new Date(b.createdAt); // Sort ascending by createdAt
+          return new Date(b.createdAt) - new Date(a.createdAt);
         });
 
         setUsers(sortedUsers);
         setLoading(false);
 
-        // Prepare data for line chart
+        // Prepare data for line chart (sorted in ascending order by date for the graph)
         const userJoinDates = sortedUsers.reduce((acc, user) => {
           if (user.createdAt) {
             const date = new Date(user.createdAt).toLocaleDateString('en-US');
@@ -39,8 +50,8 @@ const UsersPage = () => {
           return acc;
         }, {});
 
-        const labels = Object.keys(userJoinDates);
-        const data = Object.values(userJoinDates);
+        const labels = Object.keys(userJoinDates).sort((a, b) => new Date(a) - new Date(b)); // Ascending order
+        const data = labels.map(label => userJoinDates[label]); // Get data in sorted order
 
         setChartData({
           labels,
@@ -54,7 +65,6 @@ const UsersPage = () => {
             },
           ],
         });
-
       } catch (error) {
         setError('Error fetching users');
         setLoading(false);
@@ -75,7 +85,7 @@ const UsersPage = () => {
       {/* Display the line chart if chartData is available */}
       {chartData && (
         <div className={styles.chartContainer}>
-          <Line 
+          <Line
             data={chartData}
             options={{
               responsive: true,
