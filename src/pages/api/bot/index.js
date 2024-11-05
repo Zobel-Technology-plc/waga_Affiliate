@@ -157,7 +157,7 @@ export default async function handler(req, res) {
           { upsert: true, new: true }
         );
 
-        await sendMessage(chatId, 'ስልኮን ሼር ስላረጉ እናመሰግናለን! እባክዎ የሚኖሩበትን ከተማ ያስገቡ:', {
+        await sendMessage(chatId, 'እባክዎ የሚኖሩበትን ከተማ ያስገቡ:', {
           remove_keyboard: true,
         });
 
