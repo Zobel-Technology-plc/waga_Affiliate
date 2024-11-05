@@ -29,19 +29,10 @@ const UsersPage = () => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get('/api/user');
-
-        // Sort users in descending order by createdAt for the table (newest at the top)
-        const sortedUsers = response.data.data.sort((a, b) => {
-          if (!a.createdAt && !b.createdAt) return 0;
-          if (!a.createdAt) return 1;
-          if (!b.createdAt) return -1;
-          return new Date(b.createdAt) - new Date(a.createdAt);
-        });
-
+        const sortedUsers = response.data.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setUsers(sortedUsers);
         setLoading(false);
 
-        // Prepare data for line chart (sorted in ascending order by date for the graph)
         const userJoinDates = sortedUsers.reduce((acc, user) => {
           if (user.createdAt) {
             const date = new Date(user.createdAt).toLocaleDateString('en-US');
@@ -50,8 +41,8 @@ const UsersPage = () => {
           return acc;
         }, {});
 
-        const labels = Object.keys(userJoinDates).sort((a, b) => new Date(a) - new Date(b)); // Ascending order
-        const data = labels.map(label => userJoinDates[label]); // Get data in sorted order
+        const labels = Object.keys(userJoinDates).sort((a, b) => new Date(a) - new Date(b));
+        const data = labels.map(label => userJoinDates[label]);
 
         setChartData({
           labels,
@@ -73,6 +64,16 @@ const UsersPage = () => {
 
     fetchUsers();
   }, []);
+
+  const handleRequestInfo = async (userId, type) => {
+    try {
+      await axios.post('/api/bot/request', { userId, type });
+      alert(`Requested ${type} from user ${userId}`);
+    } catch (error) {
+      console.error(`Error requesting ${type} from user ${userId}:`, error);
+      alert(`Failed to request ${type}`);
+    }
+  };
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
@@ -142,8 +143,30 @@ const UsersPage = () => {
               <td className={styles.td} onClick={() => router.push(`/admin/user/${user.userId}`)}>
                 <a className={styles.link}>{user.userId}</a>
               </td>
-              <td className={styles.td}>{user.phoneNumber}</td>
-              <td className={styles.td}>{user.city}</td>
+              <td className={styles.td}>
+                {user.phoneNumber && user.phoneNumber.length >= 12 ? (
+                  user.phoneNumber
+                ) : (
+                  <button
+                    onClick={() => handleRequestInfo(user.userId, 'phone number')}
+                    className={`${styles.requestButton} ${styles.phoneButton}`}
+                  >
+                    Request Phone
+                  </button>
+                )}
+              </td>
+              <td className={styles.td}>
+                {user.city ? (
+                  user.city
+                ) : (
+                  <button
+                    onClick={() => handleRequestInfo(user.userId, 'city')}
+                    className={`${styles.requestButton} ${styles.cityButton}`}
+                  >
+                    Request City
+                  </button>
+                )}
+              </td>
               <td className={styles.td}>{user.commission}</td>
               <td className={styles.td}>{new Intl.NumberFormat().format(user.points)}</td>
             </tr>

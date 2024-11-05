@@ -37,3 +37,24 @@
     background-color: #ddd;
   }
   
+  .requestButton {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    color: #fff;
+  }
+  
+  .phoneButton {
+    background-color: #4caf50; /* Green for phone */
+  }
+  
+  .cityButton {
+    background-color: #2196f3; /* Blue for city */
+  }
+  
+  .requestButton:hover {
+    opacity: 0.9;
+  }
+  
