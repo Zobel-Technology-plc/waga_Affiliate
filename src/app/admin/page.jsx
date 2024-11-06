@@ -243,42 +243,42 @@ const AdminDashboard = () => {
 
   return session && (
     <div className="flex h-screen bg-gray-50">
-      <div className="flex-1 p-6">
+      <div className="flex-1">
         {activeTab === 'dashboard' && (
           <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
   {/* Cards for various data */}
 
-<div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
-  <Link href="admin/user">
-      <div className="absolute top-4 left-40 w-16 h-16 bg-blue-500 rounded-full"></div>
-      <div>Total Users: {userCount}</div>
-  </Link>
-</div>
-<div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
-  <Link href="/admin/orderlist">
-      <div className="absolute top-4 left-40 w-16 h-16 bg-green-500 rounded-full"></div>
-      <div>Total Product Orders: {PendingorderCount}</div>
-  </Link>
-</div>
-<div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
-  <Link href="/admin/serviceorderlist">
-      <div className="absolute top-4 left-40 w-16 h-16 bg-yellow-500 rounded-full"></div>
-      <div>Total Service Orders: {pendigserviceOrderCount}</div>
-  </Link>
-</div>
-<div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
-  <Link href="#">
-    <div className="absolute top-4 left-40 w-16 h-16 bg-purple-500 rounded-full"></div>
-    <div>Commissions product: {new Intl.NumberFormat().format(pendingCommissionTotal)}</div> {/* Updated to show totalCommission */}
-  </Link>
-</div>
-<div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
-  <Link href="#">
-      <div className="absolute top-4 left-40 w-16 h-16 bg-red-500 rounded-full"></div>
-      <div>Point Service: {new Intl.NumberFormat().format(pendingPointTotal)}</div>
-  </Link>
-</div>
+  <div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
+    <Link href="admin/user">
+        <div className="absolute top-4 left-40 w-16 h-16 bg-blue-500 rounded-full"></div>
+        <div>Total Users: {userCount}</div>
+    </Link>
+  </div>
+  <div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
+    <Link href="/admin/orderlist">
+        <div className="absolute top-4 left-40 w-16 h-16 bg-green-500 rounded-full"></div>
+        <div>Total Product Orders: {PendingorderCount}</div>
+    </Link>
+  </div>
+  <div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
+    <Link href="/admin/serviceorderlist">
+        <div className="absolute top-4 left-40 w-16 h-16 bg-yellow-500 rounded-full"></div>
+        <div>Total Service Orders: {pendigserviceOrderCount}</div>
+    </Link>
+  </div>
+  <div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
+    <Link href="#">
+      <div className="absolute top-4 left-40 w-16 h-16 bg-purple-500 rounded-full"></div>
+      <div>Commissions product: {new Intl.NumberFormat().format(pendingCommissionTotal)}</div> {/* Updated to show totalCommission */}
+    </Link>
+  </div>
+  <div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end          transition-transform duration-300 transform hover:scale-105">
+    <Link href="#">
+        <div className="absolute top-4 left-40 w-16 h-16 bg-red-500 rounded-full"></div>
+        <div>Point Service: {new Intl.NumberFormat().format(pendingPointTotal)}</div>
+    </Link>
+  </div>
 
 </div>
 

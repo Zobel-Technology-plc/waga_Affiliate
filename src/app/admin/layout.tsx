@@ -1,4 +1,5 @@
 // File: admin/layout.tsx
+
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css'; // Import Font Awesome styles
 config.autoAddCss = false;
@@ -12,8 +13,12 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     <div className="flex flex-col h-screen">
       <AdminHeader /> {/* Header at the top */}
       <div className="flex flex-1 overflow-hidden">
-        <SideNav /> {/* Sidebar on the left */}
-        <div className="flex-1 ml-64 p-6 overflow-auto"> {/* Main content */}
+        {/* Sidebar with fixed width, hidden on small screens */}
+        <div className="hidden md:block w-64 flex-shrink-0">
+          <SideNav />
+        </div>
+        {/* Main content area fills the rest of the space */}
+        <div className="flex-1 p-6 overflow-auto">
           {children}
         </div>
       </div>
