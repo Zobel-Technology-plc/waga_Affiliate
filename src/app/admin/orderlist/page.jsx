@@ -189,7 +189,7 @@ const OrdersListPage = () => {
                       </td>
                       <td>{order.commissionStatus === 'canceled' ? 'Canceled' : order.commissionStatus}</td>
                       <td>
-                        <button onClick={() => toggleRow(index)}>
+                        <button className='text-black' onClick={() => toggleRow(index)}>
                           {expandedRow === index ? '-' : '+'}
                         </button>
                       </td>
