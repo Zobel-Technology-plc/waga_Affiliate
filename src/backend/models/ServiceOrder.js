@@ -33,7 +33,7 @@ const serviceOrderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'complete','canceled'],
+    enum: ['pending', 'complete', 'canceled'],
     default: 'pending',
   },
   points: {
@@ -42,24 +42,28 @@ const serviceOrderSchema = new mongoose.Schema({
   },
   commission: {
     type: Number,
-    required: true, // Required to store the commission amount
+    required: true,
   },
   commissionStatus: {
     type: String,
-    enum: ['pending', 'paid','canceled'],
-    default: 'pending', // Default to 'pending'
+    enum: ['pending', 'paid', 'canceled'],
+    default: 'pending',
   },
   totalAmount: {
     type: Number,
-    required: true, // Required to store the total amount
+    required: true,
+  },
+  commissionAmount: { // New field to store calculated commission
+    type: Number,
+    default: 0,
   },
   createdAt: { 
     type: Date, 
-    default: Date.now 
+    default: Date.now,
   },
   updatedAt: { 
     type: Date, 
-    default: Date.now 
+    default: Date.now,
   }
 }, { timestamps: true });
 

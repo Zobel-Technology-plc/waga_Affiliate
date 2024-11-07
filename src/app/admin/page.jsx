@@ -34,7 +34,7 @@ const AdminDashboard = () => {
   const [serviceOrderCount, setServiceOrderCount] = useState(0);
   const [pendigserviceOrderCount, setPendingServiceOrderCount] = useState(0);
   const [pendingCommissionTotal, setPendingCommissionTotal] = useState(0); // Total commission state
-  const [pendingPointTotal, setPendingPointTotal] = useState(0);
+  const [totalServiceCommission, setTotalServiceCommission] = useState(0); // Total service commission state
   
   // Arrays to store historical data for chart
   const [historyData, setHistoryData] = useState({
@@ -43,7 +43,7 @@ const AdminDashboard = () => {
     productOrders: Array(31).fill(0),
     serviceOrders: Array(31).fill(0),
     pendingCommissions: Array(31).fill(0),
-    pendingPoints: Array(31).fill(0),
+    serviceCommissions: Array(31).fill(0), // To track service commission history data
   });
 
   useEffect(() => {
@@ -124,10 +124,9 @@ const AdminDashboard = () => {
         }
       };
 
-      // New function to fetch total commission from your API
       const fetchTotalCommission = async () => {
         try {
-          const response = await fetch('/api/user?hasCommission=true'); // Call your endpoint
+          const response = await fetch('/api/user?hasCommission=true');
           const data = await response.json();
 
           if (response.ok && data.success) {
@@ -143,54 +142,62 @@ const AdminDashboard = () => {
         }
       };
 
-      const fetchPendingPoints = async () => {
+      const fetchTotalServiceCommission = async () => {
         try {
-          const response = await fetch('/api/services/serviceorder?status=true');
+          const response = await fetch('/api/services/serviceorder?commissionAmount=true'); // Adjust your endpoint accordingly
           const data = await response.json();
           if (response.ok && data.success) {
-            const totalPoints = data.orders.reduce((acc, order) => acc + (order.points || 0), 0);
-            setPendingPointTotal(totalPoints);
-            return totalPoints;
+            const totalCommissionAmount = data.orders.reduce(
+              (acc, order) => acc + (order.commissionAmount || 0),
+              0
+            );
+            setTotalServiceCommission(totalCommissionAmount); // Update state with total service commission amount
+            return totalCommissionAmount;
           }
         } catch (error) {
-          console.error('Error fetching pending points:', error);
+          console.error('Error fetching total service commission:', error);
           return 0;
         }
       };
 
-      // Fetch all data and update chart history
-      const [users, productOrders, serviceOrders, totalCommission, pendingPoints] = await Promise.all([
+      const [
+        users,
+        productOrders,
+        pendingProductOrders,
+        pendingServiceOrders,
+        serviceOrders,
+        totalCommission,
+        serviceCommission
+      ] = await Promise.all([
         fetchUserCount(),
         fetchOrderCount(),
         fetchPredningOrderCount(),
         fetchPendingServiceOrderCount(),
         fetchServiceOrderCount(),
-        fetchTotalCommission(), // Fetch the total commission
-        fetchPendingPoints()
+        fetchTotalCommission(),
+        fetchTotalServiceCommission()
       ]);
 
-      // For simplicity, assign the fetched data to the last date (today) in the array
       setHistoryData(prevState => {
         const newState = { ...prevState };
         newState.users[newState.users.length - 1] = users;
         newState.productOrders[newState.productOrders.length - 1] = productOrders;
         newState.serviceOrders[newState.serviceOrders.length - 1] = serviceOrders;
         newState.pendingCommissions[newState.pendingCommissions.length - 1] = totalCommission;
-        newState.pendingPoints[newState.pendingPoints.length - 1] = pendingPoints;
+        newState.serviceCommissions[newState.serviceCommissions.length - 1] = serviceCommission;
         return newState;
       });
     };
 
     fetchData();
-  }, []); // Fetch data periodically
+  }, []);
 
   if (status === 'loading') {
     return <div>Loading...</div>;
   }
 
-  // Chart Data
   const chartData = {
-    labels: historyData.labels, // Dates from one month ago to today
+    labels: historyData.labels,
     datasets: [
       {
         label: 'Users',
@@ -221,8 +228,8 @@ const AdminDashboard = () => {
         fill: true,
       },
       {
-        label: 'Pending Points',
-        data: historyData.pendingPoints,
+        label: 'Service Commissions',
+        data: historyData.serviceCommissions,
         borderColor: 'red',
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
         fill: true,
@@ -246,45 +253,33 @@ const AdminDashboard = () => {
       <div className="flex-1">
         {activeTab === 'dashboard' && (
           <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-  {/* Cards for various data */}
-
-  <div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
-    <Link href="admin/user">
-        <div className="absolute top-4 left-40 w-16 h-16 bg-blue-500 rounded-full"></div>
-        <div>Total Users: {userCount}</div>
-    </Link>
-  </div>
-  <div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
-    <Link href="/admin/orderlist">
-        <div className="absolute top-4 left-40 w-16 h-16 bg-green-500 rounded-full"></div>
-        <div>Total Product Orders: {PendingorderCount}</div>
-    </Link>
-  </div>
-  <div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
-    <Link href="/admin/serviceorderlist">
-        <div className="absolute top-4 left-40 w-16 h-16 bg-yellow-500 rounded-full"></div>
-        <div>Total Service Orders: {pendigserviceOrderCount}</div>
-    </Link>
-  </div>
-  <div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
-    <Link href="#">
-      <div className="absolute top-4 left-40 w-16 h-16 bg-purple-500 rounded-full"></div>
-      <div>Commissions product: {new Intl.NumberFormat().format(pendingCommissionTotal)}</div> {/* Updated to show totalCommission */}
-    </Link>
-  </div>
-  <div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end          transition-transform duration-300 transform hover:scale-105">
-    <Link href="#">
-        <div className="absolute top-4 left-40 w-16 h-16 bg-red-500 rounded-full"></div>
-        <div>Point Service: {new Intl.NumberFormat().format(pendingPointTotal)}</div>
-    </Link>
-  </div>
-
-</div>
-
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
+                <Link href="admin/user">
+                    <div className="absolute top-4 left-40 w-16 h-16 bg-blue-500 rounded-full"></div>
+                    <div>Total Users: {userCount}</div>
+                </Link>
+              </div>
+              <div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
+                <Link href="/admin/orderlist">
+                    <div className="absolute top-4 left-40 w-16 h-16 bg-green-500 rounded-full"></div>
+                    <div>Total Product Orders: {PendingorderCount}</div>
+                </Link>
+              </div>
+              <div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
+                <Link href="/admin/serviceorderlist">
+                    <div className="absolute top-4 left-40 w-16 h-16 bg-yellow-500 rounded-full"></div>
+                    <div>Total Service Orders: {pendigserviceOrderCount}</div>
+                </Link>
+              </div>
+              <div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
+                <Link href="#">
+                  <div className="absolute top-4 left-40 w-16 h-16 bg-purple-500 rounded-full"></div>
+                  <div>Commissions: {new Intl.NumberFormat().format(pendingCommissionTotal)}</div>
+                </Link>
+              </div>
+            </div>
             <AdminGraphPage/>
-            {/* pie chart */}
-            
           </>
         )}
       </div>

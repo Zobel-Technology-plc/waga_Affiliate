@@ -10,7 +10,7 @@ export const config = {
   },
 };
 
-const botToken = "7350305630:AAFT8WHJATAN9aV71eL1WoiCYCuA-LslLkc"; // Replace with your actual bot token
+const botToken = "7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg"; // Replace with your actual bot token
 const telegramApiUrl = `https://api.telegram.org/bot${botToken}`;
 
 const sendTelegramMessage = async (chatId, text, photoPath) => {

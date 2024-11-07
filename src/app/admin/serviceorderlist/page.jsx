@@ -150,6 +150,7 @@ const ServiceOrdersListPage = () => {
                   <th>City</th>
                   <th>Order For</th>
                   <th>Status</th>
+                  <th>Commissions</th>
                   <th>Points</th>
                   <th>Time</th>
                   <th>Date</th>
@@ -182,6 +183,7 @@ const ServiceOrdersListPage = () => {
                     </td>
                     <td>{order.orderFor}</td>
                     <td>{order.commissionStatus}</td>
+                    <td>{order.commissionAmount} birr</td>
                     <td>{order.points}</td>
                     <td>{new Date(order.createdAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric' })}</td>
                     <td>{new Date(order.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'long' })}</td>
