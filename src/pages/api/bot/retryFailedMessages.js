@@ -6,11 +6,11 @@ import fs from 'fs';
 
 export const config = {
   api: {
-    bodyParser: false,
+    bodyParser: false, // Disable body parser to handle file uploads
   },
 };
 
-const botToken = "7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg";
+const botToken = "7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg"; // Replace with your actual bot token
 const telegramApiUrl = `https://api.telegram.org/bot${botToken}`;
 
 const sendTelegramMessage = async (chatId, text, photoPath) => {
@@ -47,50 +47,63 @@ export default async function handler(req, res) {
         return res.status(500).json({ success: false, message: 'Form parsing error' });
       }
 
+      let userIds;
+      try {
+        userIds = JSON.parse(fields.userIds[0]);
+      } catch (parseError) {
+        console.error('Error parsing userIds:', parseError);
+        return res.status(400).json({ success: false, message: 'Invalid user IDs format' });
+      }
+
       const message = Array.isArray(fields.message) ? fields.message[0] : fields.message || '';
       const photoPath = files.image ? files.image.filepath : null;
 
       try {
         await dbConnect();
-        const users = await User.find({}).select('userId');
 
-        const messageResults = {
+        const retryResults = {
           success: [],
-          failed: []
+          failed: [],
         };
 
-        for (const user of users) {
+        for (const userId of userIds) {
+          const user = await User.findOne({ userId });
+
+          if (!user) {
+            console.warn(`User with userId ${userId} not found`);
+            retryResults.failed.push(userId);
+            continue;
+          }
+
+          // Send message and log success/failure
           const success = await sendTelegramMessage(user.userId, message, photoPath);
 
-          // Update user's last message status and date
-          const updatedUser = await User.findByIdAndUpdate(user._id, {
+          // Update lastMessageStatus and lastMessageDate in User document
+          await User.findByIdAndUpdate(user._id, {
             lastMessageStatus: success ? 'success' : 'failed',
             lastMessageDate: new Date(),
           }, { new: true });
 
-          if (updatedUser) {
-            console.log(`Updated user ${updatedUser.userId}:`, updatedUser);
-          } else {
-            console.error(`Failed to update user with ID: ${user._id}`);
-          }
-
           if (success) {
-            messageResults.success.push(user.userId);
+            retryResults.success.push(userId);
           } else {
-            messageResults.failed.push(user.userId);
+            retryResults.failed.push(userId);
           }
         }
 
-        if (photoPath) fs.unlinkSync(photoPath);
+        // Clean up the photo file if it was used
+        if (photoPath) {
+          fs.unlinkSync(photoPath);
+        }
 
         res.status(200).json({
           success: true,
-          message: 'Message broadcasted to all users',
-          results: messageResults,
+          message: 'Retry broadcast sent to users with failed status',
+          results: retryResults,
         });
       } catch (error) {
-        console.error('Error broadcasting message:', error);
-        res.status(500).json({ success: false, message: 'Failed to broadcast message' });
+        console.error('Error retrying broadcast:', error);
+        res.status(500).json({ success: false, message: 'Failed to retry message broadcast' });
       }
     });
   } else {

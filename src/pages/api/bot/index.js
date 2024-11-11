@@ -178,7 +178,7 @@ export default async function handler(req, res) {
 
         const inviteLink = `https://t.me/Waga_affiliate_bot?start=${userId}`;
 
-        await sendMessage(chatId, `ስለተመዘገቡ እናመሰግናለን! ይህ የእርሶ ልዩ መጋበዛ ማስፈንጥሪያ ነው: ${inviteLink}`);
+        await sendMessage(chatId, `ስለተመዘገቡ እናመሰግናለን! ይህ የእርሶ ልዩ መጋበዣ ማስፈንጥሪያ ነው: ${inviteLink}`);
 
         return res.status(200).json({ success: true, message: 'City saved, registration complete' });
       } catch (error) {

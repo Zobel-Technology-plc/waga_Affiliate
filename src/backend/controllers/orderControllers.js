@@ -118,7 +118,7 @@ const sendOrderNotificationToTelegram = async (userId, order) => {
 
   // Add order items to the message
   message += `*Order Items:*\n${order.orderItems.map(item => {
-    return `- ${item.name} (${item.quantity}x): ${(order.totalAmount / item.quantity).toFixed(2)} birr`;
+    return `- ${item.name} (${item.quantity}x): ${(item.price * item.quantity).toFixed(2)} birr`;
   }).join('\n')}`;
 
   // Include address and phone number if provided

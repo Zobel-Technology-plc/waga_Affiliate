@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
   username: String,
   languageCode: String,
   phoneNumber: String,
-  city: String, // Add city field to store user's city
+  city: String,
   points: {
     type: Number,
     default: 0,
@@ -27,6 +27,15 @@ const userSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  lastMessageStatus: {
+    type: String,
+    enum: ['success', 'failed'],
+    default: null,
+  },
+  lastMessageDate: {
+    type: Date,
+    default: null,
   },
 });
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { Line } from 'react-chartjs-2';
@@ -23,6 +23,13 @@ const UsersPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [chartData, setChartData] = useState(null);
+  const [showMessageForm, setShowMessageForm] = useState(false);
+  const [message, setMessage] = useState('');
+  const [image, setImage] = useState(null);
+  const [sending, setSending] = useState(false);
+  const [broadcastResults, setBroadcastResults] = useState(null); // Track broadcast results
+  const [lastRetryTime, setLastRetryTime] = useState(null); // Track last retry time
+
   const router = useRouter();
 
   useEffect(() => {
@@ -65,25 +72,129 @@ const UsersPage = () => {
     fetchUsers();
   }, []);
 
-  const handleRequestInfo = async (userId, type) => {
+  // Define retryFailedMessages as a stable function using useCallback
+  const retryFailedMessages = useCallback(async () => {
+    const failedUserIds = broadcastResults ? broadcastResults.failed : [];
+
+    if (!failedUserIds || failedUserIds.length === 0) {
+      console.log("No failed user IDs to retry");
+      return;
+    }
+
+    console.log("Retrying failed messages for user IDs:", failedUserIds);
+
+    const formData = new FormData();
+    formData.append("message", message);
+    if (image) formData.append("image", image);
+    formData.append("userIds", JSON.stringify(failedUserIds));
+
+    setSending(true);
     try {
-      await axios.post('/api/bot/request', { userId, type });
-      alert(`Requested ${type} from user ${userId}`);
+      const response = await axios.post("/api/bot/retryFailedMessages", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      setBroadcastResults(response.data.results);
+      alert("Retry broadcast sent to users with failed status.");
     } catch (error) {
-      console.error(`Error requesting ${type} from user ${userId}:`, error);
-      alert(`Failed to request ${type}`);
+      console.error("Error retrying failed messages:", error);
+      alert("Failed to retry message.");
+    } finally {
+      setSending(false);
+    }
+  }, [broadcastResults, message, image]); // Include dependencies
+
+  const handleSendMessage = async () => {
+    if (!message && !image) {
+      alert('Please enter a message or select an image.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('message', message);
+    if (image) formData.append('image', image);
+
+    setSending(true);
+    try {
+      const response = await axios.post('/api/bot/broadcastMessage', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setBroadcastResults(response.data.results); // Store broadcast results
+      alert('Message sent to all users.');
+      setMessage('');
+      setImage(null);
+      setShowMessageForm(false);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Failed to send message.');
+    } finally {
+      setSending(false);
     }
   };
+
+  // Automatically retry failed messages after 2 hours
+  useEffect(() => {
+    if (broadcastResults && broadcastResults.failed.length > 0) {
+      const retryTimeout = setTimeout(() => {
+        retryFailedMessages();
+        setLastRetryTime(new Date());
+      }, 2 * 60 * 60 * 1000); // 2 hours in milliseconds
+
+      return () => clearTimeout(retryTimeout);
+    }
+  }, [broadcastResults, retryFailedMessages]); // Add retryFailedMessages to dependencies
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Users</h1>
+      <div className={styles.header}>
+        <h1 className={styles.title}>Users</h1>
+        <button onClick={() => setShowMessageForm(!showMessageForm)} className={styles.sendMessageButton}>
+          {showMessageForm ? 'Hide Message Form' : 'Send Message'}
+        </button>
+      </div>
       <p className={styles.userCount}>Total Users: {users.length}</p>
 
-      {/* Display the line chart if chartData is available */}
+      {showMessageForm && (
+        <div className={styles.messageForm}>
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Enter your message here"
+            className={styles.messageInput}
+          />
+
+          {broadcastResults && (
+            <div className={styles.broadcastResults}>
+              <h3 className='mt-7'>Broadcast Results</h3>
+              <p>Success: {broadcastResults.success.length}</p>
+              <p>Failed: {broadcastResults.failed.length}</p>
+            </div>
+          )}
+
+          <button onClick={handleSendMessage} disabled={sending} className={styles.sendButton}>
+            {sending ? 'Sending...' : 'Send'}
+          </button>
+
+          {/* Show retry button if there are failed messages */}
+          {broadcastResults && broadcastResults.failed.length > 0 && (
+            <button 
+              onClick={retryFailedMessages} 
+              disabled={sending} 
+              className={`${
+                sending 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-blue-500 hover:bg-blue-600'
+              } text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-150 ease-in-out`}
+            >
+              {sending ? "Retrying..." : "Retry Failed Messages"}
+            </button>
+          )}
+        </div>
+      )}
+
       {chartData && (
         <div className={styles.chartContainer}>
           <Line
@@ -143,30 +254,8 @@ const UsersPage = () => {
               <td className={styles.td} onClick={() => router.push(`/admin/user/${user.userId}`)}>
                 <a className={styles.link}>{user.userId}</a>
               </td>
-              <td className={styles.td}>
-                {user.phoneNumber && user.phoneNumber.length >= 12 ? (
-                  user.phoneNumber
-                ) : (
-                  <button
-                    onClick={() => handleRequestInfo(user.userId, 'phone number')}
-                    className={`${styles.requestButton} ${styles.phoneButton}`}
-                  >
-                    Request Phone
-                  </button>
-                )}
-              </td>
-              <td className={styles.td}>
-                {user.city ? (
-                  user.city
-                ) : (
-                  <button
-                    onClick={() => handleRequestInfo(user.userId, 'city')}
-                    className={`${styles.requestButton} ${styles.cityButton}`}
-                  >
-                    Request City
-                  </button>
-                )}
-              </td>
+              <td className={styles.td}>{user.phoneNumber}</td>
+              <td className={styles.td}>{user.city}</td>
               <td className={styles.td}>{user.commission}</td>
               <td className={styles.td}>{new Intl.NumberFormat().format(user.points)}</td>
             </tr>
