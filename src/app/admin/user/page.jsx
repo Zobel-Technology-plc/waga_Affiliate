@@ -1,5 +1,4 @@
 'use client';
-
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
@@ -27,9 +26,7 @@ const UsersPage = () => {
   const [message, setMessage] = useState('');
   const [image, setImage] = useState(null);
   const [sending, setSending] = useState(false);
-  const [broadcastResults, setBroadcastResults] = useState(null); // Track broadcast results
-  const [lastRetryTime, setLastRetryTime] = useState(null); // Track last retry time
-
+  const [broadcastResults, setBroadcastResults] = useState(null); 
   const router = useRouter();
 
   useEffect(() => {
@@ -72,7 +69,40 @@ const UsersPage = () => {
     fetchUsers();
   }, []);
 
-  // Define retryFailedMessages as a stable function using useCallback
+  const handleImageChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setImage(e.target.files[0]);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!message && !image) {
+      alert('Please enter a message or select an image.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('message', message);
+    if (image) formData.append('image', image);
+
+    setSending(true);
+    try {
+      const response = await axios.post('/api/bot/broadcastMessage', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setBroadcastResults(response.data.results);
+      alert('Message sent to all users.');
+      setMessage('');
+      setImage(null);
+      setShowMessageForm(false);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Failed to send message.');
+    } finally {
+      setSending(false);
+    }
+  };
+
   const retryFailedMessages = useCallback(async () => {
     const failedUserIds = broadcastResults ? broadcastResults.failed : [];
 
@@ -80,8 +110,6 @@ const UsersPage = () => {
       console.log("No failed user IDs to retry");
       return;
     }
-
-    console.log("Retrying failed messages for user IDs:", failedUserIds);
 
     const formData = new FormData();
     formData.append("message", message);
@@ -102,47 +130,7 @@ const UsersPage = () => {
     } finally {
       setSending(false);
     }
-  }, [broadcastResults, message, image]); // Include dependencies
-
-  const handleSendMessage = async () => {
-    if (!message && !image) {
-      alert('Please enter a message or select an image.');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('message', message);
-    if (image) formData.append('image', image);
-
-    setSending(true);
-    try {
-      const response = await axios.post('/api/bot/broadcastMessage', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      setBroadcastResults(response.data.results); // Store broadcast results
-      alert('Message sent to all users.');
-      setMessage('');
-      setImage(null);
-      setShowMessageForm(false);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      alert('Failed to send message.');
-    } finally {
-      setSending(false);
-    }
-  };
-
-  // Automatically retry failed messages after 2 hours
-  useEffect(() => {
-    if (broadcastResults && broadcastResults.failed.length > 0) {
-      const retryTimeout = setTimeout(() => {
-        retryFailedMessages();
-        setLastRetryTime(new Date());
-      }, 2 * 60 * 60 * 1000); // 2 hours in milliseconds
-
-      return () => clearTimeout(retryTimeout);
-    }
-  }, [broadcastResults, retryFailedMessages]); // Add retryFailedMessages to dependencies
+  }, [broadcastResults, message, image]);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
@@ -166,6 +154,15 @@ const UsersPage = () => {
             className={styles.messageInput}
           />
 
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className={styles.imageInput}
+          />
+
+          {image && <p>Selected image: {image.name}</p>}
+
           {broadcastResults && (
             <div className={styles.broadcastResults}>
               <h3 className='mt-7'>Broadcast Results</h3>
@@ -178,7 +175,6 @@ const UsersPage = () => {
             {sending ? 'Sending...' : 'Send'}
           </button>
 
-          {/* Show retry button if there are failed messages */}
           {broadcastResults && broadcastResults.failed.length > 0 && (
             <button 
               onClick={retryFailedMessages} 
