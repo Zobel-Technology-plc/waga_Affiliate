@@ -26,7 +26,7 @@ const UsersPage = () => {
   const [message, setMessage] = useState('');
   const [image, setImage] = useState(null);
   const [sending, setSending] = useState(false);
-  const [broadcastResults, setBroadcastResults] = useState(null); 
+  const [broadcastResults, setBroadcastResults] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -131,6 +131,16 @@ const UsersPage = () => {
       setSending(false);
     }
   }, [broadcastResults, message, image]);
+
+  const requestUserInfo = async (userId, type) => {
+    try {
+      await axios.post('/api/bot/request', { userId, type });
+      alert(`Request for user's ${type} sent successfully.`);
+    } catch (error) {
+      console.error(`Error requesting ${type}:`, error);
+      alert(`Failed to request ${type}.`);
+    }
+  };
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
@@ -250,8 +260,29 @@ const UsersPage = () => {
               <td className={styles.td} onClick={() => router.push(`/admin/user/${user.userId}`)}>
                 <a className={styles.link}>{user.userId}</a>
               </td>
-              <td className={styles.td}>{user.phoneNumber}</td>
-              <td className={styles.td}>{user.city}</td>
+              <td className={styles.td}>
+  {user.phoneNumber || (
+    <button
+      onClick={() => requestUserInfo(user.userId, 'phone number')}
+      style={{ backgroundColor: 'red', color: 'white' }}
+      className={styles.requestButton}
+    >
+      Request Phone
+    </button>
+  )}
+</td>
+<td className={styles.td}>
+  {user.city || (
+    <button
+      onClick={() => requestUserInfo(user.userId, 'city')}
+      style={{ backgroundColor: 'green', color: 'white' }}
+      className={styles.requestButton}
+    >
+      Request City
+    </button>
+  )}
+</td>
+
               <td className={styles.td}>{user.commission}</td>
               <td className={styles.td}>{new Intl.NumberFormat().format(user.points)}</td>
             </tr>
