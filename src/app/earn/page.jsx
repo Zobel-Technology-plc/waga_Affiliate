@@ -6,7 +6,7 @@ import WebApp from '@twa-dev/sdk'; // Ensure WebApp SDK is properly imported
 import { FaInstagram, FaTelegramPlane, FaFacebook } from 'react-icons/fa';
 import styles from './index.module.css';
 
-// Modal Component
+/// Modal Component
 const Modal = ({
   option,
   isOpen,
@@ -75,7 +75,6 @@ const Modal = ({
               completedActions[option.text] ? styles.doneButton : joinClicked ? styles.checkButton : ''
             }`}
             onClick={(e) => handleCheckClick(e, option, joinClicked)}
-            disabled={completedActions[option.text]} // Disable if action is completed
           >
             {completedActions[option.text] ? 'Done' : joinClicked ? 'Check' : 'Join'}
           </button>
@@ -96,7 +95,6 @@ const EarnPage = () => {
   const [inviteLink, setInviteLink] = useState('');
   const [joinClicked, setJoinClicked] = useState(false);
 
-  // Check and fetch userId using WebApp SDK
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -135,7 +133,6 @@ const EarnPage = () => {
     }
   }, []);
 
-  // Fetch earn options
   useEffect(() => {
     const fetchOptions = async () => {
       try {
@@ -158,7 +155,6 @@ const EarnPage = () => {
     fetchOptions();
   }, []);
 
-  // Fetch completed actions when userId is available
   useEffect(() => {
     if (userId) {
       const fetchCompletedActions = async () => {
@@ -169,9 +165,9 @@ const EarnPage = () => {
           if (response.ok) {
             const actionStatus = {};
             data.actions.forEach((action) => {
-              actionStatus[action.action] = true; // Mark as done
+              actionStatus[action.action] = true;
             });
-            setCompletedActions(actionStatus); // Update state with completed actions
+            setCompletedActions(actionStatus);
           } else {
             console.error('Failed to fetch completed actions:', data.message);
           }
@@ -184,29 +180,25 @@ const EarnPage = () => {
     }
   }, [userId]);
 
-  // Check if the action is completed, and handle click events
   const handleCheckClick = async (event, option, joinClicked) => {
     event.preventDefault();
 
-    // If the action is already completed, just redirect to the link
     if (completedActions[option.text]) {
       if (option.link) {
-        window.open(option.link, '_blank'); // Redirect to the link without further action
+        window.open(option.link, '_blank');
       }
-      return; // Stop execution since the action is already done
+      return;
     }
 
-    // If action is not completed yet, proceed with the normal flow
     if (option.link) {
-      window.open(option.link, '_blank'); // Open the external link in a new tab
+      window.open(option.link, '_blank');
     }
 
     if (!joinClicked) {
       setJoinClicked(true);
-      return; // User needs to come back and click "Check"
+      return;
     }
 
-    // Handle action saving
     try {
       const response = await fetch('/api/user/actions', {
         method: 'POST',
@@ -218,6 +210,10 @@ const EarnPage = () => {
 
       if (response.ok) {
         setCompletedActions((prev) => ({ ...prev, [option.text]: true }));
+
+        if (option.link) {
+          window.open(option.link, '_blank');
+        }
       } else {
         console.error('Failed to save action');
       }
@@ -254,7 +250,6 @@ const EarnPage = () => {
         ))}
       </div>
 
-      {/* Modal */}
       {selectedOption && (
         <Modal
           option={selectedOption}
@@ -271,3 +266,4 @@ const EarnPage = () => {
 };
 
 export default EarnPage;
+
