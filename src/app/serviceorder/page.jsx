@@ -42,17 +42,33 @@ const ServiceOrder = () => {
         return;
       }
   
+      // Validate for missing fields based on `orderFor` value
+      if (orderFor === "other") {
+        if (!city || !phoneNumber) {
+          const missingField = !city ? "City" : "Phone Number";
+          setNotification(`${missingField} አላስገቡም እባክዎ /start የሚለውን በመጫን ${missingField} ያስገቡ፡፡`);
+  
+          // Clear notification after 3 seconds
+          setTimeout(() => {
+            setNotification("");
+          }, 3000);
+  
+          return; // Prevent further execution if required fields are missing
+        }
+      }
+  
+      // Prepare order details
       const orderDetails = {
         userId,
         serviceId,
-        serviceName,  // Include the service name
-        city: orderFor === 'other' ? city : '',
-        phoneNumber: orderFor === 'other' ? phoneNumber : '',
+        serviceName, // Include the service name
+        city: orderFor === "other" ? city : "", // Only include city for "other"
+        phoneNumber: orderFor === "other" ? phoneNumber : "", // Only include phoneNumber for "other"
         orderFor,
         status: "pending",
       };
   
-      console.log("Order Details Sent:", orderDetails);  // Log the details
+      console.log("Order Details Sent:", orderDetails); // Log the details
   
       const response = await fetch("/api/services/serviceorder", {
         method: "POST",
@@ -72,37 +88,7 @@ const ServiceOrder = () => {
     } catch (error) {
       console.error("Error creating order:", error);
     }
-
-    if (orderFor === "self") {
-      if (!city || !phoneNumber) {
-        // Display notification for missing phone number
-        const missingField = !city ? "City" : "Phone Number";
-        setNotification(`${missingField} አላስገቡም እባክዎ /start የሚለውን በመጫን ${missingField} ያስገቡ፡፡`);
-    
-        // Clear notification after 3 seconds
-        setTimeout(() => {
-          setNotification("");
-        }, 3000);
-    
-        return; // Prevent further execution if phone number is missing
-      }
-    }
-    
-
-    // If "other" is selected, require address and phone number
-    if (orderFor === "other") {
-      if (!city || !phoneNumber) {
-        const missingField = !city ? "City" : "Phone Number";
-        setNotification(`${missingField} አላስገቡም እባክዎ /start የሚለውን በመጫን ${missingField} ያስገቡ፡፡`);
-        
-        // Clear notification after 3 seconds
-        setTimeout(() => {
-          setNotification("");
-        }, 3000);
-        return;
-      }
-    }
-  };
+  };  
   
 
   return (
