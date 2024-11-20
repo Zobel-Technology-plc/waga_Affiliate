@@ -63,14 +63,16 @@ const UserActionsPage = () => {
           </tr>
         </thead>
         <tbody>
-          {uniqueActions.map((action, index) => (
-            <tr key={index} className={styles.tr}>
-              <td className={styles.td}>{index + 1}</td>
-              <td className={styles.td}>{action.joinerUserId}</td>
-              <td className={styles.td}>{action.action}</td>
-              <td className={styles.td}>{new Intl.NumberFormat().format(action.points)}</td>
-            </tr>
-          ))}
+          {uniqueActions
+            .filter(action => !isNaN(action.points)) // Filter out actions with NaN points
+            .map((action, index) => (
+              <tr key={index} className={styles.tr}>
+                <td className={styles.td}>{index + 1}</td>
+                <td className={styles.td}>{action.joinerUserId}</td>
+                <td className={styles.td}>{action.action}</td>
+                <td className={styles.td}>{new Intl.NumberFormat().format(action.points)}</td>
+              </tr>
+            ))}
         </tbody>
       </table>
     </div>
