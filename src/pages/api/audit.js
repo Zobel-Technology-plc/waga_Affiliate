@@ -1,6 +1,7 @@
 import dbConnect from '../../backend/config/dbConnect';
 import UserAction from '../../backend/models/useraction';
 import ConversionRecord from '../../backend/models/conversionRecord';
+import User from '../../backend/models/user';
 import mongoose from 'mongoose';
 
 // Audited Users Schema
@@ -20,80 +21,89 @@ export default async function handler(req, res) {
       return res.status(405).json({ success: false, message: `Method ${req.method} Not Allowed` });
     }
 
-    // Step 1: Fetch all distinct user IDs
-    const allUserIds = await UserAction.distinct('userId');
+    const { userId } = req.query;
 
-    // Step 2: Fetch already audited user IDs
-    const auditedUserIds = await AuditedUser.distinct('userId');
+    if (!userId) {
+      return res.status(400).json({ success: false, message: 'Missing userId in request' });
+    }
 
-    // Step 3: Identify users needing audit
-    const usersToAudit = allUserIds.filter(userId => !auditedUserIds.includes(userId));
+    // Check if the user has already been audited
+    const alreadyAudited = await AuditedUser.findOne({ userId });
+    if (alreadyAudited) {
+      return res.status(200).json({ success: true, message: `User ${userId} has already been audited.` });
+    }
 
+    // Fetch the user
+    const user = await User.findOne({ userId });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Fetch conversion records for the user
+    const conversionRecords = await ConversionRecord.find({ userId });
+    const convertedPoints = conversionRecords.reduce((sum, record) => sum + record.pointsUsed, 0);
+
+    // Fetch and sort user actions by timestamp
+    const userActions = await UserAction.find({ userId }).sort({ timestamp: 1 });
+
+    const seenActions = new Set();
+    const duplicates = [];
+    let duplicatePoints = 0;
+
+    let totalPointsToAudit = userActions.reduce((sum, action) => sum + (action.points || 0), 0);
+
+    if (totalPointsToAudit <= convertedPoints) {
+      console.log(`Skipping audit for user ${userId}, all points converted.`);
+      await AuditedUser.create({ userId });
+      return res.status(200).json({
+        success: true,
+        message: `User ${userId} has no points left to audit. All points have been converted.`,
+      });
+    }
+
+    let remainingPoints = totalPointsToAudit - convertedPoints;
+
+    userActions.forEach((action) => {
+      if (remainingPoints <= 0) return; // No more points to process
+
+      if (seenActions.has(action.action)) {
+        duplicates.push(action._id); // Track duplicate IDs
+        duplicatePoints += action.points || 0; // Sum points of duplicate actions
+      } else {
+        seenActions.add(action.action); // Mark first occurrence
+        remainingPoints -= action.points || 0;
+      }
+    });
+
+    // Remove duplicate actions for this user
     let totalDuplicatesRemoved = 0;
+    if (duplicates.length > 0) {
+      const result = await UserAction.deleteMany({ _id: { $in: duplicates } });
+      totalDuplicatesRemoved = result.deletedCount;
+    }
 
-    // Process users in batches
-    const batchSize = 50;
-    for (let i = 0; i < usersToAudit.length; i += batchSize) {
-      const batch = usersToAudit.slice(i, i + batchSize);
+    // Deduct duplicate points from user's points
+    user.points = Math.max(0, user.points - duplicatePoints); // Ensure points are not negative
+    await user.save();
 
-      for (const userId of batch) {
-        // Fetch conversion records for the user
-        const conversionRecords = await ConversionRecord.find({ userId });
-        const convertedPoints = conversionRecords.reduce((sum, record) => sum + record.pointsUsed, 0);
-
-        // Fetch and sort actions by timestamp
-        const userActions = await UserAction.find({ userId }).sort({ timestamp: 1 });
-
-        const seenActions = new Set();
-        const duplicates = [];
-
-        let totalPointsToAudit = userActions.reduce((sum, action) => sum + (action.points || 0), 0);
-
-        if (totalPointsToAudit <= convertedPoints) {
-          console.log(`Skipping audit for user ${userId}, all points converted.`);
-          await AuditedUser.create({ userId });
-          continue; // Skip if all points have been converted
-        }
-
-        let remainingPoints = totalPointsToAudit - convertedPoints;
-
-        userActions.forEach((action) => {
-          if (remainingPoints <= 0) return; // No more points to process
-
-          if (seenActions.has(action.action)) {
-            duplicates.push(action._id); // Track duplicate IDs
-          } else {
-            seenActions.add(action.action); // Mark first occurrence
-            remainingPoints -= action.points || 0;
-          }
-        });
-
-        // Remove duplicate actions for this user
-        if (duplicates.length > 0) {
-          await UserAction.deleteMany({ _id: { $in: duplicates } });
-          totalDuplicatesRemoved += duplicates.length;
-        }
-
-        // Mark this user as audited
-        try {
-          await AuditedUser.create({ userId });
-        } catch (err) {
-          if (err.code !== 11000) { // Ignore duplicate key errors
-            console.error(`Error marking user ${userId} as audited:`, err.message);
-          }
-        }
+    // Mark this user as audited
+    try {
+      await AuditedUser.create({ userId });
+    } catch (err) {
+      if (err.code !== 11000) { // Ignore duplicate key errors
+        console.error(`Error marking user ${userId} as audited:`, err.message);
       }
     }
 
     return res.status(200).json({
       success: true,
-      message: `Audit complete. Removed ${totalDuplicatesRemoved} duplicate actions across ${usersToAudit.length} users.`,
+      message: `Audit complete for user ${userId}. Removed ${totalDuplicatesRemoved} duplicate actions and deducted ${duplicatePoints} points.`,
     });
   } catch (error) {
     console.error('Error auditing user actions:', error.message);
     return res.status(500).json({
       success: false,
-      message: 'Failed to audit user actions',
+      message: `Failed to audit user ${req.query.userId}'s actions.`,
     });
   }
 }

@@ -143,19 +143,6 @@ const UsersPage = () => {
     }
   };
 
-  const handleAuditAll = async () => {
-    setAuditing(true);
-    try {
-      const response = await axios.delete('/api/audit');
-      alert(response.data.message);
-    } catch (error) {
-      console.error('Error auditing users:', error);
-      alert('Failed to audit users.');
-    } finally {
-      setAuditing(false);
-    }
-  };
-
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
@@ -166,9 +153,6 @@ const UsersPage = () => {
         
         <button onClick={() => setShowMessageForm(!showMessageForm)} className={styles.sendMessageButton}>
           {showMessageForm ? 'Hide Message Form' : 'Send Message'}
-        </button>
-        <button onClick={handleAuditAll} className={styles.auditButton} disabled={auditing}>
-          {auditing ? 'Auditing...' : 'Audit All'}
         </button>
       </div>
       <p className={styles.userCount}>Total Users: {users.length}</p>
@@ -264,6 +248,7 @@ const UsersPage = () => {
             <th className={styles.th}>City</th>
             <th className={styles.th}>Commission</th>
             <th className={styles.th}>Points</th>
+            <th className={styles.th}>Audit</th>
           </tr>
         </thead>
         <tbody>
@@ -303,6 +288,23 @@ const UsersPage = () => {
 
               <td className={styles.td}>{user.commission}</td>
               <td className={styles.td}>{new Intl.NumberFormat().format(user.points)}</td>
+              <td className={styles.td}>
+  <button
+    onClick={async () => {
+      try {
+        const response = await axios.delete(`/api/audit?userId=${user.userId}`);
+        alert(response.data.message);
+      } catch (error) {
+        console.error('Error auditing user:', error);
+        alert('Failed to audit user.');
+      }
+    }}
+    className={styles.auditButton}
+  >
+    Audit
+  </button>
+</td>
+
             </tr>
           ))}
         </tbody>
