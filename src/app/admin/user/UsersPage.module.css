@@ -1,100 +1,144 @@
 /* app/users/UsersPage.module.css */
 
 .container {
-    padding: 20px;
-  }
-  
-  .title {
-    font-size: 24px;
-    margin-bottom: 20px;
-  }
-  
-  .userCount {
-    font-size: 18px;
-    margin-bottom: 10px;
-  }
-  
+  padding: 20px;
+}
+
+.title {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.userCount {
+  font-size: 18px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+.tableContainer {
+  overflow-x: auto; /* Enable horizontal scrolling for small screens */
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* Ensure table columns adjust dynamically */
+}
+
+.th, .td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+  word-wrap: break-word; /* Prevent overflow by wrapping text */
+}
+
+.th {
+  background-color: #f2f2f2;
+}
+
+.tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.tr:hover {
+  background-color: #ddd;
+}
+
+.requestButton {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #fff;
+}
+
+.phoneButton {
+  background-color: #4caf50; /* Green for phone */
+}
+
+.cityButton {
+  background-color: #2196f3; /* Blue for city */
+}
+
+.requestButton:hover {
+  opacity: 0.6;
+}
+
+.sendMessageButton {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #0070f3;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.messageForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.messageInput {
+  width: 100%;
+  height: 80px;
+  padding: 10px;
+  font-size: 1rem;
+}
+
+.imageInput {
+  font-size: 1rem;
+}
+
+.sendButton {
+  padding: 10px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.auditButton {
+  background-color: #ffc107;
+  color: #000;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: 20px;
+  margin-right: 5px;
+}
+
+.auditButton:hover {
+  background-color: #e0a800;
+}
+
+.auditButton:disabled {
+  background-color: #e0e0e0;
+  cursor: not-allowed;
+}
+
+/* Add responsiveness for smaller screens */
+@media screen and (max-width: 768px) {
   .table {
-    width: 100%;
-    border-collapse: collapse;
+      font-size: 14px; /* Reduce font size for smaller screens */
   }
-  
+
   .th, .td {
-    border: 1px solid #ddd;
-    padding: 8px;
+      padding: 6px; /* Reduce padding for smaller screens */
   }
-  
-  .th {
-    background-color: #f2f2f2;
-    text-align: left;
+
+  .auditButton {
+      margin-left: 10px;
+      margin-right: 0;
   }
-  
-  .tr:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-  
-  .tr:hover {
-    background-color: #ddd;
-  }
-  
-  .requestButton {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
-    color: #fff;
-  }
-  
-  .phoneButton {
-    background-color: #4caf50; /* Green for phone */
-  }
-  
-  .cityButton {
-    background-color: #2196f3; /* Blue for city */
-  }
-  
-  .requestButton:hover {
-    opacity: 0.9;
-  }
-  
-  .sendMessageButton {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #0070f3;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .messageForm {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .messageInput {
-    width: 100%;
-    height: 80px;
-    padding: 10px;
-    font-size: 1rem;
-  }
-  
-  .imageInput {
-    font-size: 1rem;
-  }
-  
-  .sendButton {
-    padding: 10px;
-    background-color: #28a745;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
+}

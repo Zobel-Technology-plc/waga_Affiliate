@@ -3,9 +3,11 @@
 
 import React, { useEffect, useState } from 'react';
 import WebApp from '@twa-dev/sdk';
+import { useRouter } from 'next/navigation';
 import './Profile.css'; // Import the CSS file
 
 const Profile = () => {
+  const router = useRouter();
   const [userData, setUserData] = useState(null);
   const [points, setPoints] = useState(0);
   const [commission, setCommission] = useState(0); // State for commission
@@ -42,6 +44,12 @@ const Profile = () => {
     }
   }, [userData]);
 
+  const handleWithdrawClick = () => {
+    if (userData) {
+      router.push(`/profile/${userData.id}`);
+    }
+  };
+
   if (!userData) {
     return <p>Loading profile...</p>;
   }
@@ -75,6 +83,9 @@ const Profile = () => {
             <li><strong>Total Commission:</strong> {new Intl.NumberFormat().format(commission.toFixed(2))} birr</li> {/* Display total commission */}
           </ul>
         </div>
+         <button className="withdraw-button" onClick={handleWithdrawClick}>
+          Withdraw
+        </button>
       </div>
     </div>
   );

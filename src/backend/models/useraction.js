@@ -24,4 +24,6 @@ const UserActionSchema = new mongoose.Schema({
   },
 });
 
+UserActionSchema.index({ timestamp: 1 });
+
 export default mongoose.models.UserAction || mongoose.model('UserAction', UserActionSchema);

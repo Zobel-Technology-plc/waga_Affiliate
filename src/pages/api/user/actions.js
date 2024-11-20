@@ -112,7 +112,11 @@ export default async function handler(req, res) {
     }
 
     try {
-      const userActions = await UserAction.find({ userId: userId.toString() }).select('action points joinerUserId -_id');
+      await dbConnect();
+
+      // Retrieve user actions and user commission
+      const userActions = await UserAction.find({ userId }).select('action points joinerUserId -_id');
+      const user = await User.findOne({ userId }).select('commission points'); 
 
       if (!userActions || userActions.length === 0) {
         return res.status(404).json({ success: false, message: 'No actions found for this user' });
@@ -124,16 +128,17 @@ export default async function handler(req, res) {
           action: action.action,
           points: action.points,
           joinerUserId: action.joinerUserId,
-        }))
+        })),
+        commission: user.commission, // Include commission in the response
+        points:user.points,
       });
     } catch (error) {
       console.error('Error fetching user actions:', error);
       return res.status(500).json({ success: false, message: 'Failed to fetch user actions' });
     }
-  }
-  
-  // Handle unsupported methods
-  else {
-    return res.status(405).json({ success: false, message: 'Method Not Allowed' });
+  } else {
+    res.setHeader('Allow', ['GET']);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
+

@@ -24,6 +24,18 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  cashoutInProgress: {
+    type: Boolean,
+    default: false,
+  },
+  bankAccount: {
+    type: String,
+    default: null,
+  },
+  accountHolderName: {
+    type: String,
+    default: null,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -37,6 +49,7 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  
 });
 
 export default mongoose.models.User || mongoose.model("User", userSchema);

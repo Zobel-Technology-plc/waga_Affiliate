@@ -27,6 +27,7 @@ const UsersPage = () => {
   const [image, setImage] = useState(null);
   const [sending, setSending] = useState(false);
   const [broadcastResults, setBroadcastResults] = useState(null);
+  const [auditing, setAuditing] = useState(false); // New state for auditing
   const router = useRouter();
 
   useEffect(() => {
@@ -142,6 +143,19 @@ const UsersPage = () => {
     }
   };
 
+  const handleAuditAll = async () => {
+    setAuditing(true);
+    try {
+      const response = await axios.delete('/api/audit');
+      alert(response.data.message);
+    } catch (error) {
+      console.error('Error auditing users:', error);
+      alert('Failed to audit users.');
+    } finally {
+      setAuditing(false);
+    }
+  };
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
@@ -149,8 +163,12 @@ const UsersPage = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>Users</h1>
+        
         <button onClick={() => setShowMessageForm(!showMessageForm)} className={styles.sendMessageButton}>
           {showMessageForm ? 'Hide Message Form' : 'Send Message'}
+        </button>
+        <button onClick={handleAuditAll} className={styles.auditButton} disabled={auditing}>
+          {auditing ? 'Auditing...' : 'Audit All'}
         </button>
       </div>
       <p className={styles.userCount}>Total Users: {users.length}</p>
