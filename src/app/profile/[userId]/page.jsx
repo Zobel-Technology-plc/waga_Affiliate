@@ -17,7 +17,7 @@ const UserActionsPage = () => {
   const [error, setError] = useState(null);
 
   const POINTS_TO_BIRR_RATIO = 10000;
-  const BIRR_CONVERSION_RATE = 5;
+  const BIRR_CONVERSION_RATE = 1;
 
   useEffect(() => {
     if (!userId) return;
@@ -50,9 +50,9 @@ const UserActionsPage = () => {
   };
 
   const handleChange = async () => {
-    const pointsToConvert = Math.min(points); // Ensure we only convert available points
+    const pointsToConvert = points; // Use all available points
     const birrEquivalent = Math.floor(pointsToConvert / POINTS_TO_BIRR_RATIO) * BIRR_CONVERSION_RATE;
-
+  
     if (birrEquivalent > 0) {
       try {
         const response = await axios.post('/api/user/convert', {
@@ -60,23 +60,23 @@ const UserActionsPage = () => {
           birrEquivalent,
           pointsUsed: Math.floor(pointsToConvert / POINTS_TO_BIRR_RATIO) * POINTS_TO_BIRR_RATIO,
         });
-
+  
         if (response.data.success) {
-          setCommission(commission + birrEquivalent);
-          setPoints(points); // Reset points to zero
           setShowConversionPopup(false);
-          alert(`Conversion successful! ${birrEquivalent} birr added to your commission.`);
+          alert('Conversion request submitted for approval.');
         } else {
           alert('Conversion failed. Please try again.');
         }
       } catch (error) {
-        console.error('Error converting points:', error);
+        console.error('Error submitting conversion request:', error);
         alert('Conversion failed. Please try again.');
       }
     } else {
       alert("You don't have enough points to convert.");
     }
   };
+  
+  
 
   const uniqueActions = [];
   const actionMap = new Map();
@@ -136,7 +136,7 @@ const UserActionsPage = () => {
         <div className={styles.popupOverlay}>
           <div className={styles.popup}>
             <h3>Convert Points to Birr</h3>
-            <p>Conversion Rate: 10,000 points = 5 birr</p>
+            <p>Conversion Rate: 10,000 points = 1 birr</p>
             <p>Your Total Points: {new Intl.NumberFormat().format(points)}</p>
             <p>Birr Equivalent: {new Intl.NumberFormat().format(totalPointsInBirr)} birr</p>
             <button onClick={handleChange} className={styles.changeButton}>Convert</button>
