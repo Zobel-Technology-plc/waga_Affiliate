@@ -1,81 +1,165 @@
 /* General Table Styling */
 table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th, td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+  color: #555;
+}
+
+thead th {
+  background-color: #0070f3;
+  color: white;
+  font-weight: bold;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tbody tr:hover {
+  background-color: #e6f7ff;
+}
+
+/* Action Button Styling */
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+/* Button Base Styles */
+button {
+  padding: 8px 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+  color: white;
+}
+
+/* Update Button */
+.update-btn {
+  background-color: #4CAF50; /* Green */
+}
+
+.update-btn:hover {
+  background-color: #45a049;
+}
+
+.update-btn:disabled {
+  background-color: #ccc; /* Gray when disabled */
+  cursor: not-allowed;
+  color: #888;
+}
+
+/* Complete Button */
+.complete-btn {
+  background-color: #007bff; /* Blue */
+}
+
+.complete-btn:hover {
+  background-color: #0069d9;
+}
+
+.complete-btn:disabled,
+.completed-btn {
+  background-color: #ccc; /* Gray when completed or disabled */
+  cursor: not-allowed;
+  color: #888;
+}
+
+/* Cancel Button */
+.cancel-order-btn {
+  background-color: #ff4d4f; /* Red */
+}
+
+.cancel-order-btn:hover {
+  background-color: #e53935;
+}
+
+.cancel-order-btn[disabled] {
+  background-color: #ccc; /* Gray when disabled */
+  cursor: not-allowed;
+  color: #888;
+}
+
+/* Save and Cancel Editing Buttons */
+.save-btn {
+  background-color: #007bff; /* Blue */
+}
+
+.save-btn:hover {
+  background-color: #0069d9;
+}
+
+.cancel-btn {
+  background-color: #ff4d4f; /* Red */
+}
+
+.cancel-btn:hover {
+  background-color: #e53935;
+}
+
+/* Expand Row Button */
+button.expand-btn {
+  padding: 5px 10px;
+  background-color: #f4f4f4;
+  color: #0d0d0d;
+  border: 1px solid #ddd;
+}
+
+button.expand-btn:hover {
+  background-color: #ddd;
+}
+
+/* Pagination Styling */
+.pagination {
+  margin: 20px 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  background-color: #007bff; /* Blue */
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.pagination button:hover {
+  background-color: #0069d9;
+}
+
+.pagination button:disabled {
+  background-color: #ccc; /* Gray when disabled */
+  color: #888;
+  cursor: not-allowed;
+}
+
+/* Responsive Table Styling */
+@media (max-width: 768px) {
+  table {
+    font-size: 14px;
   }
-  
+
   th, td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #ddd;
-    text-align: left;
+    padding: 8px;
   }
-  
-  thead th {
-    background-color: #f4f4f4;
-    font-weight: bold;
-  }
-  
-  tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-  
-  /* Button Styling */
-  .action-buttons {
-    display: flex;
-    flex-direction: column; /* Stack buttons vertically */
-    gap: 8px; /* Add spacing between buttons */
-  }
-  
-  .save-btn, .cancel-btn, .update-btn, .complete-btn, .completed-btn {
+
+  button {
     padding: 6px 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+    font-size: 14px;
   }
-  
-  .save-btn {
-    background-color: #4CAF50;
-    color: white;
-  }
-  
-  .cancel-btn {
-    background-color: #f44336;
-    color: white;
-  }
-  
-  .update-btn {
-    background-color: #008CBA;
-    color: white;
-  }
-  
-  .complete-btn {
-    background-color: #f0ad4e;
-    color: white;
-  }
-  
-  .completed-btn {
-    background-color: #5cb85c;
-    color: white;
-    cursor: not-allowed;
-  }
-  
-  /* Pagination Styling */
-  .pagination {
-    margin: 20px 0;
-    text-align: center;
-  }
-  
-  .pagination button {
-    padding: 8px 16px;
-    margin: 0 5px;
-    background-color: #f4f4f4;
-    border: 1px solid #ddd;
-    cursor: pointer;
-  }
-  
-  .pagination button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
-  
+}

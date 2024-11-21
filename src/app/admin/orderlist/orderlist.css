@@ -3,21 +3,32 @@ table {
   width: 100%;
   border-collapse: collapse;
   margin: 20px 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 th, td {
   padding: 12px 15px;
   border-bottom: 1px solid #ddd;
   text-align: left;
+  color: #555;
 }
 
 thead th {
-  background-color: #f4f4f4;
+  background-color: #0070f3;
+  color: white;
   font-weight: bold;
 }
 
 tbody tr:nth-child(even) {
   background-color: #f9f9f9;
+}
+
+tbody tr:hover {
+  background-color: #e6f7ff;
 }
 
 /* Action Button Styling */
@@ -88,7 +99,7 @@ button.expand-btn {
 }
 
 button.expand-btn:hover {
-  background-color: #0f0f0f;
+  background-color: #ddd;
 }
 
 /* Pagination Styling */

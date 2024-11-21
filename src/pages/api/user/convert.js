@@ -1,10 +1,9 @@
 import dbConnect from '../../../backend/config/dbConnect';
 import User from '../../../backend/models/user';
 import ConversionRecord from '../../../backend/models/conversionRecord';
-import axios from 'axios';
 
 export default async function handler(req, res) {
-  await dbConnect(); // Ensure the database is connected for both POST and GET requests
+  await dbConnect();
 
   if (req.method === 'POST') {
     const { userId, birrEquivalent, pointsUsed } = req.body;
@@ -20,56 +19,52 @@ export default async function handler(req, res) {
         return res.status(404).json({ success: false, message: 'User not found' });
       }
 
-      // Update user details
-      user.commission += birrEquivalent;
-      user.points = 0; // Reset points to 0 after conversion
+      if (user.points < pointsUsed) {
+        return res.status(400).json({ success: false, message: 'Insufficient points.' });
+      }
+
+      // Deduct points from the user
+      user.points -= pointsUsed;
       await user.save();
 
-      console.log(`Updated user: ${user.userId}, Commission: ${user.commission}, Points: ${user.points}`);
-
-      // Save conversion record
+      // Create a new conversion record
+      console.log('Saving conversion record:', { userId, pointsUsed, birrEquivalent, status: 'pending' });
       const conversionRecord = new ConversionRecord({
         userId,
         pointsUsed,
         birrEquivalent,
+        status: 'pending', // Explicitly set the status to pending
       });
 
-      await conversionRecord.save();
-      console.log(`Saved conversion record for user: ${userId}`);
+      const savedRecord = await conversionRecord.save();
 
-      // Send success message via Telegram bot
-      const botToken = '7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg'; 
-      const telegramApiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+      // Log the saved record to confirm it was saved correctly
+      console.log('Saved conversion record:', savedRecord);
 
-      await axios.post(telegramApiUrl, {
-        chat_id: userId,
-        text: `You have successfully converted ${pointsUsed} points to ${birrEquivalent} birr! Your points are now 0.`,
-      });
+      // Check if status field is present in the saved record
+      if (!savedRecord.status) {
+        console.error('Status field is missing in the saved record:', savedRecord);
+      }
 
       return res.status(200).json({
         success: true,
-        message: `Converted ${pointsUsed} points to ${birrEquivalent} birr successfully.`,
+        message: `Conversion request for ${pointsUsed} points to ${birrEquivalent} birr has been submitted for approval.`,
       });
     } catch (error) {
       console.error('Error during conversion:', error);
       return res.status(500).json({ success: false, message: 'Conversion failed' });
     }
   } else if (req.method === 'GET') {
-    const { userId } = req.query;  // Expecting userId as a query parameter
+    const { userId } = req.query;
 
     try {
-      let conversionRecords;
-      if (userId) {
-        conversionRecords = await ConversionRecord.find({ userId });
-      } else {
-        conversionRecords = await ConversionRecord.find({});
-      }
+      const conversionRecords = userId
+        ? await ConversionRecord.find({ userId })
+        : await ConversionRecord.find();
 
-      if (!conversionRecords || conversionRecords.length === 0) {
+      if (!conversionRecords.length) {
         return res.status(404).json({ success: false, message: 'No conversion records found' });
       }
-
-      const totalConversions = conversionRecords.reduce((sum, record) => sum + record.birrEquivalent, 0);
 
       return res.status(200).json({
         success: true,
@@ -81,6 +76,6 @@ export default async function handler(req, res) {
     }
   } else {
     res.setHeader('Allow', ['POST', 'GET']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+    res.status(405).json({ success: false, message: `Method ${req.method} Not Allowed` });
   }
 }

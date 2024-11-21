@@ -23,7 +23,9 @@ const SideNav = () => {
         setActiveTab('categories');
       } else if (pathname.startsWith('/admin/subcategory')) {
         setActiveTab('subcategories');
-      } else {
+      } else if (pathname.startsWith('/admin/PendingPoint')) {
+        setActiveTab('conversions');
+      } else  {
         setActiveTab('dashboard');
       }
     }
@@ -81,7 +83,6 @@ const SideNav = () => {
           </ul>
         )}
 
-        {/* Added Products, Categories, and Subcategories */}
         <li
           className={`p-2 mb-4 cursor-pointer ${activeTab === 'products' ? 'bg-gray-200' : ''}`}
           onClick={() => {
@@ -110,6 +111,16 @@ const SideNav = () => {
           }}
         >
           Subcategories
+        </li>
+
+        <li
+          className={`p-2 mb-4 cursor-pointer ${activeTab === 'conversions' ? 'bg-gray-200' : ''}`}
+          onClick={() => {
+            setActiveTab('conversions');
+            router.push('/admin/PendingPoint');
+          }}
+        >
+          Conversions
         </li>
 
         <li className="p-2 mt-8 cursor-pointer" onClick={() => signOut({ callbackUrl: '/login' })}>

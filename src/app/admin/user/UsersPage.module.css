@@ -2,74 +2,95 @@
 
 .container {
   padding: 20px;
+  margin: 0 auto;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
 .title {
-  font-size: 24px;
+  font-size: 28px;
   margin-bottom: 20px;
+  text-align: center;
+  color: #333;
+  font-weight: bold;
 }
 
 .userCount {
   font-size: 18px;
   margin-bottom: 10px;
   margin-top: 10px;
+  color: #555;
+  text-align: center;
 }
 
 .tableContainer {
-  overflow-x: auto; /* Enable horizontal scrolling for small screens */
+  overflow-x: auto;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed; /* Ensure table columns adjust dynamically */
+  table-layout: fixed;
+  font-family: 'Arial', sans-serif;
 }
 
 .th, .td {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 12px;
   text-align: left;
-  word-wrap: break-word; /* Prevent overflow by wrapping text */
+  word-wrap: break-word;
+  color: #555;
 }
 
 .th {
-  background-color: #f2f2f2;
+  background-color: #0070f3;
+  color: white;
+  font-weight: bold;
 }
 
-.tr:nth-child(even) {
+.tr:nth-child(even) .td {
   background-color: #f9f9f9;
 }
 
-.tr:hover {
-  background-color: #ddd;
+.tr:hover .td {
+  background-color: #e6f7ff;
 }
 
-.requestButton {
-  padding: 6px 12px;
+.button {
+  padding: 8px 12px;
+  margin: 5px;
   border: none;
   border-radius: 4px;
-  font-size: 14px;
   cursor: pointer;
-  color: #fff;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
 }
 
 .phoneButton {
-  background-color: #4caf50; /* Green for phone */
+  background-color: #4caf50;
+  color: white;
+}
+
+.phoneButton:hover {
+  background-color: #45a049;
 }
 
 .cityButton {
-  background-color: #2196f3; /* Blue for city */
+  background-color: #2196f3;
+  color: white;
 }
 
-.requestButton:hover {
-  opacity: 0.6;
+.cityButton:hover {
+  background-color: #1e87e5;
 }
 
 .sendMessageButton {
   padding: 10px 20px;
+  margin-left: 525px;
   font-size: 16px;
   background-color: #0070f3;
-  color: #fff;
+  color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -100,7 +121,7 @@
 .sendButton {
   padding: 10px;
   background-color: #28a745;
-  color: #fff;
+  color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -108,7 +129,7 @@
 
 .auditButton {
   background-color: #ffc107;
-  color: #000;
+  color: black;
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
@@ -130,15 +151,15 @@
 /* Add responsiveness for smaller screens */
 @media screen and (max-width: 768px) {
   .table {
-      font-size: 14px; /* Reduce font size for smaller screens */
+    font-size: 14px;
   }
 
   .th, .td {
-      padding: 6px; /* Reduce padding for smaller screens */
+    padding: 6px;
   }
 
   .auditButton {
-      margin-left: 10px;
-      margin-right: 0;
+    margin-left: 10px;
+    margin-right: 0;
   }
 }

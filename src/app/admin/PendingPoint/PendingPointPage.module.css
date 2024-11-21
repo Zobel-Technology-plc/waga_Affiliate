@@ -1,0 +1,78 @@
+/* UserActionPage.module.css */
+
+.container {
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.title {
+  font-size: 28px;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #333;
+  font-weight: bold;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  font-family: 'Arial', sans-serif;
+}
+
+.table th, .table td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: center;
+  color: #555;
+}
+
+.table th {
+  background-color: #0070f3;
+  color: white;
+  font-weight: bold;
+}
+
+.table td {
+  background-color: #fafafa;
+}
+
+.table tr:nth-child(even) .table td {
+  background-color: #f4f4f4;
+}
+
+.table tr:hover .table td {
+  background-color: #e6f7ff;
+}
+
+.button {
+  padding: 8px 12px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.approveButton {
+  background-color: #4caf50;
+  color: white;
+}
+
+.approveButton:hover {
+  background-color: #45a049;
+}
+
+.rejectButton {
+  background-color: #f44336;
+  color: white;
+}
+
+.rejectButton:hover {
+  background-color: #e53935;
+}
