@@ -2,12 +2,14 @@
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 import styles from './converted.module.css';
 
 const ConvertedPage = () => {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchRecords = async () => {
@@ -51,7 +53,9 @@ const ConvertedPage = () => {
         <tbody>
           {records.map((record) => (
             <tr key={record._id} className={styles.tr}>
-              <td className={styles.td}>{record.userId}</td>
+              <td className={styles.td} onClick={() => router.push(`/admin/user/${record.userId}`)}>
+                <a className={styles.link}>{record.userId}</a>
+              </td>
               <td className={styles.td}>{new Intl.NumberFormat().format(record.pointsUsed)}</td>
               <td className={styles.td}>{new Intl.NumberFormat().format(record.birrEquivalent)} birr</td>
               <td className={styles.td}>{new Date(record.timestamp).toLocaleString()}</td>

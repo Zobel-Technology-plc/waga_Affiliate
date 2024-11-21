@@ -25,7 +25,9 @@ const SideNav = () => {
         setActiveTab('subcategories');
       } else if (pathname.startsWith('/admin/PendingPoint')) {
         setActiveTab('conversions');
-      } else  {
+      } else if (pathname.startsWith('/admin/converted')) {
+        setActiveTab('converted');
+      } else {
         setActiveTab('dashboard');
       }
     }
@@ -121,6 +123,16 @@ const SideNav = () => {
           }}
         >
           Conversions
+        </li>
+
+        <li
+          className={`p-2 mb-4 cursor-pointer ${activeTab === 'converted' ? 'bg-gray-200' : ''}`}
+          onClick={() => {
+            setActiveTab('converted');
+            router.push('/admin/converted');
+          }}
+        >
+          Converted
         </li>
 
         <li className="p-2 mt-8 cursor-pointer" onClick={() => signOut({ callbackUrl: '/login' })}>
