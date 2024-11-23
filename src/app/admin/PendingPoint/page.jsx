@@ -3,17 +3,22 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import styles from './PendingPointPage.module.css';
+import { useRouter } from 'next/navigation';
 
 const PendingPointPage = () => {
   const [pendingRequests, setPendingRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchPendingRequests = async () => {
       try {
         const response = await axios.get('/api/conversionRecords?status=pending');
-        setPendingRequests(response.data.data);
+        const sortedRequests = response.data.data.sort(
+          (a, b) => new Date(b.timestamp) - new Date(a.timestamp) // Sort by newest first
+        );
+        setPendingRequests(sortedRequests);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching pending requests:', error);
@@ -37,7 +42,12 @@ const PendingPointPage = () => {
       }
     } catch (error) {
       console.error(`Error ${status} conversion:`, error);
-      alert(`Failed to ${status} conversion request.`);
+
+      if (error.response && error.response.status === 404) {
+        alert('No conversion request found.');
+      } else {
+        alert(`Failed to ${status} conversion request.`);
+      }
     }
   };
 
@@ -53,7 +63,6 @@ const PendingPointPage = () => {
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>Request ID</th>
               <th>User ID</th>
               <th>Points Used</th>
               <th>Birr Equivalent</th>
@@ -64,8 +73,12 @@ const PendingPointPage = () => {
           <tbody>
             {pendingRequests.map(request => (
               <tr key={request._id}>
-                <td>{request._id}</td>
-                <td>{request.userId}</td>
+                <td
+                  className={styles.td}
+                  onClick={() => router.push(`/admin/user/${request.userId}`)}
+                >
+                  <a className={styles.link}>{request.userId}</a>
+                </td>
                 <td>{request.pointsUsed.toLocaleString()}</td>
                 <td>{request.birrEquivalent.toLocaleString()} birr</td>
                 <td>{new Date(request.timestamp).toLocaleString()}</td>

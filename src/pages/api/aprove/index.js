@@ -41,9 +41,8 @@ export default async function handler(req, res) {
     let message;
 
     if (status === 'approved') {
-      // Update user's commission and points
+      // Update only user's commission, do not touch points
       user.commission += conversion.birrEquivalent;
-      user.points -= conversion.pointsUsed;
       await user.save();
 
       // Prepare approval message

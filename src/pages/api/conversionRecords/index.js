@@ -25,7 +25,7 @@ export default async function handler(req, res) {
       });
     } catch (error) {
       console.error('Error fetching conversion records:', error);
-      return res.status(500).json({ success: false, message: 'Failed to fetch conversion records.' });
+      return res.status(500).json({ success: false, message: 'No conversion records found.' });
     }
   } else {
     res.setHeader('Allow', ['GET']);

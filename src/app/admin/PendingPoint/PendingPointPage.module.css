@@ -76,3 +76,9 @@
 .rejectButton:hover {
   background-color: #e53935;
 }
+
+.link {
+  color: #0070f3;
+  text-decoration: none;
+  cursor: pointer;
+}
