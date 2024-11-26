@@ -1,0 +1,112 @@
+.container {
+  padding: 20px;
+  margin: 0 auto;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.title {
+  font-size: 28px;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #333;
+  font-weight: bold;
+}
+
+.tableContainer {
+  overflow-x: auto; /* Ensures the table is scrollable on smaller screens */
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: 'Arial', sans-serif;
+}
+
+.th, .td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: center; /* Ensure all cells are center-aligned */
+  word-wrap: break-word;
+  color: #555;
+}
+
+.numberColumn {
+  text-align: center; /* Center-align for the Number column */
+  font-weight: bold;
+  color: #333;
+}
+
+.linkCell {
+  border: 1px solid #ddd;
+  text-align: center; /* Align the User ID to match Points Earned */
+  color: #0070f3;
+  cursor: pointer;
+}
+
+.linkCell:hover {
+  text-decoration: underline;
+  color: #0056b3;
+}
+
+.tr:nth-child(even) .linkCell {
+  background-color: #f9f9f9;
+}
+
+.tr:nth-child(even) .td{
+  background-color: #f9f9f9; /* Alternate row shading */
+}
+
+.tr:hover .td {
+  background-color: #e6f7ff; /* Highlight row on hover */
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.paginationButton {
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.paginationButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.paginationButton:hover:not(:disabled) {
+  background-color: #005bb5;
+}
+
+.paginationInfo {
+  font-size: 14px;
+  color: #333;
+}
+
+
+
+
+
+/* Responsiveness for smaller screens */
+@media screen and (max-width: 768px) {
+  .table {
+    font-size: 14px;
+  }
+
+  .th, .td {
+    padding: 8px;
+  }
+}

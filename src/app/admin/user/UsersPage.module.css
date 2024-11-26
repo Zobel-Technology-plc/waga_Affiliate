@@ -53,8 +53,23 @@
   background-color: #f9f9f9;
 }
 
+.tr:nth-child(even) .linkCell {
+  background-color: #f9f9f9;
+}
 .tr:hover .td {
   background-color: #e6f7ff;
+}
+
+.linkCell {
+  border: 1px solid #ddd;
+  text-align: center; /* Align the User ID to match Points Earned */
+  color: #0070f3;
+  cursor: pointer;
+}
+
+.linkCell:hover {
+  text-decoration: underline;
+  color: #0056b3;
 }
 
 .button {

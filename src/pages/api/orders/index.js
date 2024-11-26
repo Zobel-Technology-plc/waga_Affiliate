@@ -1,4 +1,12 @@
-import { newOrder, getOrders, getallOrders, getPendingCommissions, getOrdersFromLast30Days,getPendingOrders } from '../../../backend/controllers/orderControllers';
+import {
+  newOrder,
+  getOrders,
+  getallOrders,
+  getPendingCommissions,
+  getOrdersFromLast30Days,
+  getPendingOrders,
+  getCompletedCommissions, // New function
+} from '../../../backend/controllers/orderControllers';
 import dbConnect from '../../../backend/config/dbConnect';
 
 export default async function handler(req, res) {
@@ -23,23 +31,26 @@ export default async function handler(req, res) {
 
     case 'GET':
       try {
-        const { all, commissionPending, last30Days, pending } = req.query;  // Added 'last30Days' query param check
+        const { all, commissionPending, last30Days, pending, commissionComplete } = req.query; // Added `commissionComplete` param
 
         if (commissionPending === 'true') {
           console.log('Fetching orders with pending commissions...');
-          await getPendingCommissions(req, res);  // Fetch orders with pending commission status
+          await getPendingCommissions(req, res);
         } else if (all === 'true') {
           console.log('Fetching all orders...');
-          await getallOrders(req, res);  // Fetch all orders for admin
-        } else if (last30Days === 'true') {  // Fetch orders from the last 30 days
+          await getallOrders(req, res);
+        } else if (last30Days === 'true') {
           console.log('Fetching orders from the last 30 days...');
-          await getOrdersFromLast30Days(req, res);  // Implement this controller function
-        }else if (pending === 'true') {  // Fetch orders from the last 30 days
-          console.log('Fetching orders from the last 30 days...');
-          await getPendingOrders(req, res);  // Implement this controller function
+          await getOrdersFromLast30Days(req, res);
+        } else if (pending === 'true') {
+          console.log('Fetching pending orders...');
+          await getPendingOrders(req, res);
+        } else if (commissionComplete === 'true') {
+          console.log('Fetching orders with completed commissions...');
+          await getCompletedCommissions(req, res); // New handler for completed commissions
         } else {
           console.log('Fetching user-specific orders...');
-          await getOrders(req, res);  // Fetch orders for a specific user
+          await getOrders(req, res);
         }
 
         console.log('Orders fetched successfully');

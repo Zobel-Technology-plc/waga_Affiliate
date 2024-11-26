@@ -260,7 +260,7 @@ const UsersPage = () => {
                   ? new Date(user.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'long' })
                   : 'N/A'}
               </td>
-              <td className={styles.td} onClick={() => router.push(`/admin/user/${user.userId}`)}>
+              <td className={styles.linkCell} onClick={() => router.push(`/admin/user/${user.userId}`)}>
                 <a className={styles.link}>{user.userId}</a>
               </td>
               <td className={styles.td}>

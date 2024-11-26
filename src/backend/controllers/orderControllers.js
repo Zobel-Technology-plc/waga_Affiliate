@@ -254,7 +254,7 @@ const rewardUserPoints = async (userId, points) => {
 export const getPendingCommissions = async (req, res) => {
   try {
     // Fetch pending orders with commissionAmount and commissionStatus fields
-    const pendingOrders = await Order.find({ commissionStatus: 'complete' })
+    const pendingOrders = await Order.find({ commissionStatus: 'Complete' })
                                      .select('commissionamount commissionStatus');
 
     // Calculate the total commission amount by summing over the pending orders
@@ -277,6 +277,22 @@ export const getPendingCommissions = async (req, res) => {
     res.status(500).json({ success: false, message: 'Error fetching pending commissions' });
   }
 };
+
+export const getCompletedCommissions = async (req, res) => {
+  try {
+    const completedOrders = await Order.find({ commissionStatus: 'Complete' });
+
+    if (!completedOrders || completedOrders.length === 0) {
+      return res.status(404).json({ success: false, message: 'No completed commissions found' });
+    }
+
+    return res.status(200).json({ success: true, orders: completedOrders });
+  } catch (error) {
+    console.error('Error fetching completed commissions:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch completed commissions' });
+  }
+};
+
 
 export const getPendingOrders = async (req, res) => {
   try {

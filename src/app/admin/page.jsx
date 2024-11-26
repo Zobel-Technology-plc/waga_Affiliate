@@ -273,7 +273,7 @@ const AdminDashboard = () => {
                 </Link>
               </div>
               <div className="bg-white p-12 rounded-lg shadow-md text-center text-xl relative h-48 flex flex-col justify-end transition-transform duration-300 transform hover:scale-105">
-                <Link href="#">
+                <Link href="/admin/complete">
                   <div className="absolute top-4 left-40 w-16 h-16 bg-purple-500 rounded-full"></div>
                   <div>Commissions: {new Intl.NumberFormat().format(pendingCommissionTotal)}</div>
                 </Link>

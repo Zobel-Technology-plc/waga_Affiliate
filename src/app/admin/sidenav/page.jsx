@@ -19,6 +19,10 @@ const SideNav = () => {
         setShowOrderLinks(true);
       } else if (pathname.startsWith('/admin/product')) {
         setActiveTab('products');
+      } else if (pathname.startsWith('/admin/serviceorderlist')) {
+        setActiveTab('serviceorderlist');
+      } else if (pathname.startsWith('/admin/orderlist')) {
+        setActiveTab('orderlist');
       } else if (pathname.startsWith('/admin/category')) {
         setActiveTab('categories');
       } else if (pathname.startsWith('/admin/subcategory')) {
@@ -27,6 +31,10 @@ const SideNav = () => {
         setActiveTab('conversions');
       } else if (pathname.startsWith('/admin/converted')) {
         setActiveTab('converted');
+      } else if (pathname.startsWith('/admin/complete')) {
+        setActiveTab('complete');
+      } else if (pathname.startsWith('/admin/earn')) {
+        setActiveTab('earn');
       } else {
         setActiveTab('dashboard');
       }
@@ -34,10 +42,10 @@ const SideNav = () => {
   }, [pathname]);
 
   return (
-    <nav className="w-64 bg-white text-gray-800 p-5 h-full fixed shadow-md">
-      <ul>
+    <nav className="w-64 bg-white text-gray-800 p-5 h-full fixed shadow-md overflow-y-auto">
+      <ul className="space-y-2 pb-20"> {/* Adds spacing between items and space at the bottom */}
         <li
-          className={`p-2 mb-4 cursor-pointer ${activeTab === 'dashboard' ? 'bg-gray-200' : ''}`}
+          className={`p-2 cursor-pointer ${activeTab === 'dashboard' ? 'bg-gray-200' : ''}`}
           onClick={() => {
             setActiveTab('dashboard');
             router.push('/admin');
@@ -47,7 +55,7 @@ const SideNav = () => {
         </li>
 
         <li
-          className={`p-2 mb-4 cursor-pointer ${activeTab === 'users' ? 'bg-gray-200' : ''}`}
+          className={`p-2 cursor-pointer ${activeTab === 'users' ? 'bg-gray-200' : ''}`}
           onClick={() => {
             setActiveTab('users');
             router.push('/admin/user');
@@ -56,17 +64,17 @@ const SideNav = () => {
           Users
         </li>
 
-        <li className="p-2 mb-4 cursor-pointer flex justify-between items-center" onClick={() => setShowOrderLinks(!showOrderLinks)}>
+        <li className="p-2 cursor-pointer flex justify-between items-center" onClick={() => setShowOrderLinks(!showOrderLinks)}>
           <span>Orders</span>
           {showOrderLinks ? <FaAngleUp /> : <FaAngleDown />} {/* Toggle arrow based on state */}
         </li>
 
         {showOrderLinks && (
-          <ul className="pl-4 mb-4">
+          <ul className="pl-4 space-y-2">
             <li
-              className={`p-2 cursor-pointer mb-2 ${activeTab === 'orders' ? 'bg-gray-200' : ''}`}
+              className={`p-2 cursor-pointer ${activeTab === 'orderlist' ? 'bg-gray-200' : ''}`}
               onClick={() => {
-                setActiveTab('orders');
+                setActiveTab('orderlist');
                 router.push('/admin/orderlist');
               }}
             >
@@ -74,9 +82,9 @@ const SideNav = () => {
             </li>
 
             <li
-              className={`p-2 cursor-pointer ${activeTab === 'orders' ? 'bg-gray-200' : ''}`}
+              className={`p-2 cursor-pointer ${activeTab === 'serviceorderlist' ? 'bg-gray-200' : ''}`}
               onClick={() => {
-                setActiveTab('orders');
+                setActiveTab('serviceorderlist');
                 router.push('/admin/serviceorderlist');
               }}
             >
@@ -86,7 +94,7 @@ const SideNav = () => {
         )}
 
         <li
-          className={`p-2 mb-4 cursor-pointer ${activeTab === 'products' ? 'bg-gray-200' : ''}`}
+          className={`p-2 cursor-pointer ${activeTab === 'products' ? 'bg-gray-200' : ''}`}
           onClick={() => {
             setActiveTab('products');
             router.push('/admin/product');
@@ -96,7 +104,7 @@ const SideNav = () => {
         </li>
 
         <li
-          className={`p-2 mb-4 cursor-pointer ${activeTab === 'categories' ? 'bg-gray-200' : ''}`}
+          className={`p-2 cursor-pointer ${activeTab === 'categories' ? 'bg-gray-200' : ''}`}
           onClick={() => {
             setActiveTab('categories');
             router.push('/admin/category');
@@ -106,7 +114,7 @@ const SideNav = () => {
         </li>
 
         <li
-          className={`p-2 mb-4 cursor-pointer ${activeTab === 'subcategories' ? 'bg-gray-200' : ''}`}
+          className={`p-2 cursor-pointer ${activeTab === 'subcategories' ? 'bg-gray-200' : ''}`}
           onClick={() => {
             setActiveTab('subcategories');
             router.push('/admin/subcategory');
@@ -116,7 +124,7 @@ const SideNav = () => {
         </li>
 
         <li
-          className={`p-2 mb-4 cursor-pointer ${activeTab === 'conversions' ? 'bg-gray-200' : ''}`}
+          className={`p-2 cursor-pointer ${activeTab === 'conversions' ? 'bg-gray-200' : ''}`}
           onClick={() => {
             setActiveTab('conversions');
             router.push('/admin/PendingPoint');
@@ -126,13 +134,33 @@ const SideNav = () => {
         </li>
 
         <li
-          className={`p-2 mb-4 cursor-pointer ${activeTab === 'converted' ? 'bg-gray-200' : ''}`}
+          className={`p-2 cursor-pointer ${activeTab === 'converted' ? 'bg-gray-200' : ''}`}
           onClick={() => {
             setActiveTab('converted');
             router.push('/admin/converted');
           }}
         >
           Converted
+        </li>
+
+        <li
+          className={`p-2 cursor-pointer ${activeTab === 'complete' ? 'bg-gray-200' : ''}`}
+          onClick={() => {
+            setActiveTab('complete');
+            router.push('/admin/complete');
+          }}
+        >
+          Completed Orders
+        </li>
+
+        <li
+          className={`p-2 mb-4 cursor-pointer ${activeTab === 'earn' ? 'bg-gray-200' : ''}`}
+          onClick={() => {
+            setActiveTab('earn');
+            router.push('/admin/earn');
+          }}
+        >
+          Earned
         </li>
 
         <li className="p-2 mt-8 cursor-pointer" onClick={() => signOut({ callbackUrl: '/login' })}>

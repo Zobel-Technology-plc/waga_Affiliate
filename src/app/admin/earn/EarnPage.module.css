@@ -1,0 +1,120 @@
+/* General Page Styling */
+.container {
+    padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+  
+  .title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #333;
+  }
+  
+  /* Card Container Styling */
+  .cardContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+  }
+  
+  /* Individual Card Styling */
+  .card {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    width: calc(33.333% - 40px); /* 3 cards per row with a gap of 20px */
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  
+  .card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .cardImage {
+    width: 60px; /* Smaller size */
+    height: 60px; /* Maintain aspect ratio */
+    margin-bottom: 10px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .cardTitle {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+  }
+  
+  .cardPoints {
+    font-size: 16px;
+    color: #555;
+    margin-top: 5px;
+  }
+  
+  /* Details Container Styling */
+  .detailsContainer {
+    margin-top: 30px;
+  }
+  
+  .detailsTitle {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+    color: #333;
+  }
+
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .container {
+      padding: 15px;
+    }
+  
+    .title, .detailsTitle {
+      font-size: 24px;
+    }
+  
+    .card {
+      width: calc(50% - 20px); /* 2 cards per row */
+      padding: 15px;
+    }
+  
+    .cardImage {
+      width: 50px; /* Adjust size for smaller screens */
+      height: 50px; /* Maintain aspect ratio */
+    }
+  
+    .cardTitle {
+      font-size: 18px;
+    }
+  
+    .cardPoints {
+      font-size: 14px;
+    }
+  
+  }
+  
+  @media (max-width: 480px) {
+    .card {
+      width: 100%; /* 1 card per row */
+    }
+  
+    .cardImage {
+      width: 40px; /* Adjust size for smaller screens */
+      height: 40px; /* Maintain aspect ratio */
+    }
+  }
+  

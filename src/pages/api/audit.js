@@ -27,10 +27,15 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, message: 'Missing userId in request' });
     }
 
-    // Check if the user has already been audited
+    // Check if the user has already been audited within the last 2 hours
     const alreadyAudited = await AuditedUser.findOne({ userId });
     if (alreadyAudited) {
-      return res.status(200).json({ success: true, message: `User ${userId} has already been audited.` });
+      const now = new Date();
+      const auditTimeDiff = (now - new Date(alreadyAudited.auditedAt)) / (1000 * 60 * 60); // Difference in hours
+
+      if (auditTimeDiff < 2) {
+        return res.status(200).json({ success: true, message: `User ${userId} has already been audited within the last 2 hours.` });
+      }
     }
 
     // Fetch the user
@@ -86,9 +91,14 @@ export default async function handler(req, res) {
     user.points = Math.max(0, user.points - duplicatePoints); // Ensure points are not negative
     await user.save();
 
-    // Mark this user as audited
+    // Update the audit timestamp for this user
     try {
-      await AuditedUser.create({ userId });
+      if (alreadyAudited) {
+        alreadyAudited.auditedAt = new Date();
+        await alreadyAudited.save();
+      } else {
+        await AuditedUser.create({ userId });
+      }
     } catch (err) {
       if (err.code !== 11000) { // Ignore duplicate key errors
         console.error(`Error marking user ${userId} as audited:`, err.message);
