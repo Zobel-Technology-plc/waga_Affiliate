@@ -2,13 +2,14 @@
 import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import React, { useState, useEffect } from 'react';
-import { FaAngleDown, FaAngleUp } from 'react-icons/fa'; // For the arrow icons
+import { FaAngleDown, FaAngleUp } from 'react-icons/fa';
 
 const SideNav = () => {
   const router = useRouter();
   const pathname = usePathname();
   const [activeTab, setActiveTab] = useState('');
   const [showOrderLinks, setShowOrderLinks] = useState(false);
+  const [showserviceLinks, setShowserviceLinks] = useState(false);
 
   useEffect(() => {
     if (pathname) {
@@ -19,6 +20,7 @@ const SideNav = () => {
         setShowOrderLinks(true);
       } else if (pathname.startsWith('/admin/product')) {
         setActiveTab('products');
+        setShowserviceLinks(true);
       } else if (pathname.startsWith('/admin/serviceorderlist')) {
         setActiveTab('serviceorderlist');
       } else if (pathname.startsWith('/admin/orderlist')) {
@@ -35,6 +37,8 @@ const SideNav = () => {
         setActiveTab('complete');
       } else if (pathname.startsWith('/admin/earn')) {
         setActiveTab('earn');
+      }else if (pathname.startsWith('/admin/canceled')) {
+        setActiveTab('cancel');
       } else {
         setActiveTab('dashboard');
       }
@@ -43,7 +47,7 @@ const SideNav = () => {
 
   return (
     <nav className="w-64 bg-white text-gray-800 p-5 h-full fixed shadow-md overflow-y-auto">
-      <ul className="space-y-2 pb-20"> {/* Adds spacing between items and space at the bottom */}
+      <ul className="space-y-2 pb-20">
         <li
           className={`p-2 cursor-pointer ${activeTab === 'dashboard' ? 'bg-gray-200' : ''}`}
           onClick={() => {
@@ -66,7 +70,7 @@ const SideNav = () => {
 
         <li className="p-2 cursor-pointer flex justify-between items-center" onClick={() => setShowOrderLinks(!showOrderLinks)}>
           <span>Orders</span>
-          {showOrderLinks ? <FaAngleUp /> : <FaAngleDown />} {/* Toggle arrow based on state */}
+          {showOrderLinks ? <FaAngleUp /> : <FaAngleDown />}
         </li>
 
         {showOrderLinks && (
@@ -93,15 +97,34 @@ const SideNav = () => {
           </ul>
         )}
 
-        <li
-          className={`p-2 cursor-pointer ${activeTab === 'products' ? 'bg-gray-200' : ''}`}
-          onClick={() => {
-            setActiveTab('products');
-            router.push('/admin/product');
-          }}
-        >
-          Products
+        <li className="p-2 cursor-pointer flex justify-between items-center" onClick={() => setShowserviceLinks(!showserviceLinks)}>
+          <span>Item</span>
+          {showserviceLinks ? <FaAngleUp /> : <FaAngleDown />}
         </li>
+
+        {showserviceLinks && (
+          <ul className="pl-4 space-y-2">
+            <li
+              className={`p-2 cursor-pointer ${activeTab === 'products' ? 'bg-gray-200' : ''}`}
+              onClick={() => {
+                setActiveTab('products');
+                router.push('/admin/product');
+              }}
+            >
+              Product
+            </li>
+
+            <li
+              className={`p-2 cursor-pointer ${activeTab === 'service' ? 'bg-gray-200' : ''}`}
+              onClick={() => {
+                setActiveTab('service');
+                router.push('/admin/service');
+              }}
+            >
+              Service
+            </li>
+          </ul>
+        )}
 
         <li
           className={`p-2 cursor-pointer ${activeTab === 'categories' ? 'bg-gray-200' : ''}`}
@@ -151,6 +174,16 @@ const SideNav = () => {
           }}
         >
           Completed Orders
+        </li>
+
+        <li
+          className={`p-2 cursor-pointer ${activeTab === 'cancel' ? 'bg-gray-200' : ''}`}
+          onClick={() => {
+            setActiveTab('cancel');
+            router.push('/admin/canceled');
+          }}
+        >
+          Canceled Orders
         </li>
 
         <li

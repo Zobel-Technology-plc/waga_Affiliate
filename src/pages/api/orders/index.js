@@ -5,7 +5,8 @@ import {
   getPendingCommissions,
   getOrdersFromLast30Days,
   getPendingOrders,
-  getCompletedCommissions, // New function
+  getCompletedCommissions,
+  getCanceledOrders, // New function
 } from '../../../backend/controllers/orderControllers';
 import dbConnect from '../../../backend/config/dbConnect';
 
@@ -31,7 +32,7 @@ export default async function handler(req, res) {
 
     case 'GET':
       try {
-        const { all, commissionPending, last30Days, pending, commissionComplete } = req.query; // Added `commissionComplete` param
+        const { all, commissionPending, last30Days, pending, commissionComplete, canceled } = req.query;
 
         if (commissionPending === 'true') {
           console.log('Fetching orders with pending commissions...');
@@ -47,7 +48,10 @@ export default async function handler(req, res) {
           await getPendingOrders(req, res);
         } else if (commissionComplete === 'true') {
           console.log('Fetching orders with completed commissions...');
-          await getCompletedCommissions(req, res); // New handler for completed commissions
+          await getCompletedCommissions(req, res);
+        } else if (canceled === 'true') {
+          console.log('Fetching canceled orders...');
+          await getCanceledOrders(req, res); // New handler for canceled orders
         } else {
           console.log('Fetching user-specific orders...');
           await getOrders(req, res);

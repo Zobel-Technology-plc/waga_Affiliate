@@ -293,6 +293,26 @@ export const getCompletedCommissions = async (req, res) => {
   }
 };
 
+export const getCanceledOrders = async (req, res) => {
+  const { page = 1, limit = 50 } = req.query; // Default to page 1 and limit 50 if not provided
+  try {
+    const canceledOrders = await Order.find({ commissionStatus: 'canceled' })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await Order.countDocuments({ commissionStatus: 'canceled' });
+
+    res.status(200).json({
+      success: true,
+      data: canceledOrders,
+      total,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to fetch canceled orders' });
+  }
+};
+
+
 
 export const getPendingOrders = async (req, res) => {
   try {
