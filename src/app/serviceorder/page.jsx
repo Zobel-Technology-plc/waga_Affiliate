@@ -1,4 +1,5 @@
-"use client";
+/* eslint-disable @next/next/no-img-element */
+'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -16,6 +17,7 @@ const ServiceOrder = () => {
   const [userId, setUserId] = useState(null);
   const [orderFor, setOrderFor] = useState('self');  // New state for order type (self/other)
   const [notification, setNotification] = useState("");
+  const [isWithinTimeRange, setIsWithinTimeRange] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && WebApp.initDataUnsafe.user) {
@@ -34,6 +36,20 @@ const ServiceOrder = () => {
     if (serviceNameParam) setServiceName(serviceNameParam);  // Set the serviceName
     if (userIdParam) setUserId(userIdParam);
   }, [searchParams]);
+
+  useEffect(() => {
+    const checkTimeRange = () => {
+      const now = new Date();
+      const currentHour = now.getHours();
+      const isWithinRange = currentHour >= 7 && currentHour < 18; // Between 7 AM and 6 PM
+      setIsWithinTimeRange(isWithinRange);
+    };
+
+    checkTimeRange();
+    const interval = setInterval(checkTimeRange, 60000); // Check every minute
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
 
   const handleOrder = async () => {
     try {
@@ -176,7 +192,8 @@ const ServiceOrder = () => {
       <div className="flex justify-center mb-14">
         <button
           onClick={handleOrder}
-          className="bg-blue-500 text-white p-2 rounded-md"
+          className={`bg-blue-500 text-white p-2 rounded-md ${!isWithinTimeRange ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={!isWithinTimeRange} // Disable button outside time range
         >
           Place Order
         </button>
