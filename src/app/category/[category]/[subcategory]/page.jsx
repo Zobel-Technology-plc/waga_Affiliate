@@ -11,7 +11,7 @@ const Subcategory = ({ params }) => {
   const [products, setProducts] = useState([]);
   const [totalProducts, setTotalProducts] = useState(0);
   const [loading, setLoading] = useState(true);
-  const resPerPage = 7; // Show 7 products per page
+  const resPerPage = 10; // Show 7 products per page
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentPage = Number(searchParams.get('page')) || 1;
@@ -30,10 +30,10 @@ const Subcategory = ({ params }) => {
           page: currentPage,
           limit: resPerPage,
         });
-
+    
         const res = await fetch(`/api/products/category?${query.toString()}`);
         const data = await res.json();
-
+    
         if (data.success) {
           setProducts(data.products);
           setTotalProducts(data.totalProducts); // Total number of products
@@ -45,7 +45,7 @@ const Subcategory = ({ params }) => {
       } finally {
         setLoading(false); // Stop loading
       }
-    };
+    };    
 
     fetchProducts();
   }, [currentPage, decodedCategory, decodedSubcategory]);

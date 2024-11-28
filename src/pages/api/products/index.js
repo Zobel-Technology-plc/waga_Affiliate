@@ -132,11 +132,30 @@ const handleGetProducts = async (req, res) => {
 // GET handler (fetch on-sale products)
 const handleGetOnsaleProducts = async (req, res) => {
   try {
-    const products = await Product.find({ onSale: true });
-    return res.status(200).json({ success: true, products });
+    const { page = 1, limit = 10 } = req.query;
+
+    // Parse page and limit to integers
+    const currentPage = parseInt(page, 10);
+    const pageLimit = parseInt(limit, 10);
+
+    const totalProducts = await Product.countDocuments({ 
+      onSale: true,
+      $or: [{ status: "approved" }, { status: { $exists: false } }]
+     });
+    const products = await Product.find({ onSale: true })
+      .skip((currentPage - 1) * pageLimit)
+      .limit(pageLimit);
+
+    return res.status(200).json({
+      success: true,
+      products,
+      totalProducts,
+      currentPage,
+      totalPages: Math.ceil(totalProducts / pageLimit),
+    });
   } catch (error) {
-    console.error('Error fetching on-sale products:', error);
-    return res.status(500).json({ message: 'Error fetching on-sale products', error });
+    console.error('Error fetching products:', error);
+    return res.status(500).json({ message: 'Error fetching products', error });
   }
 };
 

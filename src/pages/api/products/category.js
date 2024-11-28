@@ -1,21 +1,32 @@
-// api/products/category.js
 import dbConnect from '../../../backend/config/dbConnect';
 import Product from '../../../backend/models/product';
 
-export const getProductsByCategoryAndSubcategory = async (category, subcategory) => {
+// Function to fetch products with pagination
+export const getProductsByCategoryAndSubcategory = async (category, subcategory, page, limit) => {
   try {
     await dbConnect();
 
-    const products = await Product.find({
-      category,  // Now category is a string
+    // Convert page and limit to integers and set defaults
+    const currentPage = parseInt(page, 10) || 1;
+    const perPage = parseInt(limit, 10) || 10;
+
+    // Build the query
+    const query = {
+      category,
       subcategory,
-    });
+      $or: [
+        { status: 'approved' },
+        { status: { $exists: false } }, // Include products without a status
+      ],
+    };
 
-    if (!products || products.length === 0) {
-      return { success: false, message: 'No products found', products: [] };
-    }
+    // Fetch total product count and paginated products
+    const totalProducts = await Product.countDocuments(query);
+    const products = await Product.find(query)
+      .skip((currentPage - 1) * perPage)
+      .limit(perPage);
 
-    return { success: true, products };
+    return { success: true, products, totalProducts, currentPage, totalPages: Math.ceil(totalProducts / perPage) };
   } catch (error) {
     console.error('Error fetching products:', error);
     return { success: false, message: 'Server Error', products: [] };
@@ -29,8 +40,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { category, subcategory } = req.query;
-    const result = await getProductsByCategoryAndSubcategory(category, subcategory);
+    const { category, subcategory, page, limit } = req.query;
+    const result = await getProductsByCategoryAndSubcategory(category, subcategory, page, limit);
 
     return res.status(result.success ? 200 : 404).json(result);
   } catch (error) {
