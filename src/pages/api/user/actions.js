@@ -55,7 +55,7 @@ export default async function handler(req, res) {
           return res.status(200).json({
             success: true,
             message: 'Invite action recorded successfully, points awarded',
-            points: points || 50000,
+            points: inviter.points,
           });
         }
 
@@ -77,7 +77,7 @@ export default async function handler(req, res) {
           return res.status(200).json({
             success: true,
             message: 'Points earned successfully',
-            points: points || 0,
+            points: earnUser.points,
           });
         }
 
@@ -89,53 +89,60 @@ export default async function handler(req, res) {
       return res.status(500).json({ success: false, message: 'Failed to handle user action' });
     }
   } else if (req.method === 'GET') {
-  const { userId, actionName, page = 1, limit = 50 } = req.query;
+    const { userId, actionName, page = 1, limit = 50 } = req.query;
 
-  try {
-    if (userId) {
-      // Fetch actions for a specific user
-      const userActions = await UserAction.find({ userId })
-        .select('action points joinerUserId -_id')
-        .skip((page - 1) * limit)
-        .limit(Number(limit));
-      const total = await UserAction.countDocuments({ userId });
+    try {
+      if (userId) {
+        // Fetch user's total points
+        const user = await User.findOne({ userId }).select('points');
+        if (!user) {
+          return res.status(404).json({ success: false, message: 'User not found' });
+        }
 
-      return res.status(200).json({
-        success: true,
-        actions: userActions,
-        total, // Total number of actions for the user
-      });
-    } else if (actionName) {
-      // Fetch all users who performed a specific action
-      const filter =
-        actionName === 'Invite Your Friend'
-          ? { action: { $regex: '^Invited', $options: 'i' } }
-          : { action: actionName };
+        // Fetch actions for a specific user
+        const userActions = await UserAction.find({ userId })
+          .select('action points joinerUserId -_id')
+          .skip((page - 1) * limit)
+          .limit(Number(limit));
 
-      const actionRecords = await UserAction.find(filter)
-        .select(' action userId points -_id')
-        .skip((page - 1) * limit)
-        .limit(Number(limit));
-      const total = await UserAction.countDocuments(filter);
+        const total = await UserAction.countDocuments({ userId });
 
-      return res.status(200).json({
-        success: true,
-        actions: actionRecords.map((record) => ({
-          userId: record.userId,
-          points: record.points,
-          action: record.action,
-        })),
-        total, // Total number of matching actions
-      });
-    } else {
-      return res.status(400).json({ success: false, message: 'Missing userId or actionName in request' });
+        return res.status(200).json({
+          success: true,
+          actions: userActions,
+          points: user.points, // Ensure current points are sent
+          total, // Total number of actions for the user
+        });
+      } else if (actionName) {
+        // Fetch all users who performed a specific action
+        const filter =
+          actionName === 'Invite Your Friend'
+            ? { action: { $regex: '^Invited', $options: 'i' } }
+            : { action: actionName };
+
+        const actionRecords = await UserAction.find(filter)
+          .select('action userId points -_id')
+          .skip((page - 1) * limit)
+          .limit(Number(limit));
+        const total = await UserAction.countDocuments(filter);
+
+        return res.status(200).json({
+          success: true,
+          actions: actionRecords.map((record) => ({
+            userId: record.userId,
+            points: record.points,
+            action: record.action,
+          })),
+          total, // Total number of matching actions
+        });
+      } else {
+        return res.status(400).json({ success: false, message: 'Missing userId or actionName in request' });
+      }
+    } catch (error) {
+      console.error('Error fetching user actions:', error);
+      return res.status(500).json({ success: false, message: 'Failed to fetch user actions' });
     }
-  } catch (error) {
-    console.error('Error fetching user actions:', error);
-    return res.status(500).json({ success: false, message: 'Failed to fetch user actions' });
-  }
-}
- else {
+  } else {
     res.setHeader('Allow', ['GET', 'POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
