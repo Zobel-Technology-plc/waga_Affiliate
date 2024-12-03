@@ -12,7 +12,8 @@ const Profile = () => {
   const [points, setPoints] = useState(0);
   const [commission, setCommission] = useState(0); // State for commission
   const [phoneNumber, setPhoneNumber] = useState(''); // State for phone number
-  const [City, setCity] = useState('')
+  const [city, setCity] = useState(''); // State for city
+  const [role, setRole] = useState(''); // State for user role
 
   useEffect(() => {
     // Fetch the user data from Telegram WebApp SDK
@@ -23,7 +24,7 @@ const Profile = () => {
 
   useEffect(() => {
     if (userData) {
-      // Fetch the user's profile information including points, commission, and phone number
+      // Fetch the user's profile information including points, commission, phone number, city, and role
       const fetchUserProfile = async () => {
         try {
           const response = await fetch(`/api/user/${userData.id}`);
@@ -34,7 +35,8 @@ const Profile = () => {
           setPoints(data.data.points || 0);
           setCommission(data.data.commission || 0);
           setPhoneNumber(data.data.phoneNumber || '');
-          setCity(data.data.City || '') // Set the fetched phone number
+          setCity(data.data.City || ''); // Set the fetched city
+          setRole(data.data.Role || ''); // Set the fetched role
         } catch (error) {
           console.error('Error fetching user profile:', error);
         }
@@ -47,6 +49,12 @@ const Profile = () => {
   const handleWithdrawClick = () => {
     if (userData) {
       router.push(`/profile/${userData.id}`);
+    }
+  };
+
+  const handleUploadProductsClick = () => {
+    if (userData) {
+      router.push(`/seller`);
     }
   };
 
@@ -77,15 +85,23 @@ const Profile = () => {
             <li><strong>First Name:</strong> {userData.first_name}</li>
             {userData.last_name && <li><strong>Last Name:</strong> {userData.last_name}</li>}
             <li><strong>Username:</strong> @{userData.username}</li>
-            <li><strong>Phone Number:</strong> {phoneNumber}</li> {/* Display phone number */}
-            <li><strong>City:</strong> {City}</li>
-            <li><strong>Total Points:</strong> {new Intl.NumberFormat().format(points)}</li> {/* Display total points */}
-            <li><strong>Total Commission:</strong> {new Intl.NumberFormat().format(commission.toFixed(2))} birr</li> {/* Display total commission */}
+            <li><strong>Phone Number:</strong> {phoneNumber}</li>
+            <li><strong>City:</strong> {city}</li>
+            <li><strong>Total Points:</strong> {new Intl.NumberFormat().format(points)}</li>
+            <li><strong>Total Commission:</strong> {new Intl.NumberFormat().format(commission.toFixed(2))} birr</li>
           </ul>
         </div>
-         <button className="withdraw-button" onClick={handleWithdrawClick}>
+
+        <button className="withdraw-button" onClick={handleWithdrawClick}>
           Withdraw
         </button>
+
+        {/* Display the Upload Products button if the user is a seller */}
+        {role === 'seller' && (
+          <button className="upload-button" onClick={handleUploadProductsClick}>
+            Upload Products
+          </button>
+        )}
       </div>
     </div>
   );

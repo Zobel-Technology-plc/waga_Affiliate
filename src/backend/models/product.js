@@ -33,7 +33,7 @@ const productSchema = new mongoose.Schema({
   },
   seller: {
     type: String,
-    required: [true, 'Please enter product seller'],
+    required: false, // Not mandatory, auto-filled from `userId`
   },
   stock: {
     type: Number,
@@ -47,10 +47,21 @@ const productSchema = new mongoose.Schema({
     type: Boolean,
     default: false, // Free delivery is false by default
   },
-  // Add the onSale field
   onSale: {
     type: Boolean,
     default: false, // Product is not on sale by default
+  },
+  userId: {
+    type: Number,
+    required: false, // Not mandatory
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'], // Possible statuses
+    required: function () {
+      return !!this.userId; // Only required if userId is present
+    },
+    default: 'pending', // Default to 'pending' for user-created products
   },
 });
 

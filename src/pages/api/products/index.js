@@ -42,7 +42,6 @@ const upload = multer({
       cb(new Error('Invalid file type. Only JPEG and PNG are allowed.'));
     }
   },
-  limits: { fileSize: 1024 * 1024 * 2 },
 });
 
 const uploadMiddleware = upload.array('images', 5); // Allow up to 5 images
@@ -71,6 +70,7 @@ export default async function handler(req, res) {
 const handleCreateProduct = async (req, res) => {
   try {
     await uploadPromise(req, res);
+
     const {
       name,
       description,
@@ -78,15 +78,25 @@ const handleCreateProduct = async (req, res) => {
       commission,
       category,
       subcategory,
-      seller,
+      seller, // Use this or get it from userId
       stock,
       onSale,
       freeDelivery,
     } = req.body;
+
+    // Extract seller's userId from headers or body, or leave it undefined
+    const sellerUserId = req.headers.authorization || seller; 
+
     if (!name || !description || !price || !commission || !category || !subcategory) {
       console.log('Missing required fields:', req.body);
       return res.status(400).json({ message: 'All fields are required.' });
     }
+
+    // Enforce seller userId only when required (for seller's portal)
+    if (sellerUserId && !seller) {
+      return res.status(400).json({ message: 'Seller ID must be provided when creating product as a seller.' });
+    }
+
     const images = [];
     for (const file of req.files) {
       const imagePath = file.path;
@@ -96,6 +106,7 @@ const handleCreateProduct = async (req, res) => {
         public_id: uploadedImage.public_id,
       });
     }
+
     const product = new Product({
       name,
       description,
@@ -103,20 +114,23 @@ const handleCreateProduct = async (req, res) => {
       commission,
       category,
       subcategory,
-      seller,
+      seller: sellerUserId || 'N/A', // Default or anonymous fallback
       stock,
       freeDelivery,
       onSale,
       images,
     });
+
     console.log('Product to be saved:', product);
     await product.save();
+
     return res.status(201).json({ message: 'Product created successfully', product });
   } catch (error) {
     console.error('Error creating product:', error);
     return res.status(500).json({ message: 'Error creating product', error });
   }
 };
+
 
 // GET handler (fetch products)
 const handleGetProducts = async (req, res) => {

@@ -49,7 +49,11 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
-  
+  role: {
+    type: String,
+    enum: ['seller', 'affiliate_buyer'], // Predefined roles
+    default: 'affiliate_buyer', // Default to 'affiliate_buyer'
+  },
 });
 
 export default mongoose.models.User || mongoose.model("User", userSchema);

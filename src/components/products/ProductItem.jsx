@@ -70,7 +70,12 @@ const ProductItem = ({ product }) => {
               </span>
             )}
             <span className="text-xl text-black">
-              Commission: {product?.commission} birr
+            
+              Commission: {product?.commission > 0 && (
+              <span className="text-xl font-semibold text-black">
+                {product.commission} Birr
+              </span>
+            )}
             </span>
             {/* Conditionally render free delivery */}
             {product?.freeDelivery && <p className="text-green-500">Free Delivery</p>}
