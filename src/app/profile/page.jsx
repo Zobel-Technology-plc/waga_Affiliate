@@ -10,7 +10,7 @@ const Profile = () => {
   const router = useRouter();
   const [userData, setUserData] = useState(null);
   const [points, setPoints] = useState(0);
-  const [commission, setCommission] = useState(0); // State for commission
+  const [commission, setCommission] = useState(0); // State for commissionF
   const [phoneNumber, setPhoneNumber] = useState(''); // State for phone number
   const [city, setCity] = useState(''); // State for city
   const [role, setRole] = useState(''); // State for user role
@@ -97,7 +97,7 @@ const Profile = () => {
         </button>
 
         {/* Display the Upload Products button if the user is a seller */}
-        {role === 'seller' && (
+        {role === 'Seller' && (
           <button className="upload-button" onClick={handleUploadProductsClick}>
             Upload Products
           </button>
