@@ -29,6 +29,10 @@ const SideNav = () => {
         setActiveTab('categories');
       } else if (pathname.startsWith('/admin/subcategory')) {
         setActiveTab('subcategories');
+      }else if (pathname.startsWith('/admin/productApproval')) {
+        setActiveTab('productApproval');
+        setShowOrderLinks(false); // Ensure unrelated menus collapse
+         setShowServiceLinks(false);
       } else if (pathname.startsWith('/admin/PendingPoint')) {
         setActiveTab('conversions');
       } else if (pathname.startsWith('/admin/converted')) {
@@ -164,6 +168,16 @@ const SideNav = () => {
           }}
         >
           Converted
+        </li>
+
+        <li
+          className={`p-2 cursor-pointer ${activeTab === 'productApproval' ? 'bg-gray-200' : ''}`}
+          onClick={() => {
+            setActiveTab('productApproval');
+            router.push('/admin/productApproval');
+          }}
+        >
+          Product Approval
         </li>
 
         <li

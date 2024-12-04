@@ -8,8 +8,8 @@ const UserActionsPage = () => {
   const { userId } = useParams();
   const [activeTab, setActiveTab] = useState('actions'); // Tab management
   const [actions, setActions] = useState([]);
-  const [productOrders, setProductOrders] = useState([]);
-  const [serviceOrders, setServiceOrders] = useState([]);
+  const [completedOrders, setCompletedOrders] = useState([]);
+  const [canceledOrders, setCanceledOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -25,10 +25,15 @@ const UserActionsPage = () => {
           axios.get(`/api/services/serviceorder?userId=${userId}`),
         ]);
 
-        // Set fetched data
         setActions(actionsResponse.data.actions || []);
-        setProductOrders(productOrdersResponse.data.data || []);
-        setServiceOrders(serviceOrdersResponse.data.data || []);
+
+        const allOrders = [
+          ...productOrdersResponse.data.data,
+          ...serviceOrdersResponse.data.data,
+        ];
+
+        setCompletedOrders(allOrders.filter((order) => order.commissionStatus === 'Complete'));
+        setCanceledOrders(allOrders.filter((order) => order.status === 'canceled'));
       } catch (error) {
         setError('Error fetching data');
       } finally {
@@ -42,7 +47,6 @@ const UserActionsPage = () => {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
-  // Prepare unique actions
   const uniqueActions = [];
   const actionMap = new Map();
 
@@ -53,11 +57,55 @@ const UserActionsPage = () => {
   });
 
   actionMap.forEach((action) => uniqueActions.push(action));
-  uniqueActions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by timestamp
+  uniqueActions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   const totalPoints = uniqueActions.reduce((sum, action) => sum + (action.points || 0), 0);
 
-  // Render content based on the active tab
+  const renderOrdersTable = (orders) => (
+    <table className={styles.table}>
+      <thead>
+        <tr className={styles.tr}>
+          <th className={styles.th}>Order Type</th>
+          <th className={styles.th}>Order Details</th>
+          <th className={styles.th}>Total Amount</th>
+          <th className={styles.th}>Status</th>
+          <th className={styles.th}>Created At</th>
+        </tr>
+      </thead>
+      <tbody>
+        {orders.map((order, index) => (
+          <tr key={index} className={styles.tr}>
+            <td className={styles.td}>{order.orderId ? 'Product' : 'Service'}</td>
+            <td className={styles.td}>
+              {order.orderId ? (
+                <ul className={styles.productList}>
+                  {order.orderItems.map((item) => (
+                    <li key={item._id} className={styles.productItem}>
+                      {item.name} ({item.quantity} × {new Intl.NumberFormat().format(item.price)} birr)
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <>
+                  <p><strong>Service:</strong> {order.serviceName}</p>
+                  <p><strong>City:</strong> {order.city}</p>
+                  <p><strong>Phone:</strong> {order.phoneNumber}</p>
+                </>
+              )}
+            </td>
+            <td className={styles.td}>
+              {order.totalAmount
+                ? `${order.totalAmount} birr`
+                : `${order.servicePrice || 0} birr`}
+            </td>
+            <td className={styles.td}>{order.status}</td>
+            <td className={styles.td}>{new Date(order.createdAt).toLocaleString()}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+
   const renderContent = () => {
     if (activeTab === 'actions') {
       return (
@@ -77,78 +125,22 @@ const UserActionsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {uniqueActions
-                .filter((action) => !isNaN(action.points)) // Filter valid points
-                .map((action, index) => (
-                  <tr key={index} className={styles.tr}>
-                    <td className={styles.td}>{index + 1}</td>
-                    <td className={styles.td}>{action.joinerUserId}</td>
-                    <td className={styles.td}>{action.action}</td>
-                    <td className={styles.td}>{new Intl.NumberFormat().format(action.points)}</td>
-                  </tr>
-                ))}
+              {uniqueActions.map((action, index) => (
+                <tr key={index} className={styles.tr}>
+                  <td className={styles.td}>{index + 1}</td>
+                  <td className={styles.td}>{action.joinerUserId}</td>
+                  <td className={styles.td}>{action.action}</td>
+                  <td className={styles.td}>{new Intl.NumberFormat().format(action.points || 0)}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       );
-    } else if (activeTab === 'products') {
-      return (
-        <table className={styles.table}>
-          <thead>
-            <tr className={styles.tr}>
-              <th className={styles.th}>Order ID</th>
-              <th className={styles.th}>Order Item</th>
-              <th className={styles.th}>Total Amount</th>
-              <th className={styles.th}>Status</th>
-              <th className={styles.th}>Created At</th>
-            </tr>
-          </thead>
-          <tbody>
-            {productOrders.map((order, index) => (
-              <tr key={index} className={styles.tr}>
-                <td className={styles.td}>{order.orderId}</td>
-                <td className={styles.td}>
-                  <ul className={styles.productList}>
-                    {order.orderItems.map((item) => (
-                      <li key={item._id} className={styles.productItem}>
-                        {item.name} ({item.quantity} × {new Intl.NumberFormat().format(item.price)} birr)
-                      </li>
-                    ))}
-                  </ul>
-                </td>
-                <td className={styles.td}>{order.totalAmount} birr</td>
-                <td className={styles.td}>{order.commissionStatus}</td>
-                <td className={styles.td}>{new Date(order.createdAt).toLocaleString()}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      );
-    } else if (activeTab === 'services') {
-      return (
-        <table className={styles.table}>
-          <thead>
-            <tr className={styles.tr}>
-              <th className={styles.th}>Service Name</th>
-              <th className={styles.th}>City</th>
-              <th className={styles.th}>Phone Number</th>
-              <th className={styles.th}>Created At</th>
-              <th className={styles.th}>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {serviceOrders.map((order, index) => (
-              <tr key={index} className={styles.tr}>
-                <td className={styles.td}>{order.serviceName}</td>
-                <td className={styles.td}>{order.city}</td>
-                <td className={styles.td}>{order.phoneNumber}</td>
-                <td className={styles.td}>{new Date(order.createdAt).toLocaleString()}</td>
-                <td className={styles.td}>{order.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      );
+    } else if (activeTab === 'completed') {
+      return renderOrdersTable(completedOrders);
+    } else if (activeTab === 'canceled') {
+      return renderOrdersTable(canceledOrders);
     }
   };
 
@@ -165,22 +157,22 @@ const UserActionsPage = () => {
           Actions
         </button>
         <button
-          onClick={() => setActiveTab('products')}
-          className={`text-white ${activeTab === 'products' ? 'font-bold underline' : ''}`}
+          onClick={() => setActiveTab('completed')}
+          className={`text-white ${activeTab === 'completed' ? 'font-bold underline' : ''}`}
         >
-          Product Orders
+          Completed
         </button>
         <button
-          onClick={() => setActiveTab('services')}
-          className={`text-white ${activeTab === 'services' ? 'font-bold underline' : ''}`}
+          onClick={() => setActiveTab('canceled')}
+          className={`text-white ${activeTab === 'canceled' ? 'font-bold underline' : ''}`}
         >
-          Service Orders
+          Canceled
         </button>
       </nav>
 
       {/* Render Content */}
       {renderContent()}
-    </div>              
+    </div>
   );
 };
 

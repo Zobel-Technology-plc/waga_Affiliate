@@ -63,6 +63,10 @@ const productSchema = new mongoose.Schema({
     },
     default: 'pending', // Default to 'pending' for user-created products
   },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 export default mongoose.models.Product || mongoose.model('Product', productSchema);
