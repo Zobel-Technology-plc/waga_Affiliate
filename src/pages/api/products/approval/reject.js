@@ -24,7 +24,7 @@ export default async function handler(req, res) {
       await Product.findByIdAndUpdate(productId, { status: 'rejected' });
 
       // Telegram Bot API credentials
-      const botToken = '7350305630:AAGbLF6EUkCsblHfv0voojqIfitsOzQee6Y';
+      const botToken = '7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg';
       const telegramApiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
       // Construct the rejection message

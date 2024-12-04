@@ -24,7 +24,7 @@ export default async function handler(req, res) {
       await Product.findByIdAndUpdate(productId, { status: 'approved' });
 
       // Telegram Bot API credentials
-      const botToken = 'YOUR_TELEGRAM_BOT_TOKEN';
+      const botToken = '7316973369:AAGYzlMkYWSgTobE6w7ETkDXrt0aR_a8YMg';
       const telegramApiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
       // Construct the approval message
