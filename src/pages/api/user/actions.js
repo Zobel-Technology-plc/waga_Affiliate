@@ -89,7 +89,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ success: false, message: 'Failed to handle user action' });
     }
   } else if (req.method === 'GET') {
-    const { userId, actionName, page = 1, limit = 50 } = req.query;
+    const { userId, actionName } = req.query;
 
     try {
       if (userId) {
@@ -99,19 +99,14 @@ export default async function handler(req, res) {
           return res.status(404).json({ success: false, message: 'User not found' });
         }
 
-        // Fetch actions for a specific user
+        // Fetch all actions for a specific user
         const userActions = await UserAction.find({ userId })
-          .select('action points joinerUserId -_id')
-          .skip((page - 1) * limit)
-          .limit(Number(limit));
-
-        const total = await UserAction.countDocuments({ userId });
+          .select('action points joinerUserId -_id');
 
         return res.status(200).json({
           success: true,
           actions: userActions,
-          points: user.points, // Ensure current points are sent
-          total, // Total number of actions for the user
+          points: user.points
         });
       } else if (actionName) {
         // Fetch all users who performed a specific action
@@ -121,10 +116,7 @@ export default async function handler(req, res) {
             : { action: actionName };
 
         const actionRecords = await UserAction.find(filter)
-          .select('action userId points -_id')
-          .skip((page - 1) * limit)
-          .limit(Number(limit));
-        const total = await UserAction.countDocuments(filter);
+          .select('action userId points -_id');
 
         return res.status(200).json({
           success: true,
@@ -132,8 +124,7 @@ export default async function handler(req, res) {
             userId: record.userId,
             points: record.points,
             action: record.action,
-          })),
-          total, // Total number of matching actions
+          }))
         });
       } else {
         return res.status(400).json({ success: false, message: 'Missing userId or actionName in request' });
