@@ -9,12 +9,15 @@ const earnOptionSchema = new mongoose.Schema({
     default: '', 
     validate: {
       validator: function(v) {
-        return this.text === "Invite Your Friend" || v.length > 0;
+        // `link` is only required if `text` is neither "Invite Your Friend" nor "Share to Stories"
+        return this.text === "Invite Your Friend" || this.text === "Share to Stories" || v.length > 0;
       },
-      message: props => `${props.path} is required unless text is "Invite Your Friend"`
-    }
+      message: props => `${props.path} is required unless text is "Invite Your Friend" or "Share to Stories"`,
+    },
   },
-  requiresCheck: { type: Boolean, default: false },
+  image: { type: String, default: null }, // Optional for "Share to Stories"
+  description: { type: String, default: null }, // Optional for "Share to Stories"
+  requiresCheck: { type: Boolean, default: true },
 });
 
 export default mongoose.models.EarnOption || mongoose.model('EarnOption', earnOptionSchema);

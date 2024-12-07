@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import WebApp from '@twa-dev/sdk'; // Ensure WebApp SDK is properly imported
 import { FaInstagram, FaTelegramPlane, FaFacebook } from 'react-icons/fa';
 import styles from './index.module.css';
 
@@ -15,6 +14,8 @@ const Modal = ({
   completedActions,
   inviteLink,
   joinClicked,
+  handleShareToStories,
+  setJoinClicked,
 }) => {
   const [isCopied, setIsCopied] = useState(false);
 
@@ -44,13 +45,38 @@ const Modal = ({
         <h1>{new Intl.NumberFormat().format(option.points)}</h1>
         <Image
           className={styles.image}
-          src={option.icon}
+          src={option.icon || '/fallback.png'}
           alt={option.text}
           width={60}
           height={60}
+          priority={true}
+          onError={(e) => {
+            e.target.src = '/fallback.png';
+          }}
         />
 
-        {option.text === 'Invite Your Friend' ? (
+        {option.text === 'Share to Stories' ? (
+          <button
+            id={option.text}
+            className={`${styles.joinButton} ${
+              completedActions[option.text] ? styles.doneButton : joinClicked ? styles.checkButton : ''
+            }`}
+            onClick={(e) => {
+              e.preventDefault();
+              if (completedActions[option.text]) {
+                return;
+              }
+              if (!joinClicked) {
+                handleShareToStories(option);
+                setJoinClicked(true);
+              } else {
+                handleCheckClick(e, option, joinClicked);
+              }
+            }}
+          >
+            {completedActions[option.text] ? 'Done' : joinClicked ? 'Check' : 'Share to Stories'}
+          </button>
+        ) : option.text === 'Invite Your Friend' ? (
           <div>
             <p>{inviteLink}</p>
             <button className={styles.copyButton} onClick={handleCopyClick}>
@@ -84,7 +110,6 @@ const Modal = ({
   );
 };
 
-// EarnPage Component
 const EarnPage = () => {
   const [userId, setUserId] = useState(null);
   const [options, setOptions] = useState([]);
@@ -94,44 +119,31 @@ const EarnPage = () => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [inviteLink, setInviteLink] = useState('');
   const [joinClicked, setJoinClicked] = useState(false);
+  const [WebApp, setWebApp] = useState(null);
 
+  // Initialize WebApp
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      import('@twa-dev/sdk').then((WebAppModule) => {
+        setWebApp(WebAppModule.default);
+      });
+    }
+  }, []);
+
+  // Fetch user ID safely in the client environment
+  useEffect(() => {
+    if (WebApp && typeof window !== 'undefined') {
       try {
         if (WebApp.initDataUnsafe?.user?.id) {
-          const user = WebApp.initDataUnsafe.user;
-          setUserId(user.id);
-
-          const generateInviteLink = async () => {
-            try {
-              const response = await fetch(`/api/invite`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ userId: user.id }),
-              });
-
-              const data = await response.json();
-              if (data.success) {
-                setInviteLink(data.inviteLink);
-              } else {
-                console.error('Failed to generate invite link:', data.message);
-              }
-            } catch (error) {
-              console.error('Error generating invite link:', error);
-            }
-          };
-
-          generateInviteLink();
+          setUserId(WebApp.initDataUnsafe.user.id);
         } else {
-          console.error("User ID not found in WebApp.initDataUnsafe");
+          console.error('User ID not found in WebApp.initDataUnsafe');
         }
       } catch (error) {
         console.error('Error accessing WebApp data:', error);
       }
     }
-  }, []);
+  }, [WebApp]);
 
   useEffect(() => {
     const fetchOptions = async () => {
@@ -139,9 +151,15 @@ const EarnPage = () => {
         const response = await fetch('/api/earnOptions');
         const data = await response.json();
         if (response.ok) {
-          const inviteOption = data.data.find(option => option.text === 'Invite Your Friend');
-          const otherOptions = data.data.filter(option => option.text !== 'Invite Your Friend');
-          setOptions([inviteOption, ...otherOptions]);
+          const sortedOptions = [
+            ...data.data.filter((option) => option.text === 'Invite Your Friend'),
+            ...data.data.filter((option) => option.text === 'Share to Stories'),
+            ...data.data.filter(
+              (option) =>
+                option.text !== 'Invite Your Friend' && option.text !== 'Share to Stories'
+            ),
+          ];
+          setOptions(sortedOptions);
         } else {
           console.error('Failed to fetch options:', data.message);
         }
@@ -154,6 +172,33 @@ const EarnPage = () => {
 
     fetchOptions();
   }, []);
+
+  useEffect(() => {
+    if (userId) {
+      const generateInviteLink = async () => {
+        try {
+          const response = await fetch('/api/invite', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId }),
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            setInviteLink(data.inviteLink);
+          } else {
+            console.error('Failed to generate invite link:', data.message);
+          }
+        } catch (error) {
+          console.error('Error generating invite link:', error);
+        }
+      };
+
+      generateInviteLink();
+    }
+  }, [userId]);
 
   useEffect(() => {
     if (userId) {
@@ -179,6 +224,20 @@ const EarnPage = () => {
       fetchCompletedActions();
     }
   }, [userId]);
+
+  const handleShareToStories = async (option) => {
+    if (WebApp && WebApp.shareToStory) {
+      try {
+        await WebApp.shareToStory(option.image, {
+          text: option.description,
+        });
+      } catch (error) {
+        console.error('Error sharing to Telegram Stories:', error);
+      }
+    } else {
+      console.error('Sharing to Telegram Stories is not supported.');
+    }
+  };
 
   const handleCheckClick = async (event, option, joinClicked) => {
     event.preventDefault();
@@ -210,10 +269,6 @@ const EarnPage = () => {
 
       if (response.ok) {
         setCompletedActions((prev) => ({ ...prev, [option.text]: true }));
-
-        if (option.link) {
-          window.open(option.link, '_blank');
-        }
       } else {
         console.error('Failed to save action');
       }
@@ -230,6 +285,7 @@ const EarnPage = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedOption(null);
+    setJoinClicked(false);
   };
 
   if (loading) {
@@ -241,7 +297,17 @@ const EarnPage = () => {
       <div className={`${styles.earnOptions} ${isModalOpen ? styles.blurredBackground : ''}`}>
         {options.map((option, index) => (
           <div key={index} className={styles.option} onClick={() => handleCardClick(option)}>
-            <Image className={styles.image} src={option.icon} alt={option.text} width={60} height={60} />
+            <Image
+              className={styles.image}
+              src={option.icon || '/fallback.png'}
+              alt={option.text}
+              width={60}
+              height={60}
+              priority={true}
+              onError={(e) => {
+                e.target.src = '/fallback.png';
+              }}
+            />
             <div className={styles.text}>
               <p>{option.text}</p>
               <span>{`+${new Intl.NumberFormat().format(option.points)}`}</span>
@@ -259,6 +325,8 @@ const EarnPage = () => {
           completedActions={completedActions}
           inviteLink={inviteLink}
           joinClicked={joinClicked}
+          setJoinClicked={setJoinClicked}
+          handleShareToStories={handleShareToStories}
         />
       )}
     </div>
@@ -266,4 +334,3 @@ const EarnPage = () => {
 };
 
 export default EarnPage;
-
