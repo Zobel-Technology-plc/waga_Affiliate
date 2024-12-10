@@ -104,4 +104,46 @@
     background-color: #218838;
   }
   
+  .seller-request-button {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 20px;
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.1);
+  }
 
+  .seller-request-button:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(37, 99, 235, 0.2);
+  }
+
+  .seller-request-button:disabled {
+    background: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .seller-request-button.pending {
+    background: #f59e0b;
+    cursor: not-allowed;
+  }
+
+  .seller-request-button.approved {
+    background: #10b981;
+    cursor: default;
+  }
+
+  .seller-request-button.rejected {
+    background: #ef4444;
+    cursor: not-allowed;
+  }

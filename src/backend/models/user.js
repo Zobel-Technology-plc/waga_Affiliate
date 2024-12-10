@@ -54,6 +54,11 @@ const userSchema = new mongoose.Schema({
     enum: ['seller', 'affiliate_buyer'], // Predefined roles
     default: 'affiliate_buyer', // Default to 'affiliate_buyer'
   },
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected', null],
+    default: null,
+  },
 });
 
 export default mongoose.models.User || mongoose.model("User", userSchema);

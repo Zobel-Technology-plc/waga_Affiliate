@@ -25,7 +25,7 @@ export default async function handler(req, res) {
         phoneNumber: user.phoneNumber,
         points: user.points,
         commission: user.commission,
-        Role: user.role
+        role: user.role
       },
     });
   } catch (error) {

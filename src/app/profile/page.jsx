@@ -4,27 +4,27 @@
 import React, { useEffect, useState } from 'react';
 import WebApp from '@twa-dev/sdk';
 import { useRouter } from 'next/navigation';
-import './Profile.css'; // Import the CSS file
+import './Profile.css';
 
 const Profile = () => {
   const router = useRouter();
   const [userData, setUserData] = useState(null);
   const [points, setPoints] = useState(0);
-  const [commission, setCommission] = useState(0); // State for commissionF
-  const [phoneNumber, setPhoneNumber] = useState(''); // State for phone number
-  const [city, setCity] = useState(''); // State for city
-  const [role, setRole] = useState(''); // State for user role
+  const [commission, setCommission] = useState(0);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [city, setCity] = useState('');
+  const [role, setRole] = useState('');
+  const [status, setStatus] = useState('');
+  const [requestingSeller, setRequestingSeller] = useState(false);
 
   useEffect(() => {
-    // Fetch the user data from Telegram WebApp SDK
-    if (typeof window !== 'undefined' && WebApp.initDataUnsafe.user) {
+    if (typeof window !== 'undefined' && WebApp.initDataUnsafe?.user) {
       setUserData(WebApp.initDataUnsafe.user);
     }
   }, []);
 
   useEffect(() => {
     if (userData) {
-      // Fetch the user's profile information including points, commission, phone number, city, and role
       const fetchUserProfile = async () => {
         try {
           const response = await fetch(`/api/user/${userData.id}`);
@@ -32,11 +32,14 @@ const Profile = () => {
             throw new Error('Failed to fetch user profile');
           }
           const data = await response.json();
+          console.log('User profile data:', data); // Debugging log
+
           setPoints(data.data.points || 0);
           setCommission(data.data.commission || 0);
           setPhoneNumber(data.data.phoneNumber || '');
-          setCity(data.data.City || ''); // Set the fetched city
-          setRole(data.data.Role || ''); // Set the fetched role
+          setCity(data.data.city || '');
+          setRole(data.data.role?.toLowerCase() || ''); // Normalize and set role
+          setStatus(data.data.status || '');
         } catch (error) {
           console.error('Error fetching user profile:', error);
         }
@@ -45,6 +48,30 @@ const Profile = () => {
       fetchUserProfile();
     }
   }, [userData]);
+
+  const handleRequestSeller = async () => {
+    if (!userData) return;
+    setRequestingSeller(true);
+    try {
+      const response = await fetch(`/api/user/request-seller`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userData.id }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        alert('Request to become a seller submitted successfully!');
+        setStatus('pending');
+      } else {
+        alert(result.message || 'Failed to submit request');
+      }
+    } catch (error) {
+      console.error('Error requesting seller role:', error);
+    } finally {
+      setRequestingSeller(false);
+    }
+  };
 
   const handleWithdrawClick = () => {
     if (userData) {
@@ -92,16 +119,23 @@ const Profile = () => {
           </ul>
         </div>
 
-        <button className="withdraw-button" onClick={handleWithdrawClick}>
-          Withdraw
-        </button>
-
-        {/* Display the Upload Products button if the user is a seller */}
-        {role === 'Seller' && (
+        {role === 'seller' ? (
           <button className="upload-button" onClick={handleUploadProductsClick}>
             Upload Products
           </button>
+        ) : (
+          <button
+            className="seller-request-button mb-4"
+            onClick={handleRequestSeller}
+            disabled={status === 'pending' || requestingSeller}
+          >
+            {status === 'pending' ? 'Request Pending' : 'Request to be a Seller'}
+          </button>
         )}
+
+        <button className="withdraw-button mt-4" onClick={handleWithdrawClick}>
+          Withdraw
+        </button>
       </div>
     </div>
   );
