@@ -37,7 +37,7 @@ const Profile = () => {
           setPoints(data.data.points || 0);
           setCommission(data.data.commission || 0);
           setPhoneNumber(data.data.phoneNumber || '');
-          setCity(data.data.city || '');
+          setCity(data.data.City || '');
           setRole(data.data.role?.toLowerCase() || ''); // Normalize and set role
           setStatus(data.data.status || '');
         } catch (error) {
