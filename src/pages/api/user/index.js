@@ -57,15 +57,15 @@ export default async function handler(req, res) {
     // Format response data
     const formattedUsers = users.map(user => ({
       userId: user.userId,
-      firstName: user.firstName || 'Unknown',
-      lastName: user.lastName || '',
-      username: user.username || 'Unknown',
-      city: user.city || 'Not specified',
-      phoneNumber: user.phoneNumber || 'Not provided',
-      points: user.points || 0,
-      commission: user.commission || 0,
-      role: user.role || 'user',
-      status: user.status || 'N/A',
+      firstName: user.firstName ,
+      lastName: user.lastName ,
+      username: user.username,
+      city: user.city ,
+      phoneNumber: user.phoneNumber,
+      points: user.points ,
+      commission: user.commission ,
+      role: user.role,
+      status: user.status,
       createdAt: user.createdAt ? user.createdAt.toISOString() : null,
     }));
 
