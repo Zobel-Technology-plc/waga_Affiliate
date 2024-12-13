@@ -1,5 +1,3 @@
-// File path: /components/UserActionPage.js
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -10,7 +8,7 @@ import styles from './UserActionPage.module.css';
 const UserActionsPage = () => {
   const { userId } = useParams();
   const [actions, setActions] = useState([]);
-  const [commission, setCommission] = useState(0);
+  const [commission, setCommission] = useState(0); // Retrieved from /api/users
   const [points, setPoints] = useState(0); // Store user.points from the database
   const [showConversionPopup, setShowConversionPopup] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -22,20 +20,37 @@ const UserActionsPage = () => {
   useEffect(() => {
     if (!userId) return;
 
-    const fetchUserData = async () => {
+    const fetchUserActions = async () => {
       try {
-        const response = await axios.get(`/api/user/actions?userId=${userId}`);
-        setActions(response.data.actions);
-        setCommission(response.data.commission || 0);
-        setPoints(response.data.points || 0); // Set points from database
-        setLoading(false);
+        // Fetch user actions
+        const actionsResponse = await axios.get(`/api/user/actions?userId=${userId}`);
+        setActions(actionsResponse.data.actions);
       } catch (error) {
-        setError('Error fetching user data');
-        setLoading(false);
+        console.error('Error fetching user actions:', error);
+        setError('Error fetching user actions');
       }
     };
 
-    fetchUserData();
+    const fetchUserDetails = async () => {
+      try {
+        // Fetch user details including commission and points
+        const userResponse = await axios.get(`/api/user/${userId}`);
+        const userData = userResponse.data.data;
+        setCommission(userData.commission || 0);
+        setPoints(userData.points || 0);
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+        setError('Error fetching user details');
+      }
+    };
+
+    const fetchData = async () => {
+      setLoading(true);
+      await Promise.all([fetchUserActions(), fetchUserDetails()]);
+      setLoading(false);
+    };
+
+    fetchData();
   }, [userId]);
 
   if (loading) return <p>Loading...</p>;
@@ -52,7 +67,7 @@ const UserActionsPage = () => {
   const handleChange = async () => {
     const pointsToConvert = points; // Use all available points
     const birrEquivalent = Math.floor(pointsToConvert / POINTS_TO_BIRR_RATIO) * BIRR_CONVERSION_RATE;
-  
+
     if (birrEquivalent > 0) {
       try {
         const response = await axios.post('/api/user/convert', {
@@ -60,7 +75,7 @@ const UserActionsPage = () => {
           birrEquivalent,
           pointsUsed: Math.floor(pointsToConvert / POINTS_TO_BIRR_RATIO) * POINTS_TO_BIRR_RATIO,
         });
-  
+
         if (response.data.success) {
           setShowConversionPopup(false);
           alert('Conversion request submitted for approval.');
@@ -75,19 +90,17 @@ const UserActionsPage = () => {
       alert("You don't have enough points to convert.");
     }
   };
-  
-  
 
   const uniqueActions = [];
   const actionMap = new Map();
 
-  actions.forEach(action => {
+  actions.forEach((action) => {
     if (!actionMap.has(action.action) || action.points) {
       actionMap.set(action.action, action);
     }
   });
 
-  actionMap.forEach(action => uniqueActions.push(action));
+  actionMap.forEach((action) => uniqueActions.push(action));
   uniqueActions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
   const totalPointsInBirr = (points / POINTS_TO_BIRR_RATIO) * BIRR_CONVERSION_RATE;
 
@@ -100,9 +113,9 @@ const UserActionsPage = () => {
 
       <div className={styles.totalPointsContainer}>
         <p><strong>Total Points:</strong> {new Intl.NumberFormat().format(points)}</p>
-        <button 
-          className={styles.convertButton} 
-          onClick={handleConvert} 
+        <button
+          className={styles.convertButton}
+          onClick={handleConvert}
           disabled={points === 0} // Disable button if points are zero
         >
           Convert
