@@ -39,6 +39,8 @@ const SideNav = () => {
         setActiveTab('converted');
       } else if (pathname.startsWith('/admin/complete')) {
         setActiveTab('complete');
+      } else if (pathname.startsWith('/admin/sellerapproval')) {
+        setActiveTab('sellerapproval');
       } else if (pathname.startsWith('/admin/earn')) {
         setActiveTab('earn');
       }else if (pathname.startsWith('/admin/canceled')) {
@@ -158,6 +160,16 @@ const SideNav = () => {
           }}
         >
           Conversions
+        </li>
+
+        <li
+          className={`p-2 cursor-pointer ${activeTab === 'sellerapproval' ? 'bg-gray-200' : ''}`}
+          onClick={() => {
+            setActiveTab('sellerapproval');
+            router.push('/admin/sellerapproval');
+          }}
+        >
+          Seller Request
         </li>
 
         <li

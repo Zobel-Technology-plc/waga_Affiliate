@@ -54,11 +54,11 @@ export default async function handler(req, res) {
     case 'POST':
       return handleCreateProduct(req, res);
     case 'GET':
-      const { onSale } = req.query;
+      const { userId, onSale } = req.query;
       if (onSale === 'true') {
         return handleGetOnsaleProducts(req, res);
       } else {
-        return handleGetProducts(req, res);
+        return handleGetProducts(req, res, userId);
       }
     default:
       res.setHeader('Allow', ['POST', 'GET']);
@@ -84,17 +84,10 @@ const handleCreateProduct = async (req, res) => {
       freeDelivery,
     } = req.body;
 
-    // Extract seller's userId from headers or body, or leave it undefined
-    const sellerUserId = req.headers.authorization || seller; 
+    const sellerUserId = req.headers.authorization || seller;
 
     if (!name || !description || !price || !commission || !category || !subcategory) {
-      console.log('Missing required fields:', req.body);
       return res.status(400).json({ message: 'All fields are required.' });
-    }
-
-    // Enforce seller userId only when required (for seller's portal)
-    if (sellerUserId && !seller) {
-      return res.status(400).json({ message: 'Seller ID must be provided when creating product as a seller.' });
     }
 
     const images = [];
@@ -121,9 +114,7 @@ const handleCreateProduct = async (req, res) => {
       images,
     });
 
-    console.log('Product to be saved:', product);
     await product.save();
-
     return res.status(201).json({ message: 'Product created successfully', product });
   } catch (error) {
     console.error('Error creating product:', error);
@@ -131,11 +122,11 @@ const handleCreateProduct = async (req, res) => {
   }
 };
 
-
 // GET handler (fetch products)
-const handleGetProducts = async (req, res) => {
+const handleGetProducts = async (req, res, userId) => {
   try {
-    const products = await Product.find();
+    const query = userId ? { seller: userId } : {};
+    const products = await Product.find(query);
     return res.status(200).json({ success: true, products });
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -148,14 +139,13 @@ const handleGetOnsaleProducts = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
 
-    // Parse page and limit to integers
     const currentPage = parseInt(page, 10);
     const pageLimit = parseInt(limit, 10);
 
-    const totalProducts = await Product.countDocuments({ 
+    const totalProducts = await Product.countDocuments({
       onSale: true,
-      $or: [{ status: "approved" }, { status: { $exists: false } }]
-     });
+      $or: [{ status: 'approved' }, { status: { $exists: false } }],
+    });
     const products = await Product.find({ onSale: true })
       .skip((currentPage - 1) * pageLimit)
       .limit(pageLimit);

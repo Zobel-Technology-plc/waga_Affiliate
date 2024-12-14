@@ -20,6 +20,7 @@ const EarnPage = () => {
     icon: null,
     image: null,
     description: '',
+    category:'',
     link: '',
     requiresCheck: false,
   });
@@ -93,6 +94,7 @@ const EarnPage = () => {
     formDataToSend.append('points', formData.points);
     formDataToSend.append('icon', formData.icon);
     formDataToSend.append('link', formData.link);
+    formDataToSend.append('category', formData.category);
     formDataToSend.append('requiresCheck', formData.requiresCheck);
     
     if (isStoryEarn) {
@@ -116,6 +118,7 @@ const EarnPage = () => {
           icon: null,
           image: null,
           description: '',
+          category:'',
           link: '',
           requiresCheck: false,
         });
@@ -187,6 +190,15 @@ const EarnPage = () => {
             value={formData.text}
             onChange={handleInputChange}
             placeholder="Earn text"
+            required
+            className={styles.input}
+          />
+          <input
+            type="text"
+            name="category"
+            value={formData.category}
+            onChange={handleInputChange}
+            placeholder="Category"
             required
             className={styles.input}
           />

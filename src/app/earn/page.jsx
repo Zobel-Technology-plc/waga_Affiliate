@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { FaInstagram, FaTelegramPlane, FaFacebook } from 'react-icons/fa';
 import styles from './index.module.css';
 
+
 /// Modal Component
 const Modal = ({
   option,
@@ -55,7 +56,7 @@ const Modal = ({
           }}
         />
 
-        {option.text === 'Share to Stories' ? (
+{option.text === 'Share to Stories' ? (
           <button
             id={option.text}
             className={`${styles.joinButton} ${
@@ -63,15 +64,16 @@ const Modal = ({
             }`}
             onClick={(e) => {
               e.preventDefault();
-              if (completedActions[option.text]) {
-                return;
-              }
-              if (!joinClicked) {
+
+              // Always share to stories when Done or Share is clicked
+              if (completedActions[option.text] || !joinClicked) {
                 handleShareToStories(option);
                 setJoinClicked(true);
-              } else {
-                handleCheckClick(e, option, joinClicked);
+                return;
               }
+
+              // If already clicked and not completed, check the action
+              handleCheckClick(e, option, joinClicked);
             }}
           >
             {completedActions[option.text] ? 'Done' : joinClicked ? 'Check' : 'Share to Stories'}
@@ -79,6 +81,7 @@ const Modal = ({
         ) : option.text === 'Invite Your Friend' ? (
           <div>
             <p>{inviteLink}</p>
+
             <button className={styles.copyButton} onClick={handleCopyClick}>
               {isCopied ? 'Copied!' : 'Copy Link'}
             </button>
@@ -114,6 +117,7 @@ const EarnPage = () => {
   const [userId, setUserId] = useState(null);
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [excludedActions, setExcludedActions] = useState([]);
   const [completedActions, setCompletedActions] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -135,7 +139,12 @@ const EarnPage = () => {
     if (WebApp && typeof window !== 'undefined') {
       try {
         if (WebApp.initDataUnsafe?.user?.id) {
-          setUserId(WebApp.initDataUnsafe.user.id);
+          const id = WebApp.initDataUnsafe.user.id;
+          setUserId(id);
+
+          // Generate the invite link
+          const link = `https://t.me/Waga_affiliate_bot?start=${id}`;
+          setInviteLink(link);
         } else {
           console.error('User ID not found in WebApp.initDataUnsafe');
         }
@@ -175,53 +184,22 @@ const EarnPage = () => {
 
   useEffect(() => {
     if (userId) {
-      const generateInviteLink = async () => {
+      const fetchExcludedActions = async () => {
         try {
-          const response = await fetch('/api/invite', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userId }),
-          });
-
-          const data = await response.json();
-          if (data.success) {
-            setInviteLink(data.inviteLink);
-          } else {
-            console.error('Failed to generate invite link:', data.message);
-          }
-        } catch (error) {
-          console.error('Error generating invite link:', error);
-        }
-      };
-
-      generateInviteLink();
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    if (userId) {
-      const fetchCompletedActions = async () => {
-        try {
-          const response = await fetch(`/api/user/actions?userId=${userId}`);
+          const response = await fetch(`/api/user/actionsBefore24Hours?userId=${userId}`);
           const data = await response.json();
 
           if (response.ok) {
-            const actionStatus = {};
-            data.actions.forEach((action) => {
-              actionStatus[action.action] = true;
-            });
-            setCompletedActions(actionStatus);
+            setExcludedActions(data.data.map((action) => action.action));
           } else {
-            console.error('Failed to fetch completed actions:', data.message);
+            console.error('Failed to fetch excluded actions:', data.message);
           }
         } catch (error) {
-          console.error('Error fetching completed actions:', error);
+          console.error('Error fetching excluded actions:', error);
         }
       };
 
-      fetchCompletedActions();
+      fetchExcludedActions();
     }
   }, [userId]);
 
@@ -295,25 +273,27 @@ const EarnPage = () => {
   return (
     <div className={styles.container}>
       <div className={`${styles.earnOptions} ${isModalOpen ? styles.blurredBackground : ''}`}>
-        {options.map((option, index) => (
-          <div key={index} className={styles.option} onClick={() => handleCardClick(option)}>
-            <Image
-              className={styles.image}
-              src={option.icon || '/fallback.png'}
-              alt={option.text}
-              width={60}
-              height={60}
-              priority={true}
-              onError={(e) => {
-                e.target.src = '/fallback.png';
-              }}
-            />
-            <div className={styles.text}>
-              <p>{option.text}</p>
-              <span>{`+${new Intl.NumberFormat().format(option.points)}`}</span>
+        {options
+          .filter((option) => !excludedActions.includes(option.text))
+          .map((option, index) => (
+            <div key={index} className={styles.option} onClick={() => handleCardClick(option)}>
+              <Image
+                className={styles.image}
+                src={option.icon || '/fallback.png'}
+                alt={option.text}
+                width={60}
+                height={60}
+                priority={true}
+                onError={(e) => {
+                  e.target.src = '/fallback.png';
+                }}
+              />
+              <div className={styles.text}>
+                <p>{option.text}</p>
+                <span>{`+${new Intl.NumberFormat().format(option.points)}`}</span>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
 
       {selectedOption && (

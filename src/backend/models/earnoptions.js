@@ -18,6 +18,10 @@ const earnOptionSchema = new mongoose.Schema({
   image: { type: String, default: null }, // Optional for "Share to Stories"
   description: { type: String, default: null }, // Optional for "Share to Stories"
   requiresCheck: { type: Boolean, default: true },
+  category: { 
+    type: String, 
+    required: [true, 'Please specify a category for the earn option'],
+  },
 });
 
 export default mongoose.models.EarnOption || mongoose.model('EarnOption', earnOptionSchema);

@@ -85,6 +85,10 @@ const Profile = () => {
     }
   };
 
+  const handleMyProductsClick = () => {
+    router.push(`/sellerproduct`);
+  };
+
   if (!userData) {
     return <p>Loading profile...</p>;
   }
@@ -94,6 +98,7 @@ const Profile = () => {
       <h1 className="profile-title">Profile</h1>
       <div className="profile-card mb-10">
         <div className="profile-header">
+          
           <img
             src={userData.photo_url || '/images/default_avatar.png'}
             alt="Profile Picture"
@@ -103,6 +108,12 @@ const Profile = () => {
             <h2 className="profile-name">{userData.first_name} {userData.last_name}</h2>
             <p className="profile-username">@{userData.username}</p>
           </div>
+
+          {role === 'seller' && (
+            <button className="my-products-button" onClick={handleMyProductsClick}>
+              My Products
+            </button>
+          )}
         </div>
 
         <div className="profile-info">

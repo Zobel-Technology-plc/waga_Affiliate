@@ -21,7 +21,6 @@ const upload = multer({
     },
   }),
   fileFilter: function (req, file, cb) {
-    // Accept only PNG files for icons and PNG/JPEG for story images
     if (file.fieldname === 'icon') {
       if (file.mimetype === 'image/png') {
         cb(null, true);
@@ -56,7 +55,28 @@ export default async function handler(req, res) {
   switch (req.method) {
     case 'GET':
       try {
-        const options = await EarnOption.find();
+        const { userId } = req.query;
+
+        let options;
+        if (userId) {
+          // Filter and group by category if userId is provided
+          options = await EarnOption.aggregate([
+            {
+              $group: {
+                _id: '$category', // Group by category
+                option: { $first: '$$ROOT' }, // Select the first document in each category
+              },
+            },
+            {
+              $replaceRoot: { newRoot: '$option' }, // Replace the root with the option document
+            },
+            { $limit: 5 }, // Limit to 5 categories
+          ]);
+        } else {
+          // Return all earn options without filtering
+          options = await EarnOption.find();
+        }
+
         res.status(200).json({ success: true, data: options });
       } catch (error) {
         console.error('Error fetching earn options:', error);
@@ -68,13 +88,13 @@ export default async function handler(req, res) {
       try {
         await uploadPromise(req, res);
 
-        const { text, points, link, requiresCheck, description } = req.body;
+        const { text, points, link, requiresCheck, description, category } = req.body;
 
         // Validate required fields
-        if (!text || !points) {
+        if (!text || !points || !category) {
           return res.status(400).json({
             success: false,
-            message: 'Missing required fields: text, points',
+            message: 'Missing required fields: text, points, category',
           });
         }
 
@@ -109,6 +129,7 @@ export default async function handler(req, res) {
           requiresCheck: requiresCheck === 'true',
           image: imageUrl || null,
           description: description || null,
+          category,
         });
 
         res.status(201).json({ success: true, data: newOption });
