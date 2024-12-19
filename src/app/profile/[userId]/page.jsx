@@ -107,7 +107,7 @@ const UserActionsPage = () => {
   return (
     <div className={styles.container}>
       <div className={styles.commissionContainer}>
-        <p><strong>Total Commission:</strong> {new Intl.NumberFormat().format(commission)} birr</p>
+        <p><strong>Wallet:</strong> {new Intl.NumberFormat().format(commission)} birr</p>
         <button className={styles.cashoutButton} onClick={handleCashout}>Cashout</button>
       </div>
 

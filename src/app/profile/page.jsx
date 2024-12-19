@@ -126,7 +126,7 @@ const Profile = () => {
             <li><strong>Phone Number:</strong> {phoneNumber}</li>
             <li><strong>City:</strong> {city}</li>
             <li><strong>Total Points:</strong> {new Intl.NumberFormat().format(points)}</li>
-            <li><strong>Total Commission:</strong> {new Intl.NumberFormat().format(commission.toFixed(2))} birr</li>
+            <li><strong>Wallet:</strong> {new Intl.NumberFormat().format(commission.toFixed(2))} birr</li>
           </ul>
         </div>
 
